@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>IRONLOG</title>
+<meta name="theme-color" content="#0f0f0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IRONLOG">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMCIgZmlsbD0iIzBmMGYwZiIvPjxnIGZpbGw9IiNjODkyMmEiPjxyZWN0IHg9IjE0NiIgeT0iMjM2IiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEyMCIgeT0iMjA2IiB3aWR0aD0iMzQiIGhlaWdodD0iMTAwIiByeD0iOCIvPjxyZWN0IHg9Ijk2IiB5PSIyMjYiIHdpZHRoPSIyNiIgaGVpZ2h0PSI2MCIgcng9IjYiLz48cmVjdCB4PSIzNTgiIHk9IjIwNiIgd2lkdGg9IjM0IiBoZWlnaHQ9IjEwMCIgcng9IjgiLz48cmVjdCB4PSIzOTAiIHk9IjIyNiIgd2lkdGg9IjI2IiBoZWlnaHQ9IjYwIiByeD0iNiIvPjwvZz48L3N2Zz4=">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMCIgZmlsbD0iIzBmMGYwZiIvPjxnIGZpbGw9IiNjODkyMmEiPjxyZWN0IHg9IjE0NiIgeT0iMjM2IiB3aWR0aD0iMjIwIiBoZWlnaHQ9IjQwIiByeD0iNiIvPjxyZWN0IHg9IjEyMCIgeT0iMjA2IiB3aWR0aD0iMzQiIGhlaWdodD0iMTAwIiByeD0iOCIvPjxyZWN0IHg9Ijk2IiB5PSIyMjYiIHdpZHRoPSIyNiIgaGVpZ2h0PSI2MCIgcng9IjYiLz48cmVjdCB4PSIzNTgiIHk9IjIwNiIgd2lkdGg9IjM0IiBoZWlnaHQ9IjEwMCIgcng9IjgiLz48cmVjdCB4PSIzOTAiIHk9IjIyNiIgd2lkdGg9IjI2IiBoZWlnaHQ9IjYwIiByeD0iNiIvPjwvZz48L3N2Zz4=">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiSVJPTkxPRyIsInNob3J0X25hbWUiOiJJUk9OTE9HIiwic3RhcnRfdXJsIjoiLiIsInNjb3BlIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImJhY2tncm91bmRfY29sb3IiOiIjMGYwZjBmIiwidGhlbWVfY29sb3IiOiIjMGYwZjBmIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owaWFIUjBjRG92TDNkM2R5NTNNeTV2Y21jdk1qQXdNQzl6ZG1jaUlIWnBaWGRDYjNnOUlqQWdNQ0ExTVRJZ05URXlJajQ4Y21WamRDQjNhV1IwYUQwaU5URXlJaUJvWldsbmFIUTlJalV4TWlJZ2NuZzlJakV4TUNJZ1ptbHNiRDBpSXpCbU1HWXdaaUl2UGp4bklHWnBiR3c5SWlOak9Ea3lNbUVpUGp4eVpXTjBJSGc5SWpFME5pSWdlVDBpTWpNMklpQjNhV1IwYUQwaU1qSXdJaUJvWldsbmFIUTlJalF3SWlCeWVEMGlOaUl2UGp4eVpXTjBJSGc5SWpFeU1DSWdlVDBpTWpBMklpQjNhV1IwYUQwaU16UWlJR2hsYVdkb2REMGlNVEF3SWlCeWVEMGlPQ0l2UGp4eVpXTjBJSGc5SWprMklpQjVQU0l5TWpZaUlIZHBaSFJvUFNJeU5pSWdhR1ZwWjJoMFBTSTJNQ0lnY25nOUlqWWlMejQ4Y21WamRDQjRQU0l6TlRnaUlIazlJakl3TmlJZ2QybGtkR2c5SWpNMElpQm9aV2xuYUhROUlqRXdNQ0lnY25nOUlqZ2lMejQ4Y21WamRDQjRQU0l6T1RBaUlIazlJakl5TmlJZ2QybGtkR2c5SWpJMklpQm9aV2xuYUhROUlqWXdJaUJ5ZUQwaU5pSXZQand2Wno0OEwzTjJaejQ9Iiwic2l6ZXMiOiJhbnkiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCIsInB1cnBvc2UiOiJhbnkgbWFza2FibGUifV19">
+<style>
+@font-face{font-family:'Bebas Neue';font-style:normal;font-weight:400;font-display:swap;src:url(data:font/woff2;base64,d09GMgABAAAAADXIABEAAAAAiLwAADVkAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGm4bnwAciT4GYACEfgiBAgmcFREICoGnHIGUCAuEHAABNgIkA4gmBCAFhAQHiEAMgUsb33s1jNsvCegOdEqJ7NmTKIKNAwkzeD8SYapZbyP4/09ITsaQzQJmqr06mDEwk+VSd+dVKFwFgwY7R6EwOxxtQox9rUo2myeb61Y+iFL0z8mjmfA+74OFimpQYGQkQ4fh4xhXfPM3u1p65sN3OgdGNISd/fZJ6qtn/KMhpgxfoEgpqrQiYfs9hJNMv1twxuRWtq323noGto38SU5eomgtKrJ654DYPapnyeQYUKF6hagJsIfn5/Z/7t1d3cGoWNRdwYBVw5IaYwWMqYgwYEMYyAYWYtUT0f76jXxR+lIFo+K99mXiS59QVCf17CGmPBqDiEbs64F0Ucb2QTSqRqqWCxBMIEUCpEiJQRKZJVHpsi78P/7fIaaid9GmpnNRRY1Lu208uLZGS0RiJRSaSqdrE3/RHe8y1IbbiZplU8kBIs1cdAZtU3kDRPeOq1RJXaHfq7NmpCTFn7g74JKoJCgBZcuxsqsjKLpjt9br77gD5i60Wqiuvv4HoA/of9pSLiqHFXjKT3U3uwEyoBYuYZv1g5JvfUV9Ra2uelozgtMZSlccZTBvvb59+v+vM7vw3v+S7QCQl7xcIyiAc1w5csCjqRIvlHMU2rLcsl4d6gjWTO3a+QFBzvkXhLYulQMjgN2EWVSca6wfK3lgTIUrwAYArBL4f6aa7fxdQCBBB+5FylG6FKU7v56igkOK9dWD+Qvszs4uQSwICgsQCqB0BkkFALxASRcWSYKguyzpQswdBYo6kJfoFGIVcqjcu+hcuSjtsnLpomxduqjMw9eZvHkT7I2SLWURe9hvxjPhTgVKtRSswhW7lcv1x1D7PhQzqlcJEkWvf437/X59g7nuwzaNJRyJcIQRCc28j/977uFv+k3bq+gfkqCDEOdibHvPoahts4gfKpHSXpD/UgWwAsAkkKdIYECBARQYLAmCDsJUBFKiBEROAaJSCmLRDdKjB6RPHKTfQpCnnsJ5ZgK0VBocCDCBVh94401dAcB8SyIGqBCALmkgOPhi60BBEA7Zry8G5Cc20vsDSdNHt0ewL0DgABYFH1pk8sV1zSooQgFBAtUDJoPqSkmSVLGzM9OSk5OQE2DLB/nntIA8IptkLzQJcBIAawGAHRJJnnrO3upnyNiMy/hMyMRwGaKhrO4KTOvv60jeEPyVbcsHszvbsjHDWZFFmg8SH6BVe9OZcJoSBPch1xVnyqLHzErFRLjoPBvUEKl2To9mZP8b0UbP/FWn3/zgVKuwWleV/tXWB3Keo+TRGlNBk3TVzlypxTudY6tLp4W3atrpPYgHxibrdDN2GNgRzTY0a4474Hy8C3ES66R7zh5Oo3bOLBsunxbJCG/VtKFXMApEMmAqOjRP5BIRp8Lzamo1ulmyRYvW+9vgAXPaAwTQGOHT6gEYCTLh/vrNCGpOkp+BkynBiEAn7Wpoi/QN80qXRWI57Fe/ER9E4VAUnCUUPJUCMTkEZloVZlUBpxIKol+BzPvgEQxZAAb5FQQCZ+0QoKbplCQJMAEK35tGuPC9EgoAlUBvRTeAvBgKzwuOiHOJwiI7iAktM8VuyJrmJg77LwIggaWdJZ6UZ1ChNa0NxDOOuqo5ShbQK78C7VBK5YDMTstL9DeVukY2BZTR1bV0pPqqfxfNnjV8/W84aN7ytne864gxx5102lnnXXTZFVddc9Mtt91x1z33PfDQI++B0SBQEAoKWDIqVI4cKBYWHKFiKBkZlIoKQk2PwsAAz8iIwMSEyKwUiYUFmVUFSKVKsGouqDp1UB1iUDPMgOrXDzFgDoq55sIbNIhgnnmIhixAstBCZJC3CCAQACMATIAHjAdMBLS2NbypRkkCotgeAnMS3R08rBcCjHlq6JONaZrTRYKcyvRtg42+EGiiUakvqRnqZPzmTFcep9zxD3NFF696zn9Zx2KPVVHt7pICc+/wUSFf3OriujNSCrkKmNowSttjN9YE+4UesVx5cIedwxbm34Kuf7KFNsUuPypvoKN1AZeoi7bI4pp25NS+xrST0DcHGbkFfp0x50Qx701SNVPACNJ5cj5Kz1kFehRIkb2/qeiWYsEW7SzwA7mK1FV7Bq9CKjWXyVFEDhmNSW8iACOwNrnHeWoN69gZQA9USO1MHvsnM5ia24uB9kPtIS7WhFoIurLS1xqIlmogTwJiYIKauWLk0XIS0k2vnSEAIznPOFt/AyeQFOe+3veDgtGOA7zYbFYCMCR+FaH4CHJVNTIe3+i+1QrYEFxbhScdoVEb67PcY7E94dj0klHGWfy8L99y+hANllisCDgTaA9sZSHiuPU63z46ZTTMAR+KaunsRA+6Ie7YNkXL0ZQ11QJweHyfe46UwmHUePS/gEKGyAE2idEzcXBlEVLI2ZsAFvx/nRLTtLDr0MNphoVqwTQbDhwcOlyPoxALhCrw2w4CIhIydD0FDg6ux4ljv/sI/OaDgIiEDHUuhlIssljq9irSK5600c1JNyqUfMeVDCeVXKcVmnNKmgtKmkszp7nsmgw3lXS3lEy3lSx3lEx3lSz3FKr7SooHCtVDkbJJO9l+hZLnt5kZnvhDsj8ppkMoZjoQGID6cLWR1R/Gnm4ccr4XivvGociCSpIMmCLlsPdUadJlnAkwCyqnoInKaHjBnBAgowfyOw9JbwOR/s5wepvBSHA51BlJYEEI4F5hCPKmwzY1NVs0tZVf12nfhGtNsRwaLRDrbLDRZt/5WqGQjCg4GxTYRoVgs4BSRybKeEFMBUGMbT8Csm5BwQGh34m/tDII4EiTESC5zPaBuGqm9O+TdUrcgmqorFkQbzkCpOVQvJvuIjgFijKC6NoxiGQzoyogkiZkjEJA6SrDMk6GLZwPRWMhn7bUv4fv+M+Med8f8RiiMUvIwQYHbZaAUtbbfG1D1ZZQW6fbZbfrA/o2a8BXLYrX0nsqe6BNqrR24UE3drNKFFbO3R/GTovXwtKZu8PYYfaY6x3cHsZ2k9tMZ+94GNuMLrnWzs1hdDU4ZRpb14fREvQOtc0O2JLTL6KCt6sMLqGaWlu7e6Ex6RAajvV0Q++4/zOlJyj0yr66elq7oIPybnmbvFEellccUhfF+rv7oEHey5sVGgApMU979xVAAEGVSTJZxsuIDMk4mSDDQEw1lPUuGSjcGTCzO3kuFVG2sumoAb7FPdjvOUPC1EQg50eGvNLJEOVQJlgmlMZgK9hxhZe3EsbVYmNNGArG1ozYmaXp8lCOBbkCAqXpkLW2KmOA5QIoXA4miwEQM9DK/+xlGKDPmq7s8wpk/UNuwqtMDulOz5WpfNJMzCQBalVZarhAr+BBVgNVGROAGyhWLSvTQRYXIfK11fkgjktWiy1ZdHpIrk9iWi1YxXHJR8lNqUYEkgIHFpu5MwOm/v2DQ9sMDZrgck62hgfq4goCtpJ/1Nmdp/1ATRwzpqqGCmCsxntk48dXA8okr/i4Jf/fA6A9mqZlwDUA9ViNAZb5LoDYdRYcSEHq4FdsPWyIXMlK6AyZkMn43/CxulDv14cNaqM2btmwD/ux89lMNpctYOvZdnuAU3HTuVkTE5iMTUpvd2R8hx0Bru162bls+iy6v5X6bwG7AHQ58P8tWkSZKBWeCZJwXMFZTADAhz+8Hu/AXVj5yaCVbyEAAdYB7Oh9INcrXkrOzQpvanPUI6d84he/ec9Z55z0hbdd9pbTm+b/KeA73/jWqF8hkiRLkSZbjlx5WDi4MHxCJWTkFFTUDIxMzCwuOuOSn1yPzKpKtRq1AurUa9BkmhZhbTr0mKFPXL8Bcw2aZ8hC5/3tgh984JiPPPaxz/xjPJInFrnnR1f8Eeov33vN68H72e+Oh+BVi933hsPeNIYEjwBFREZBlSVdhkxM+WjoUgkUEhErUuArEnoaWjqlpBKcbOwqOJSr5OLn4eUzRaOQSdzaTRcR1a3T17rMMdMss83Xa4FiMXfcdcMtt90E5rzyS5gLQH4FulIRKQYS7pmx5Gay3cmko5lSJKcgpcdobn/M0r74Pak/7npWZl/nffaa2BjxoW8U+HoD7/wrjctfnpcrXN6HCdKHd6Qeby0ZlM5YTo21xKfEc6l7EGFwBQlYzNCwFwqxYhtqQHeuzd6dcRVDInhnzHS2crntYS4Pp6CbniNWsSM7m/a0VuM5wLL72Gpze29utv0YOUdcH+qMZzQh3vFn2sdauzNhOVowoo90lcTBjm+oQQf+d0aWf/VLHWMzbmhse0vNdf+3n8o16RPjO2d3XD1tHhXLjveKDItjx2UIKqlPOhgHA/JfFiZIv5QW4Tx0jAJjcIV0Ta7jQXVmAlKnyzHxnider7i1dROkef78MN4IGSNHvNGlUu2ikkQOekL0XciY4rSgDjQg89iBJnc9zeRoJWesVZK3gkbYaSQxkM3KoRMbt2nGwaQ42duxmHrLDsWJJN7o3zXyoc/J8p4Puybuqxe1CqpLTxKGn+CQtlbQBG0Oe9DpJla2nZyAyDNF0mpC0qHjXa2CbYB0rsfxDZNqNFAS6k0hGurizjh6e1zYuIGdQcQpnFGma80hIf1FZB7M5aku6IJuI5uYlSxWqAIXp+ZOs77XcRndJsJmGVDySDw2skbno1Hp2d711ojVgeVhPjKtbfMH/+KCAocOJHx+uVGgQScTSqGE90BQRCQMDE4D3DDppLpQMiDVVNNBIg0DfD30mb3X+oKjrkw7JFyy578efESMPeRwr2NkBDzSA7UaSXGUoWMboO6y/wliGMm8gJpnI4cxn8xd+sXuv1i0rMyHVKbBERqQWGeUPkc7pUC3yKSVM5V3mYGZVJOQePxLVL8aR5jJ0O1DzyA5NPRUhqNE5qGBjzsNAkm5ni7OypQsiasYI/r4DQwziTweDP4aK8+1YIyMKDSZSIRMJUoSSSOpxEgm6SSXDDKTTDKXLLKQ7AUDZELq0nj7eugFJcnz40P36k0nX+z5bL/1dZ6vm6XADGuMHH32XLL3Aj+hhAIqMKjBoAGDFgw6MOjBYAkGKzBYg/XtgPUEJvvcwOkbKmmLKsY6KcZuFncd4NLj0FvGzXIGYITpTUtclpW+fKRhWCDn6ns6e/3bc3A0nrWyrnONf6XeWhdhKhvbdwm89yB1hRnYwLbrJElQKqmfEPE/ICJbm7KcL3XO55vlGljHyI848Xz7Oip4g/L+esFjH6qpIzA3/BaZyryjTAmifnwyn9Mvu0kMRPhTswwPT64/qs7dGYTcOxDx9+QjwrzG7o2zK206HJ6lXQLW0/HRwX03SruH0kjOKAF+s8gMV+f+nNmiGTWQF5fVLb2DnEi14Y2UNtBg/hph+VOfU1tgDJ1QZ+xOnV25sYyw9BU1daJgaZwsbVw2Qs6W1K/o7FQDjoYAF4cRJsXRPcqinRNkeTCSc00Fl1aXS10/Oh844ejG9AxxWV8e8T2KkuP0FuzuLJqdjzE4KpVx2pnhA19iXazRPgzQs1jHiOHmep9fZtTJLJn0wagZae53PjljFIK1EXY8RccemuoBBUHJJpWNJ/S7Zl891rXMB50dumZ9+uT7ZnfDz2yUbXi1n4N3cefsF8D7SMWTpdpGpmOfHBoseVgkL0YRp6mZIxCPdE81BOyky+xSlLLsJvclZN7rDmt9bv9DjJKZ+cbWs8uvy7KxaROzSpe8vAB3wQ5/xaTPmJUy6JUWCnjVjB5/u0em60v9puvWnLyWeR0ZpBnhTdTf8PLbK3lzW4i3BSXaVBfW7Lcws+lQoJXzNnpgJ8E7EiHv+onAe5KS9xVgFz6QCPnQTwQ+kjT3Y5wDQoZPZEI+bSECn8lKPt8OUPhCJuTLFiLwlazG165hW/qGCfKt3xoEloTYClEFOBKI60fgSYRPD+xywAoStiCIZCIGBpDIIGkLgky2MkcmNpGiUEaodk8J2qiCjwKMXg9YwJLGC7n1gnTziVuH3sNh8HAxAn7DFOxIZi/I4gVZ55P4hs0jYPcIODwCziCQywtye8Ef+CS8HgmfR8LvkYD0UxDIz15CfvGSvl/x67zqvvY0VnpW69n2Yo1VdUNaXWqbu9On9l9tUSoI1CVTATIZoBYEfAhMWhGYOgDtNaA9B6y6AB4A1Rs5Cg7EAIchrRlw460IE65c1vya1pKh0hb/laV/Hqq5IfYlKIPO0lSUxJfWFfqusaoaFRpqLQ00WTNwQ5QapW1o7jVLnsSTFWJWySoejUi4+kDYTDDJeX7Juee5fO4yzzUMJlyPx4YRcJd7fMIzvkytwBIe55ntjLDQWHVxcFiRc3P2OQF3r73YqWeXsrcljJmsTYwmY06j4/p5O3c8rirLYtlrygZhq1a5uzmspsxlteMbIVLD9Bj3+NEfHHF0hciFSLkl3NI00dQaL2XJ1xXxfuzGU6iZIiBXIwe9DCEj1MAWeA4mBJLabrIO9JoSBvC9S+fxOFw4Sbh8yEGt1S8b8HHI4AFdRoNhuERFO/9KMEvPWu5K9gdg9VF06RB/P/VN/du5QMqbHDxyM7y7MaeODS939buIqf+afA0WLWmlUg44C0YQUm2MAjkT1Za8KNFSg4airBpezIU2jcUfkTrUz4M4yVsoDDH7KNFbpnZa4haH1tHGMGoAOly4Do0jFSHtPnriwedhqlWSqoaHXXNWllQG3fWx+IPXzG4OFtwedVld+G2O3nF4kTgKbpNYp26YqvZ0+X/1+9GKzjEWbwo5QhgZVOi2iYC3L5ftSNBtl6c2rKLMvjBONJJHkZG3kiuk/CEPdv/N+8XvVEJmMD0sR5stPznghFD73WBw+R2XxnLXkEirLauqOgVyuEJSsfw7GUzBgA/kCtbdsl5OoebEGVzGj6dVXKQ0noQOhjk4hB4rb73e904xQpi4Y/Q69fsW/9ZknAKGSjpRI8zVosAXf1N5EziSB4df/y4oCOxY78cPyywk4V4srRO3CkXNzRs+HFGWkGpGWj6ZV+V9WbATJQQCa+S3wSFnEy4hsPWsv0rTldKp+4BB0sAtJJFQu5fOSN7nmByKunnUyDcRHlMUjMLG4ySawm6z2oPgqvoRHDi8yygwNk87T568+E9AT4Im6e6pV4ZtE+ygs1CyoNeFvYb4lQZ8u3EHKm0Z5iaF4LdCHokv/XCQeLRMOmJKDLlXKO91utXQMb+SWpCq3V5rigL6l8N9VF/7u2NwXCJLU/xcuHkXO3BzE+c+evy8i3MR1yYb824i6eWox1z8CTLoKp1UQrLZugY21F7ktKgTDHg9JztV2X2//bPh+yXSIofQhAVHNzd5m6f69Wqm0EyInWh0nr/+JrH7WnGhxGdfts1smom56GbXs5KElXaLmBaDZljuwhFPyFF4ObYUxYSWf6Yw1gdE1trWiLOYnoJDZfXMkq7gBo3JMoZZuCV/gyk6IMggeosHQtTccLxLNJhL64SabSBLWFTPhh++TqYqNuAx2lXugkh7MGnXTFIj1U4T8fIpAcnkWkd2CYMvAJR/rkL8ZTT+cT/570LlIp9/1z1KWKCm7bwDEq2x+zZaLfQ8TMwR4/YY59ufK6ldft22QrfCMzt6TkdfAOtkEiztIJgsYipioW5baszj9t3DwKcsncnDh79th/w+Z7aLKQBsPDy7g9aDG1jIpoGpNhzGFHXEJSv1bLYntbtMujMz08JNrzsVDCepO9+3wPuoeRIfoEAdNVDYDpf8pj276YQbqxdDTri3rzl0jVc31y+FeXV705HEycvKmSEz2+EZnBx9DpSzcBkDDoMpTTlTZRMuvlZ6txeZ2cBZKyg8CU4abgpRHymL++i+FX878Hqhb4K3W04wu/LAYE/MeRrJ72jzNXbc8UbdgQybg77ymkdehsT7RE256oFZbwP1l4gYywPolB9fG8InXO2n0xE9/mqU+45Shzc71s++3t9hwdXjEc/UkrbYKFjJSsrhkYAE54wpLVl4KrIhiv7Tr3Dg8NI8dPPl3Ri+wkosKEfYSxbucgYVNPKXxuqJtaNgTi86JQ1IRYHM4fyyTi5l4qTg6Zgw8rLdOzHe/+M7o2Ckq/dZi895/WQ3cSBrU6JMpVW+MubP3mzk3qzmvddwi7I/H0k1OjA2wF1562sCUsepackbKig+H1TzRjfNGI1lrILnZaxo//ZraSNc0lh4bjQaPnF0S3jLwxNhycou7oron1/XwF6XRTR6sK7G7aOruTYz7KUNGL2BgO/VrTs5kEgo2MNQHTXrGScEJikikD00Jci+Rt8s3yNSW3sOr4p4LRqNZXkZ0mXTI63Xz9j23833P4FqR9BCYHL5efwcZXEeG60ioZfJ1GPJVFoGXmojOBtcVkeamDN/9AWft6GupS7cp++FA620m1gXdpOmHRcoRovVzNImKfsF1fNVzpi2Sfu+dlzXvKFKMk5dbDbmhd8+OxwelsV4CbI/VNdbd4l4PI3hxojNodM55tuRZ1+pCe/6soMeWdtijDHAiI3FDAOGGMekxvgZNlv490zOL9y8WHa92+8Vd8cVrhbEFoElx+KTNYXBT2LsfXnw7TAvT46/sr6z0nnNRTsc43CZYcdYJB2uTZu8CE5v5nQnt6pzL7yvZWzG4mdqYs0cINdNCvQGSo/X+0Na2+oYohigQcmkBF939XqNs8lH6c4fs77dEEvbInF3z1gh9+jiDIXbA7G8Xdc6rg2iridjL7eSo5GSEduzgPYq5sdepSkfFoycLtaqrMgxH+MOizllqdbvC7zDvRPnD41ZaWlhxvRtQ06Xikb3pdEXQWF3OR2ey640z2UqZ/R6TMIF0i8FAkls01oOJFIL9jDkl+QdZG+oThSR2nX0U3yJ0NpkM6iaTX5/yFPrCdUxIhh2iKaxCUSWJrtBMc1aH5jkXScadbe4xurzl9VSdWhhWoIpjWhTKt5OBGOqoYZ4OBCOGzZt1oTXzY4xsZs02k2M2Zk9xdkcymhPOROuG7RFR9fTqKOd0jxYkTfrocON7KnO0ZWyhzBGXs9Z2TarLlH5GK5+HMEkhtoStb/D3t8jrDXiJev6qwAMfTpGKogx0qddffIS1raoD+Nf2Cq2u6YVIyabvhJW8Znpv+ckW8k9bbI8Fd5QAieK17aWWyQMsoDT3nfPfu9Koyuq2q6KKhRl/dLCfYVYekbOvpyM9GjHnzMq0e+xqTol7VPMHxsPK79lsHL/H0vMl9fnTFbcXbI280zVWIwhqK4u6TSVGcuKJ8mLztCxoDpiT37a/aSdXeXGccr4KbfDZnec7GsM6CJmh45+RqKT5gr4YREHEimw23kqS3GEH/A1umu9wUCejm8fgl/nl2vNAV/Q+/anQ3fCFx/Nek8ZVs6PfZ4GT0+Vz+Y+oYmUPlbGDnITEyIZy7jhU6SD8GdlRpPXvXMo9tDs8SQ633mBUjw5kjmRz7ovXQZfK0ea80bntw++PQbtupkT9uNwVfPLk3pZCXIwGDArOU4/zGVblYxAfdDrla9kgBG28WE/x6k0B4JBv+4Fp8ap15f7NNlrbbVm89myx8l3Nb2DsnXtJ0M3gK3MDJIb1b+oG5XKyzyz5B8Jhr19Ahcs9lXJCpd/UjzmZHilDHu04wNeLiEDk4itfHWFQlGuLOS7fnsczEtaWnqlqp5cqeZbCyRYejZdxKrIzS2lFUgZ9Ox0TEKzZqsrFYpKdQZvzioYqeCb8de31y6/UUMSVxGnlONxguHXYftr8hC5Up1nZRRiWGF4MOOSrUnPiNK5yHSYLRaEZe1l+JxJ5Kj6x/h0xcIrSbBSJFimkDUZzioStMpq1VGFubAWXr/aQqz00OBw6R1TbMjJCJJXqXj25+Hny3JUq5TKZnNOWbOdly9ILeGWCIUXGcFteYk8M+DWn6mkE6EgYGPfnQzM4dkpDT7hsL14k/iy8hlXUf9k9q/M3ZOnf9akJz7zM5IVfMItP1PlcDrz4sOhmquRZ5y7PpB5e2TUSa0XZYiinSmeUYOV/KnqRQqD6KufA6dgKGzeYAdiVGqY0fCBiy3RZFuwGJb8sY/iPh2WYpQiUJFNDxreSazEZ/xs6/fyvEoxdohGO4S5Io46b6jW4wvVFbMDiX9W0ATNyA2Upn+8xxfpZzeJNtLrz237zmqVStsNmKa50Z6tbFpg2JaxIxTpi7Zom94tKle6lomG9LKLMmKNLP0dObFGnrq7gUW5pCvauuKWiXjmxYadl6PrWNYNL6ep9NGpGSbpMneuzOnw/+RPw7khGm0O9hM2B+cPcUXCH8P+rn+huetkDzVHeFv5If5W3hHNQ5k2lErbKdrsPA2fdm4W7aSlhrTa5deK9h5Vrv/xnVBFV0XoHa7wUmdvI+Su/TD8Ye5qSUiSxxgvxnNRiUfCrolS7PhM4ThFWmWIf+7Z0KQ4uzyXFx+moxoYkhtd3R5ttzbuKY9XU6umWxPHUr9UFLrHXlgdt0OVoo/OHKRK14La9VxxPn+0N/+xYfZjYeZ8pzPwo8Ldn0RpaInoHIb67a5QzWp9neOp45JZbQtZt9+91g72XuaXG+kCIW0jqLrD59+pAhtpQgFduWJt/FpubvND7dxG3W6ssxVHVCadrlQ41GhVqibpLXr/c6aQabshYMuM0MwajREbDFlVqslGu7F+uzNUupjsCdX10TXHrsa6ZsTjuRmVExHxX6fRXuc3b9MIew5WpzFrRN91kh9yp5yT1RSlFU+uq1rT85+o3N/g9njne8UR6aydpDDLIf5sTl2HkuZdfDlcHhvpaXQ0VsoRfEOz+qsRuBqZ3sjUO6ZUTkF2b0xXMBrIi6um7VYvcy9b7l6uJrHSLchfEnKHcoU/R7sjXfZoF9Mkd2d1dhPWF3RWkZmGwchMo5Erwe473c6AzHBVyJ1gWuSRLa5ihyDUKuG5MhKB9+tgbNA92OfuA1N8e84SSukXbn7aB7t3V1HSZvWt+mis5aiT3KGHbvOe0arh5FDji2JoiBNUN6pfX77x0v5vyZKRVvZLjq6DgcvJn83Hhc0dvthOvWPYcWzffN/VgwMzNy7ctazXtDpolHjxFvinDzlFVF1SFhpO3dBhNsIrptCzUzIyhaIV/pZpvW1LVp19bTCxImFsZmQRp/40Ldco4cXITZTs/sy8MRkpQM2PZE1cnmzyuis1/MrdcA/m1Ca//n3iD4UHaTexQhHEKXR3uVlh1ldM5YxYfyqc+jNvcuvw3gJBrrScdzzv1KvSAmuhoEam8LWGAmMM33XjdR9voDPgLhNF8phfMBiPGTQr8NPLavSFPEcYrrpZaKn3e72DT5kZSXlwGxw6sYbY/YjO3TTvT2n45mTyzimN+9rbEy0nbW1VDXM75lU6l/j9ROmktbXilTE4hg1njGu12rVGrKJAKhRKr20et2ZjhdYwrP3Z7vu9+8+Evl1Hdqrh0RkihXCxW4/RFdy5tPxXXZ2/ZQ/Qk/NF2Vg84ptbWfaorBJzHmmNih7DwsfRsDUFVlHV9ZcIp5iU6y9WVqpUZVZW1Y/Z2T+BfFzno2xt0l126JtQ7tkZCV2iV4SLegs6O6eWxIpqiJ97W9pb/tfGk+DjeN5we5hN4jXNcvT52WCfhs5pOFtTxDuCQODn8D/h8vncDet930tPTU2nUr89LelNYsERevqL3ywhkpLSNtaev0JaosL6lfsrtmr9L5C95TLVb5Yj3w50MMCFAJoJ8DKgLKL0NHtWJnWltGNleP5tZ9mTddqFqJ+lvFOZUIpWtD1t/udZx/LGbfir8oDwZgK8JIooPc2eTVLXar5yda7O1Z3ZfPy88HQoiASPgIiEDEWRJBlVilRp0mXIlCVbjtxmnnw0dAzMJgsbBxcPhk9ASESsQCGJIsVKSMnIKSipqGlo6egZGJmYlSpjsdRg+5c941/+k3/FL/6V3b/qd//q//zPfe1f8789/G9EYf93YaVDyQ9otidO693R4UGs5cv+t2MtSRbjb/nBGZkwqWOegufZ/dO8kWorYz/cyLxoHHr8pNT4jXpqE3bgSGAFIMDYPwGTgJzXmqCWt/COKC3EfJd+ERH2AsGafBzpNcDn0BXv4yjIDc29xW/1L0/dp2PZmfHs1oKzf6ynmKjlVdMAfOguIsJesYIM5CwI+bN5a8zffaNArTlj/DTaO3f/WHtdkLuZnhzH8PfP+bBLJTwhwNbMLytqD07BwiWvNT4jfb6mCTe/1jW0am0tvD/JZ7vjQKmyeBw5Z7/a7HoQl+UcoFazV32ETJE6mVV+wqk8G1aT2jorLnxPjfFDKD++KPjR/v4UoJYEQmnOJRbZbtH4QwbsEvKvPx3wiy1y3SsXZPLJ2qLywelUFTZDt7Arzw+8jyAfIkTfVAehDMfLXIp3XF6SnjSiYFfYqJN4m8Uz7kR9n8HWZEtXmYIqYcMCPkjTZzWvWVyNV2Z5jdfdrPbUp/G3ET3zdTq+/f5r8jz3xumkbUq12AFQQxvFpHcUmyto3s6Vfog/5Y5IoeeZQS05Auy0gBjaBWjf1JBzUv5uZ+3sSCmFwbODeiyJkh2CG3njNSjRlA0kVuYjIyJXVuZcr0Z6SKaE11xwXhzUnYUUO0PIUA7YNxhqiuAK558WexbIusyavEkmMg3STWHx9PD67/adv2pAFOKWsML7SOgB7N6EnWsjc6HXUG33jY+xfPWn8i4gQxrUVdiaPDecBI3sXA674WghtDxNhJgxa9qcsWRk2ULQY9pAIsZ9DmD1NM0neOvc678vPsd73MwaS9jO9vYS0nUsN0Hd2djIGEt9Wf2oVADgAhfLcR02UVBXDi8Nqo7awxjpoxHnUcEP52gLnacHdalDhazihgivHPvGm6gVKwAd3gKSf1F/AoERZkdka/PMoLrZBVEspQRHdS61Gjy/4aJHcs6qa0rnuRkDrZQ8tzNmbI4zld4qZWGYHX4TcixpAL9vhlyWhjUkZw4yS2gLw7kBnT3XKNsCejVc9M6gYZrWUYC5gjrIofoAXUvSnBZgJnGsZj0yM5upUwG7wB7EDqxBIFhOdsYuknoMIt2l0BidoYCGoKNYRy1Q16PmLuV79LJQ2RvKsNCzWFtDYDVCeBUq9L0xe4VckCoL8E559wTzZ9ENg6fiu+I6CqnyfExN00lj2N1G8LuH3yCxhww42h26wVvXu1V7t86beBMTKhN2KTWiTjnBEgBBFqRRCAnhpb/lY/c6DMociLAgcB6W+3jgXqNrwi6MkNUZQJDBHMwiSCwPAvGsX9fJsff4j2xLYX41PQg92YF0tBZ66TMixsLKxPWF7q/EqQkwKSaLPEWMqG8rq9OhexMKdieJscxBxjT2Tz2lZTcrOh54/Xfnzt/4thQIbwEhXoCoSTodSLdHZ8Bt11ycAPehW7XVNx4jmNNKZvXo6nDNjDjqnE7aJzSORTouFwxr5PUS9prSLwnasteGw04pALIiIUNRJSo1p7g5XqunvdBMoVVC9IU6z7ThegSV2QjlnT1IgpOCQDXCQA4erirnzTajllDqqasaIEACETv5kjodIGip40MslbyaiB4wkreCv6SVU8Srut/vkzufqA0oQW2RxTcGMCrKQIO2aZ9EtUYfUhHfKvHBztyybgaMMF9dst3MUbNGvkn2yfxWrE6aZfxKdW2T1Vk1nyFFElZhFbm9iINhw5oDgYx8Yg0cjOfbo83yLPU+7zXyJqs/6clFzbyMAkiW2jgt2P7oiTCSmeckFRwxqYpil3qtWrmN4AS+Adq7lmEljHbeCa2WggAaYd01JfSE6uibchzR4BZAG5bYsVpbeoeaVTt1j7Da/EeeqYOl7kE8rKd65g30cOQWm1CJNsFqiyi9KBrn1LVDz8LkUfWW9ZIIHKFb7dg23SOw2XyVBYA9dnXQlm0V2rwwqL0LUZfulX+YlEyEsAsSXfVYtR2cHjwSDUSY9LCIWto20JQyRhc1WCAXC4czVevGyKu3dJdA4D6o436EBea1lGXdd5KM2YYRW8GJGZfbsji1W7+llKBExEKUoqdgpIJ7/amiPAfyNm/KRXCot9FubGM/Us4A0iZoTiOIvN/207GhYXaWEenoqDvTmMii0bmfzYD+0O8361k3y2MWyJFtbZ4aTg5/1Qmq6uM0Cquc0o0W+ySxnmBIBcpmKL0PMJLO3vjXkk4V2sMQAX9KKrTQ6w8PX6bVKv3wduB3tLYLfNjwIPFFtAmCjobyaPHh21RGpz1at9jMvuFcqt8ZUwV7CDpaHzmQJXLzLnx0NJTLVPjwBmOoB06JR4ijG1G9ASFSMVgSZBosLqYy0a4JY6xUG24MAUpsTts/CfSQXGk6UagJr+yhSVOg2TabVZ/WabWYIcF02H3p6sEBMyRQ3egyIJLYKGCUlC0LuVsdnM9nWnh8qDq32nqK0o0pyZGMcDxBAI7TlxatVN6to5WmYoGdbuHndruTSXNH63IZ6ekbKmOq+PZsgfj3eSdvkA2vsEAbhebi2Wpfa63I5VKVvvnuC2Xle6bQ6WeQ6AHsyM2bv1zQvw49jKf3cYECB/b1UrLKl+T2924JDuwL4Weh9oaZGhexs81fven9Wu5LBSy+b2b9umQ9jdTopbQi0u4b+du5DAqpC0nllKWUFfoSMTUWPRpZmaelVj2rbUhQgL6E3IDg52ZRCVxFPcvT00ptYyHOeWTsZM0dOPkJmBQv6cBoT1SrmBlqCjYyu38Xzn+CJDw9ZaoJJHXo7M4cdOZDLJJ0UEZSTrXw4sTA9tVNAd9+QV5lwVCN0pRdnYXf/TKpw+X3qPUCupHsF5T8IjBKxZrwpLqpfZGw9oH1EkjWigN2BLB2GFLg7cUWWbm0nKgXCN4FcDC5rpleMvGmjc/mGvVm+A1Ai7dOkDp5L5gpH3QcFBPuNr8zZxNhSmwKr3PYyHQ6d2qv9AUfYT7L0mT6v1MFyUUJaf0SWLqoql1Zh9paIiU6q8l3AUL43hjZ5i5AQchPQNAExDFiYFAUol56NSGy1Ur4rhkgwIgBkRlLIrI3MvIuQIliKFsZpehNe1OY3ab7sY0FpkRA0ATEScTAXLIcirm3FmOXN9JOZEW0bsu/a9Tyhjr9gA9lLd/aLb+YfxhPv3WuBz/+54QMPDnWAbYCMYNEqAMKSpm0GY8eqSRdmCLMC4zyfNl6+iYtq0nBLmV0aEtjYx1U39i7S4uSRAJyTECcLI64xVDSVWlm4iJaUQHJK20TgdnIMVvAliC2BK7iRh94C0bttI7wOcsMwJiKtrZBiqO+kciaqtktg3+RV6YqBlWzBYiCg6SRMeM+6CQtyfSEheXSDKae+6VU4pigxq0TSG6nNZAQMmt9EiAxDNo7hkJwVruiOgJh+gkr8rL2svLYAeiBAbS5bD1F397sSpcok+1uJG/lc3/NmpJFOBuPQxK0ulzC7+ciit8CXfXzFXkp9V1392pIn3f9ZmXwX9mHOKSuD0CT6jbeuMxWxRDNHBXJ7GTeHlVUV42dLjm+K4pLbplhOp1tLTcUrY3HCTEjNigla0I+2cZ0emBdHDiwGGUGq2/bubQwm47Qre7a2LweAXNO6pZDfFj3MassFjKshS7jNkKfl4YT2FRDGK+DFgxvNRaivtudl1yz1mZF08ytlBcpKCq5U9RzdyjjOuxkZFvyvmsOb79GXT9G064jLUyiSdUGJpM5LwwIJDmUHOIpBO/4PwnybmpQpnYkBpEhGxMgEWMuF9FIDvxlJ7/YxNKsr5rnRgsPO6xFX1Ruqfv/MswvFAg3ZVJ+F1vVNjezdS8VOwVgPqai3sE3+jIvOt7odmQBRk/w+xmiv0GL2ESUHiC5nEvdPbRN9WXRIasS2hmHWEsBsmPqQwhun1ORFStaHluePqXA3ltihlwmo6zauWA3QlqGt3ZQNhOxTe4RgV6A3Zsjbes+lXYwnWCAgYal2YtyQto5HE5FXTDhFiHuDRw5FpCeVC0H8Mp163WeBwGwvlif77f5Kl/W5acQQyaRFP4cZ4KXeP33GX5MbkY6f38ptWgPkfklaYxunOv1dWbpixR71T0/bdfYZnjBEytGm26HNJUiK58GatPUpSHE+8iINXc7XP+cWprcnCbJyZIWTlVdkC6IXwYNJN6Y+alKjkfg+NLxxSePcIPrpqnDrmnb0Ve/zd7YyoJ0OSfZuhP0j2AFjZK3ihpmq9zzcbftaNvSh1Ipc0PYxpryktIaYaPVjopjGPekamKeaDoMwHA1XO63WGPlENJtuXWTT7uAhgk0ukxvYeMzJglmF9gf2f5vhzGTHGWN4qub62NhMp+nguwFfgdlKQr64avKqsxeRLIFyG3rYpGndVBDK9d6IDVvblNr8wKABjQQKBlloM7YurZ7EdnkaAdgjmlV3TVE9ear+/dudd/IZm5GYDI2cVUUQgDFfXF3c315vt9iy12IhZhPY/g4OB/xlANBGzPty55kE7MwzN1nom1Cqm9ag5JNGYh9uevvu/Ts27vn989vjzdX+11V7Aa/PRsL/gmU46roQf+bIbcXAHvaArFj4ZrSZKdqdUMBhEfL2lZglNSAe8q9A5HigMEO5fjGFSIE9qwFnCe467jlwDXHG0q9T61XtXJZ41739SpbQ9bJbK8LRKx84Oo3Qr6FHsxCbCESzLYkQbIJ/Oo1hbz34x/Gku6SOTTCKagVzcblCEGPd6YpJjIY1yEO9iMIAqDABxf+uln553/6/h+WArz+J+4HeOuL/jyh6NpWsCOAsWAAAX4HN98GdJGSMwZp7DNj6mNq5p3t5ylXSRq1NobmWuLm4x74Zos/34NDigoIHnw5TvuJnSJY89bMrnrItkaWCtZOs2kNxJMf62V4aiM4Rk7RPJbEImJAPd+gpydkt+XGd0nK1fhCH6I7rTVKyfUouRgZ/hkPluF/+Rz8/eDh2Lkxy4/XJvfg8QohBQQck8AFumCCwit9vNwGZDaMmtPRWxlyw5JyqXyLBiU/HuhBAFwrByw+BtgnFAevYY+mcZ21hr79olxjxAflNY7lDvnUpsswMuEuk8TroJTcKrWlyKDMSgU8yII8YVAnqfIgXxLIr4C8iscU5MGDIQbVLaqnU7OdNKBCGhcABGquAedKBRJYgEEO8IACaV6aJZKBb6nVgEESZBsZMZtwavDmiLz24HZavt2++UxW26mHYqCycddhKtB/wQkIrPAGRoiABlzcvfKRP2GLhEGzLLdHDwjIZC5EzfBgIgFrAOdMyQoHBxinHQ40Gg94xE+q3SGZ3t8dRnVtdxytjbsjML274+Wr352AS8mpqR84UEJM76VXkhvXqk/U5omgFIvzLs17uu/6DiVqOblYtWkxTZxbm35tivi06dCvyzR96rXpszJajxg2uWLSlqsOs0UHbLfR16uBXQWfGgbnhcrSDofa9Og121fRwQGjOJqUjA5bQIRUGVRzPfr06Ayi1ZxbciIhwhEahEWcWvEq2SGKdPq1EG9d4N1dHs6MJu9WTsLsNd6WXK59RQvF4KXznVPzaP0HmslACgwHc9lFLV7V6jUj+ATChL4l0uaSK64SK1BI4prrbvjHTUXhFCsJISXTTu6W2zrctc7rDlH4kZKKOjwNrXvui3hAR8/A6HujTOyipuvSKabbbg5OPcp9p0KvPnEzVKpSzeWhhAEzI+hXEzHjuNVG5uE1i89scw2aY495DvP7SUCdeis1CBqywELzNQqZZLIfHDPFDjuDypApy40DukD4NxAlkzI5UzI106RJlyFTlmw5cuXJR0PHwMTCxsHFg+ETEBIRK1DYmHFP/CFNCgamlyH24drrrOWSEaQrRZGkSTOzMqlJesObrM457y5z+otecuILHg/NGoqVtMRxxKzdUpsji+pnvziCjYNlg2n2sySPhIdshWVWW+U5i031TQpKKmoaWjp6BsbW+Ngjw2ze95H33BruOpeL0h+LSqUWpVQhlSGucE+CeJMvc+gc5GixJ550wFdNXNsrV2j2tKgt3i7aTFhtxM+q5HW1E3pibX07MbMUJAfQgc0g+oXGYTQ6sG27eHQW+r9mJTqzZmU0Fj1JkK9lfoY4qagjTAyBCiXIwgKF25kQlDqGUncwIaqY1yAGjjAQFRSCBYIwsFBBqSAIFnhPKalVV3nlHoXfYme+3YPTXqltRd5kiFlKLlPtVsPt5Vbbjgqp9uQa8kfk12/7FfsgeVprfyINbrHkwQ1YyIloV7jyKO9WrgHVR8Cle8HDEDTceAgyGV2/9zAgWt8GoGQiYD01ZhlqQBQIj5RFRNCZg5XCGriQQMePR7EeTwEjYAN9AUCAwyQlBso6jAmPAhxAfRiDVniDh8pWBBPygyTqPUICcR7qRtphYZp1jLQAQIi/pzWwgrUmWYaaYBXMJ+TgEWrBEWjiHZE1h+Gh/DfxYQJ4wQ4AAA==) format('woff2')}
+:root{--bg:#0f0f0f;--sf:#1a1a1a;--sf2:#242424;--sf3:#2c2c2c;--bd:#2e2e2e;--ac:#c8922a;--acd:#7a5518;--tx:#e8e0d4;--txd:#7a7570;--txm:#4a4540;--gn:#4caf50;--rd:#e05252;--or:#e08020;--bl:#5090d0;--r:6px}
+[data-theme=light]{--bg:#f2ede8;--sf:#e8e2da;--sf2:#ddd6cc;--sf3:#d0c9c0;--bd:#c8bfb4;--ac:#7a6238;--acd:#c8a96a;--tx:#2a2218;--txd:#7a6a5a;--txm:#b0a090;--gn:#2e7d32;--rd:#c62828;--or:#b45a00;--bl:#2060a0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:"IBM Plex Sans",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+input,button,select,textarea{font-family:inherit}
+#hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:11px 15px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.htitle{font-family:"Bebas Neue",sans-serif;font-size:21px;letter-spacing:3px;color:var(--ac)}
+.htitle small{font-size:11px;letter-spacing:1px;color:var(--txm);margin-left:8px;font-family:"IBM Plex Mono",monospace}
+#content{padding-bottom:62px}
+.panel{display:none}.panel.active{display:block}
+#nav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bd);display:flex;z-index:200}
+.nb{flex:1;padding:7px 2px 5px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--txm)}
+.nb.active{color:var(--ac)}.nb svg{width:19px;height:19px;fill:currentColor}
+.nb span{font-family:"IBM Plex Mono",monospace;font-size:9px}
+/* shared */
+.ph{padding:10px 14px 0;display:flex;align-items:center;justify-content:space-between}
+.ptitle{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:2px;color:var(--ac)}
+.con{padding:10px 14px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:13px}
+.ct{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:2px;color:var(--txd);text-transform:uppercase;margin-bottom:11px}
+.row{display:flex;gap:8px;align-items:center}.row.sb{justify-content:space-between}
+.col{display:flex;flex-direction:column;gap:7px}
+label.lb{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:1px;color:var(--txd);text-transform:uppercase}
+input[type=text],input[type=number],input[type=date],select,textarea{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:8px 10px;font-size:14px;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf2);color:var(--txd);cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:1px;white-space:nowrap}
+.btn:hover,.btn:active{border-color:var(--ac);color:var(--ac)}
+.btn.pr{background:var(--ac);border-color:var(--ac);color:#0f0f0f;font-weight:600}.btn.pr:hover{opacity:.85}
+.btn.dn{border-color:var(--rd);color:var(--rd)}.btn.sm{padding:5px 10px;font-size:10px}
+.sv{font-family:"Bebas Neue",sans-serif;font-size:27px;line-height:1}
+.sv.ac{color:var(--ac)}.sv.gn{color:var(--gn)}.sv.rd{color:var(--rd)}.sv.sm{font-size:19px}
+.su{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--txm);margin-top:2px}
+.sl2{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;color:var(--txd);text-transform:uppercase;margin-bottom:4px}
+.si{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:11px}
+.pw{background:var(--sf2);border-radius:2px;height:4px;overflow:hidden}
+.pf{height:100%;border-radius:2px;background:var(--ac);transition:width .4s}
+.pf.gn{background:var(--gn)}.pf.rd{background:var(--rd)}.pf.or{background:var(--or)}
+.sg{display:flex;background:var(--sf2);border-radius:var(--r);padding:3px;gap:3px}
+.sgb{flex:1;padding:6px;text-align:center;border-radius:4px;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:1px;color:var(--txd);border:none;background:none}
+.sgb.on{background:var(--ac);color:#0f0f0f;font-weight:600}
+.dn2{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r)}
+.dn{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)}.dn:last-child{border-bottom:none}
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1px;padding:2px 6px;border-radius:3px;border:1px solid}
+.m-leg{color:#e06060;border-color:#e06060;background:rgba(224,96,96,.1)}
+.m-chest{color:#e09040;border-color:#e09040;background:rgba(224,144,64,.1)}
+.m-back{color:#60a0e0;border-color:#60a0e0;background:rgba(96,160,224,.1)}
+.m-shoulder{color:#60c080;border-color:#60c080;background:rgba(96,192,128,.1)}
+.m-arm{color:#c080e0;border-color:#c080e0;background:rgba(192,128,224,.1)}
+.m-core{color:#e0c040;border-color:#e0c040;background:rgba(224,192,64,.1)}
+.dnav{display:flex;align-items:center;justify-content:center;gap:12px;padding:9px 14px;background:var(--sf);border-bottom:1px solid var(--bd)}
+.dnav button{background:var(--sf2);border:1px solid var(--bd);color:var(--txd);width:30px;height:30px;border-radius:var(--r);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.dnav button:hover{border-color:var(--ac);color:var(--ac)}
+.dstr{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--tx);min-width:130px;text-align:center}
+.tchip{font-size:9px;color:var(--ac);border:1px solid var(--acd);padding:1px 5px;border-radius:3px;font-family:"IBM Plex Mono",monospace}
+.spt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.spt{background:var(--sf2);border:2px solid var(--bd);border-radius:var(--r);padding:9px 4px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px}
+.spt.on{border-color:var(--ac);background:rgba(200,146,42,.08)}
+.spt-ico{font-size:20px}.spt-nm{font-family:"IBM Plex Mono",monospace;font-size:9px;color:var(--txd)}
+.swrap{position:relative}
+.sres{position:absolute;top:100%;left:0;right:0;background:var(--sf3);border:1px solid var(--acd);border-top:none;border-radius:0 0 var(--r) var(--r);z-index:50;max-height:200px;overflow-y:auto}
+.sri{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:13px}
+.sri:hover,.sri:active{background:var(--sf2);color:var(--ac)}.sri:last-child{border-bottom:none}
+mark{background:var(--acd);color:var(--ac);border-radius:2px;padding:0 2px}
+.pb-bar{display:flex;gap:6px;padding:9px 14px;background:var(--sf);border-bottom:1px solid var(--bd)}
+.pbb{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:1px;padding:5px 13px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf2);color:var(--txd);cursor:pointer}
+.pbb.on{background:var(--ac);color:#0f0f0f;border-color:var(--ac);font-weight:600}
+svg.chart{width:100%;display:block}
+.nodata{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--txm);text-align:center;padding:28px 0}
+#toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ac);color:#0f0f0f;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:1px;padding:7px 14px;border-radius:var(--r);opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;overflow-y:auto;padding:16px 14px}
+#mover.on{display:flex;align-items:flex-start;justify-content:center}
+.mod{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);width:100%;max-width:480px;padding:15px}
+.mtitle{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:2px;color:var(--ac);text-transform:uppercase;margin-bottom:13px}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div class="htitle">IRONLOG <small id="hdrSub">DASHBOARD</small></div>
+  <button class="btn sm" onclick="toggleTheme()">&#9680; THEME</button>
+</div>
+<div id="content">
+
+<!-- ① 总览 -->
+<div id="p-db" class="panel active">
+  <div class="dnav">
+    <button onclick="D.prev()">&#8592;</button>
+    <div class="dstr" id="db-ds"></div>
+    <button onclick="D.next()">&#8594;</button>
+    <span class="tchip" id="db-tc" style="display:none">TODAY</span>
+  </div>
+  <div class="con">
+    <div class="card">
+      <div class="ct">体重记录</div>
+      <div class="row">
+        <div style="display:flex;align-items:center;gap:6px;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 11px;flex:1">
+          <input type="number" id="db-wi" style="background:none;border:none;outline:none;font-family:'Bebas Neue',sans-serif;font-size:27px;color:var(--tx);width:75px" placeholder="—" step=".1" min="30" max="300">
+          <span class="su">KG</span>
+        </div>
+        <button class="btn pr" onclick="D.saveW()">SAVE</button>
+      </div>
+      <div class="row" style="margin-top:7px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txd)" id="db-wp"></span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:1px 7px;border-radius:3px" id="db-wd"></span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">热量平衡</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="si"><div class="sl2">目标摄入</div><div class="sv" id="db-tgt">—</div><div class="su">KCAL</div></div>
+        <div class="si"><div class="sl2">净摄入 ×0.9</div><div class="sv ac" id="db-act">0</div><div class="su">KCAL</div><div class="pw" style="margin-top:5px"><div class="pf" id="db-ab" style="width:0%"></div></div></div>
+        <div class="si"><div class="sl2">训练消耗</div><div class="sv gn" id="db-brn">0</div><div class="su" id="db-bd">力量0+有氧0</div></div>
+        <div class="si" style="border-color:var(--acd)"><div class="sl2">净缺口</div><div class="sv" id="db-def">—</div><div class="su" id="db-dn">未设目标</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">宏量摄入</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="si" style="text-align:center"><div class="sv" style="color:#e06060" id="db-mp">0g</div><div class="sl2">蛋白质</div><div class="su" id="db-mpt">—</div><div class="pw" style="margin-top:5px"><div style="height:100%;border-radius:2px;background:#e06060;transition:width .4s;width:0%" id="db-mpb"></div></div></div>
+        <div class="si" style="text-align:center"><div class="sv" style="color:#60a0e0" id="db-mc">0g</div><div class="sl2">碳水</div><div class="su" id="db-mct">—</div><div class="pw" style="margin-top:5px"><div style="height:100%;border-radius:2px;background:#60a0e0;transition:width .4s;width:0%" id="db-mcb"></div></div></div>
+        <div class="si" style="text-align:center"><div class="sv" style="color:#e0b040" id="db-mf">0g</div><div class="sl2">脂肪</div><div class="su" id="db-mft">—</div><div class="pw" style="margin-top:5px"><div style="height:100%;border-radius:2px;background:#e0b040;transition:width .4s;width:0%" id="db-mfb"></div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">今日运动</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--txm);text-transform:uppercase;border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:7px">力量训练</div>
+      <div id="db-wl"></div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--txm);text-transform:uppercase;border-bottom:1px solid var(--bd);padding-bottom:3px;margin:10px 0 7px">有氧运动</div>
+      <div id="db-cl"></div>
+    </div>
+    <div class="card">
+      <div class="ct">微量元素</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:26px">Ca</span><div class="pw" style="flex:1;height:6px"><div class="pf" id="db-ca" style="width:0%"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:32px;text-align:right" id="db-cap">0%</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txm);width:64px;text-align:right" id="db-cav"></span></div>
+        <div class="row"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:26px">Mg</span><div class="pw" style="flex:1;height:6px"><div class="pf" id="db-mga" style="width:0%"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:32px;text-align:right" id="db-mgp">0%</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txm);width:64px;text-align:right" id="db-mgv"></span></div>
+        <div class="row"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:26px">Zn</span><div class="pw" style="flex:1;height:6px"><div class="pf" id="db-zna" style="width:0%"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:32px;text-align:right" id="db-znp">0%</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txm);width:64px;text-align:right" id="db-znv"></span></div>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:var(--r);padding:11px 13px;display:flex;align-items:flex-start;gap:10px">
+      <span style="font-size:18px;margin-top:2px" id="db-si">&#128203;</span>
+      <div><div style="font-size:13px;line-height:1.6" id="db-st"></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px" id="db-pr"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ② 训练 -->
+<div id="p-wo" class="panel">
+  <div style="background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 13px;display:flex;gap:6px">
+    <button class="btn sm on" id="wo-t1" onclick="W.sub(1)">&#128170; 力量</button>
+    <button class="btn sm" id="wo-t2" onclick="W.sub(2)">&#127939; 有氧</button>
+  </div>
+  <div id="wo-plans">
+    <div class="ph" style="padding-top:9px"><span class="ptitle">训练计划</span><button class="btn sm pr" onclick="W.newPlan()">+ 新建</button></div>
+    <div class="con"><div id="wo-plist"></div><div id="wo-logs"></div></div>
+  </div>
+  <div id="wo-active" style="display:none">
+    <div class="ph" style="padding-top:9px"><span class="ptitle" id="wo-aname">训练中</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="W.abort()">放弃</button><button class="btn sm pr" onclick="W.finish()">&#10003; 完成</button></div></div>
+    <div class="con">
+      <div class="card" style="background:var(--sf2)">
+        <div class="row sb">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txd)" id="wo-timer">00:00</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ac)" id="wo-vol">容量 0 kg</span>
+        </div>
+      </div>
+      <div class="card" id="wo-restCard" style="display:none">
+        <div class="ct">组间休息</div>
+        <div style="text-align:center;padding:6px 0">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--ac);line-height:1" id="wo-rt">3:00</div>
+          <div class="row" style="justify-content:center;gap:7px;margin-top:9px">
+            <button class="btn sm" onclick="W.addRest(30)">+30s</button>
+            <button class="btn sm" onclick="W.skipRest()">跳过</button>
+            <button class="btn sm" onclick="W.resetRest()">重置</button>
+          </div>
+        </div>
+      </div>
+      <div id="wo-exlist"></div>
+    </div>
+  </div>
+  <div id="wo-cardio" style="display:none">
+    <div class="ph" style="padding-top:9px"><span class="ptitle">有氧训练</span></div>
+    <div class="con">
+      <div class="card"><div class="ct">选择运动</div><div class="spt-grid" id="wo-spts"></div></div>
+      <div class="card">
+        <div class="ct">训练参数</div>
+        <div class="col">
+          <div class="sg" style="margin-bottom:2px">
+            <button class="sgb on" id="c-m1" onclick="W.cmode(1)">手动输入</button>
+            <button class="sgb" id="c-m2" onclick="W.cmode(2)">实时秒表</button>
+          </div>
+          <div id="c-manual"><label class="lb">时长（分钟）</label><input type="number" id="c-dur" placeholder="30" min="1" max="300" oninput="W.cPreview()"></div>
+          <div id="c-timer" style="display:none;text-align:center;padding:8px 0">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--ac);line-height:1" id="c-sw">00:00</div>
+            <div class="row" style="justify-content:center;gap:7px;margin-top:9px">
+              <button class="btn sm pr" id="c-swb" onclick="W.swToggle()">开始</button>
+              <button class="btn sm" onclick="W.swReset()">重置</button>
+            </div>
+          </div>
+          <div class="row">
+            <div style="flex:1"><label class="lb">体重 (kg)</label><input type="number" id="c-wt" placeholder="70" step=".1" oninput="W.cPreview()"></div>
+            <div style="flex:1"><label class="lb">MET值</label><input type="number" id="c-met" placeholder="8.0" step=".5" oninput="W.cPreview()"></div>
+          </div>
+          <div style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:10px;text-align:center">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--ac)" id="c-prev">— kcal</div>
+            <div class="su">预计消耗</div>
+          </div>
+          <button class="btn pr" onclick="W.saveCardio()">记录有氧</button>
+        </div>
+      </div>
+      <div class="card"><div class="ct">本周汇总</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="wo-cwk"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 饮食 -->
+<div id="p-dt" class="panel">
+  <div style="background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 13px;display:flex;gap:6px">
+    <button class="btn sm on" id="dt-t1" onclick="DT.sub(1)">🥗 饮食日志</button>
+    <button class="btn sm" id="dt-t2" onclick="DT.sub(2)">📚 菜谱</button>
+    <button class="btn sm" id="dt-t3" onclick="DT.sub(3)">📖 饮食库</button>
+    <span class="tchip" id="dt-tc" style="display:none">TODAY</span>
+  </div>
+  <div id="dt-log">
+  <div class="con">
+    <div class="card">
+      <div class="ct">搜索食物</div>
+      <div class="swrap">
+        <input type="text" id="dt-si" placeholder="搜索食物或补剂…" oninput="DT.search(this.value)" autocomplete="off">
+        <div class="sres" id="dt-sr" style="display:none"></div>
+      </div>
+      <div style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txm)">加入：</span>
+        <button class="btn sm on" id="dt-mb0" onclick="DT.setMeal(0)">早餐</button>
+        <button class="btn sm" id="dt-mb1" onclick="DT.setMeal(1)">午餐</button>
+        <button class="btn sm" id="dt-mb2" onclick="DT.setMeal(2)">晚餐</button>
+        <button class="btn sm" id="dt-mb3" onclick="DT.setMeal(3)">加餐</button>
+      </div>
+    </div>
+    <div class="dn2">
+      <button class="btn sm" onclick="DT.prev()">◀</button>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px" id="dt-ds"></span>
+      <button class="btn sm" onclick="DT.next()">▶</button>
+    </div>
+    <div class="card">
+      <div class="row sb" style="margin-bottom:8px">
+        <div>
+          <div class="sl2">净热量 (×0.9 TEF)</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:31px;color:var(--ac)" id="dt-tk">0</div>
+          <div class="su">KCAL</div>
+        </div>
+        <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txd);line-height:1.8">
+          P <span id="dt-tp" style="color:var(--tx)">0g</span><br>
+          C <span id="dt-tc2" style="color:var(--tx)">0g</span><br>
+          F <span id="dt-tf" style="color:var(--tx)">0g</span>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txm)">Ca <span id="dt-ca" style="color:var(--txd)">0</span>/1000mg &nbsp;Mg <span id="dt-mg" style="color:var(--txd)">0</span>/400mg &nbsp;Zn <span id="dt-zn" style="color:var(--txd)">0</span>/11mg</div>
+    </div>
+    <div class="card" id="dt-mc"></div>
+  </div>
+  </div>
+  <div id="dt-rc" style="display:none">
+    <div class="ph" style="padding-top:9px"><span class="ptitle">菜谱</span><button class="btn sm pr" onclick="RC.newRecipe()">+ 新建</button></div>
+    <div class="con" id="rc-list"></div>
+  </div>
+  <div id="dt-fl" style="display:none">
+      <div class="ph" style="padding-top:9px"><span class="ptitle">饮食库</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="FL.restoreHidden()">恢复隐藏</button><button class="btn sm pr" onclick="FL.add()">+ 添加</button></div></div>
+      <div class="con">
+        <div class="card">
+          <div class="ct">搜索食物库</div>
+          <input type="text" id="fl-si" placeholder="输入名称搜索…" oninput="FL.search(this.value)" autocomplete="off">
+        </div>
+      <div id="fl-list"></div>
+    </div>
+  </div>
+</div>
+<!-- ④ 档案 -->
+<div id="p-pr" class="panel">
+  <div class="ph" style="padding-top:9px"><span class="ptitle">用户档案</span><button class="btn sm pr" onclick="PR.save()">保存</button></div>
+  <div class="con">
+    <div class="card">
+      <div class="ct">基础信息</div>
+      <div class="col">
+        <label class="lb">性别</label>
+        <div class="sg"><button class="sgb on" id="pr-m" onclick="PR.setSex(0)">男</button><button class="sgb" id="pr-f" onclick="PR.setSex(1)">女</button></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label class="lb">年龄</label><input type="number" id="pr-age" placeholder="25" min="10" max="99" oninput="PR.calc()"></div>
+          <div><label class="lb">体重 (kg)</label><input type="number" id="pr-wt" placeholder="70" step=".1" oninput="PR.calc()"></div>
+        </div>
+        <div><label class="lb">身高 (cm)</label><input type="number" id="pr-ht" placeholder="175" min="100" max="250" oninput="PR.calc()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">活动水平</div>
+      <div class="col">
+        <div class="sg">
+          <button class="sgb on" id="pr-a0" onclick="PR.setAct(0)">久坐</button>
+          <button class="sgb" id="pr-a1" onclick="PR.setAct(1)">轻度</button>
+          <button class="sgb" id="pr-a2" onclick="PR.setAct(2)">中度</button>
+          <button class="sgb" id="pr-a3" onclick="PR.setAct(3)">高强度</button>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txm)" id="pr-ad">每周0次，办公室工作</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">目标</div>
+      <div class="col">
+        <div class="sg">
+          <button class="sgb on" id="pr-g0" onclick="PR.setGoal(0)">减脂</button>
+          <button class="sgb" id="pr-g1" onclick="PR.setGoal(1)">维持</button>
+          <button class="sgb" id="pr-g2" onclick="PR.setGoal(2)">增肌</button>
+        </div>
+        <div><label class="lb">目标体重 (kg)</label><input type="number" id="pr-tw" placeholder="65" step=".1" oninput="PR.calc()"></div>
+        <div><label class="lb">目标日期（可选）</label><input type="date" id="pr-td" oninput="PR.calc()"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">TDEE 计算</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="pr-grid">
+        <div class="si" style="grid-column:1/-1"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm);text-align:center;padding:8px 0">请填写身高、体重、年龄</div></div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);margin-top:10px;line-height:1.7" id="pr-mb"></div>
+    </div>
+    <div class="card">
+      <div class="ct">数据备份</div>
+      <button class="btn" style="width:100%;margin-bottom:8px" onclick="BAK.copy()">&#128203; 复制 JSON 到剪贴板</button>
+      <button class="btn" style="width:100%;margin-bottom:12px" onclick="BAK.download()">&#11015; 下载备份文件</button>
+      <div class="ct" style="margin-top:4px;margin-bottom:8px">恢复数据</div>
+      <textarea id="bak-in" placeholder="粘贴备份 JSON..." style="width:100%;height:76px;background:var(--sf3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:8px;resize:none;box-sizing:border-box"></textarea>
+      <button class="btn pr" style="width:100%;margin-top:6px" onclick="BAK.restore()">恢复数据</button>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 历史 -->
+<div id="p-hi" class="panel">
+  <div class="pb-bar">
+    <button class="pbb on" onclick="HI.period(7,this)">7天</button>
+    <button class="pbb" onclick="HI.period(30,this)">30天</button>
+    <button class="pbb" onclick="HI.period(90,this)">90天</button>
+  </div>
+  <div class="con">
+    <div class="card"><div class="ct">本周报告</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="hi-wk"></div></div>
+    <div class="card"><div class="ct">体重趋势</div><div id="hi-wstats" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div><div id="hi-wc"></div></div>
+    <div class="card">
+      <div class="ct">热量摄入</div>
+      <div style="display:flex;gap:10px;margin-bottom:8px">
+        <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd)"><span style="width:8px;height:8px;border-radius:50%;background:var(--ac);display:inline-block"></span>净摄入</span>
+        <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd)"><span style="width:14px;height:2px;background:var(--txd);display:inline-block"></span>目标</span>
+      </div>
+      <div id="hi-cc"></div>
+    </div>
+    <div class="card">
+      <div class="ct">训练消耗</div>
+      <div style="display:flex;gap:10px;margin-bottom:8px">
+        <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd)"><span style="width:8px;height:8px;border-radius:50%;background:var(--gn);display:inline-block"></span>力量</span>
+        <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd)"><span style="width:8px;height:8px;border-radius:50%;background:var(--bl);display:inline-block"></span>有氧</span>
+      </div>
+      <div id="hi-bc"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<nav id="nav">
+  <button class="nb active" onclick="showTab('db')" id="nb-db"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg><span>总览</span></button>
+  <button class="nb" onclick="showTab('wo')" id="nb-wo"><svg viewBox="0 0 24 24"><path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/></svg><span>训练</span></button>
+  <button class="nb" onclick="showTab('dt')" id="nb-dt"><svg viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8-15.03-8-15.03 0h15.03zM1.02 17h15v2h-15z"/></svg><span>饮食</span></button>
+  <button class="nb" onclick="showTab('pr')" id="nb-pr"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>档案</span></button>
+  <button class="nb" onclick="showTab('hi')" id="nb-hi"><svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg><span>历史</span></button>
+</nav>
+
+<div id="mover" onclick="closeMod(event)"><div class="mod" id="mc"></div></div>
+<div id="toast"></div>
+
+<script>
+// ── FOOD DATABASE ──
+var FOODS=[
+{id:'f1',n:'鸡胸肉',a:['鸡胸','breast','chicken'],k:165,p:31,c:0,f:3.6,ca:11,mg:29,zn:.9},
+{id:'f2',n:'鸡腿',a:['腿肉','chicken leg'],k:185,p:18,c:0,f:13,ca:9,mg:20,zn:1.6},
+{id:'f3',n:'猪里脊',a:['里脊','猪肉','pork'],k:143,p:20,c:1.5,f:7,ca:6,mg:25,zn:2.9},
+{id:'f4',n:'牛腱子',a:['牛肉','beef','腱子'],k:106,p:21,c:0,f:2.5,ca:7,mg:22,zn:3.9},
+{id:'f5',n:'牛排',a:['steak','牛扒'],k:183,p:22,c:0,f:10,ca:11,mg:26,zn:4.5},
+{id:'f6',n:'三文鱼',a:['salmon','鲑鱼'],k:208,p:20,c:0,f:13,ca:9,mg:27,zn:.6},
+{id:'f7',n:'金枪鱼罐头',a:['tuna','吞拿鱼','金枪鱼'],k:116,p:26,c:0,f:.5,ca:11,mg:31,zn:.9},
+{id:'f8',n:'虾仁',a:['虾','shrimp','prawns'],k:87,p:18.6,c:.2,f:.8,ca:62,mg:43,zn:1.5},
+{id:'f9',n:'鸡蛋',a:['egg','蛋'],k:144,p:13,c:1.5,f:9.5,ca:56,mg:10,zn:1.1},
+{id:'f10',n:'蛋白',a:['egg white','蛋清'],k:52,p:11,c:.7,f:.2,ca:7,mg:10,zn:.02},
+{id:'f11',n:'北豆腐',a:['豆腐','tofu'],k:98,p:12.2,c:2.8,f:4.8,ca:138,mg:63,zn:1.2},
+{id:'f12',n:'纯牛奶',a:['牛奶','milk'],k:65,p:3.3,c:4.9,f:3.6,ca:120,mg:11,zn:.4},
+{id:'f13',n:'希腊酸奶',a:['酸奶','yogurt'],k:97,p:9,c:5,f:5,ca:110,mg:11,zn:.6},
+{id:'f14',n:'乳清蛋白粉',a:['蛋白粉','whey','protein powder'],k:400,p:80,c:5,f:5,ca:200,mg:60,zn:3},
+{id:'f15',n:'白米饭',a:['米饭','大米','rice'],k:116,p:2.4,c:25.6,f:.3,ca:7,mg:13,zn:.6},
+{id:'f16',n:'糙米饭',a:['糙米','brown rice'],k:111,p:2.6,c:23,f:.9,ca:10,mg:43,zn:.6},
+{id:'f17',n:'燕麦',a:['oat','麦片','oatmeal'],k:389,p:17,c:66,f:7,ca:54,mg:177,zn:4},
+{id:'f18',n:'全麦面包',a:['面包','bread','吐司'],k:247,p:13,c:41,f:3.7,ca:107,mg:76,zn:1.8},
+{id:'f19',n:'红薯',a:['番薯','sweet potato','甘薯'],k:86,p:1.6,c:20,f:.1,ca:30,mg:25,zn:.3},
+{id:'f20',n:'土豆',a:['马铃薯','potato'],k:77,p:2,c:17,f:.1,ca:9,mg:23,zn:.3},
+{id:'f21',n:'玉米',a:['corn','甜玉米'],k:86,p:3.3,c:19,f:1.2,ca:2,mg:35,zn:.9},
+{id:'f22',n:'面条（熟）',a:['面','pasta','意面','面条'],k:138,p:4.5,c:27,f:1,ca:10,mg:18,zn:.5},
+{id:'f23',n:'西兰花',a:['broccoli','花椰菜'],k:34,p:2.8,c:7,f:.4,ca:47,mg:21,zn:.4},
+{id:'f24',n:'菠菜',a:['spinach'],k:23,p:2.9,c:3.6,f:.4,ca:99,mg:58,zn:.5},
+{id:'f25',n:'番茄',a:['西红柿','tomato'],k:18,p:.9,c:3.9,f:.2,ca:10,mg:11,zn:.2},
+{id:'f26',n:'黄瓜',a:['cucumber'],k:16,p:.7,c:3.6,f:.1,ca:23,mg:10,zn:.2},
+{id:'f27',n:'白菜',a:['大白菜','小白菜','cabbage'],k:17,p:1.5,c:3.2,f:.2,ca:50,mg:11,zn:.3},
+{id:'f28',n:'蘑菇',a:['香菇','mushroom','菌菇'],k:22,p:3.1,c:3.3,f:.3,ca:2,mg:9,zn:.7},
+{id:'f29',n:'芦笋',a:['asparagus'],k:20,p:2.2,c:3.9,f:.1,ca:24,mg:14,zn:.5},
+{id:'f30',n:'香蕉',a:['banana'],k:89,p:1.1,c:22.8,f:.3,ca:5,mg:27,zn:.2},
+{id:'f31',n:'苹果',a:['apple'],k:52,p:.3,c:13.8,f:.2,ca:6,mg:5,zn:.04},
+{id:'f32',n:'蓝莓',a:['blueberry'],k:57,p:.7,c:14,f:.3,ca:6,mg:6,zn:.2},
+{id:'f33',n:'牛油果',a:['avocado','鳄梨'],k:160,p:2,c:9,f:15,ca:12,mg:29,zn:.6},
+{id:'f34',n:'橄榄油',a:['olive oil','食用油'],k:884,p:0,c:0,f:100,ca:1,mg:0,zn:0},
+{id:'f35',n:'花生',a:['peanut','花生米'],k:567,p:25.8,c:16,f:49,ca:92,mg:168,zn:3.3},
+{id:'f36',n:'杏仁',a:['almond','扁桃仁'],k:579,p:21,c:22,f:50,ca:264,mg:268,zn:3.1},
+{id:'f37',n:'核桃',a:['walnut'],k:654,p:15,c:14,f:65,ca:98,mg:158,zn:2.7},
+{id:'f38',n:'蛋白棒',a:['protein bar'],k:350,p:30,c:30,f:8,ca:80,mg:30,zn:1.5},
+{id:'f39',n:'馒头',a:['steamed bun','馍','花卷'],k:223,p:7,c:47,f:1.1,ca:18,mg:25,zn:.6},
+{id:'f40',n:'米粉',a:['rice noodle','米线','河粉'],k:110,p:1,c:25,f:.2,ca:4,mg:4,zn:.3},
+{id:'f41',n:'紫薯',a:['purple potato','紫山芋'],k:82,p:1.5,c:20,f:.2,ca:28,mg:24,zn:.3},
+{id:'f42',n:'南瓜',a:['pumpkin'],k:26,p:1,c:6.5,f:.1,ca:16,mg:8,zn:.1},
+{id:'f43',n:'胡萝卜',a:['carrot'],k:41,p:.9,c:10,f:.2,ca:33,mg:12,zn:.2},
+{id:'f44',n:'洋葱',a:['onion'],k:40,p:1.1,c:9,f:.1,ca:23,mg:10,zn:.2},
+{id:'f45',n:'青椒',a:['green pepper','柿子椒','彩椒'],k:22,p:.9,c:4.6,f:.2,ca:10,mg:10,zn:.2},
+{id:'f46',n:'茄子',a:['eggplant'],k:25,p:1,c:6,f:.2,ca:9,mg:14,zn:.2},
+{id:'f47',n:'生菜',a:['lettuce','油麦菜'],k:15,p:1.4,c:2.9,f:.2,ca:25,mg:13,zn:.2},
+{id:'f48',n:'山药',a:['yam','淮山','铁棍山药'],k:57,p:1.9,c:12.4,f:.2,ca:16,mg:20,zn:.3},
+{id:'f49',n:'毛豆',a:['edamame','青豆'],k:131,p:13,c:10,f:5,ca:135,mg:65,zn:1.4},
+{id:'f50',n:'五花肉',a:['pork belly','带皮猪肉'],k:508,p:9,c:0,f:53,ca:6,mg:12,zn:1.5},
+{id:'f51',n:'鸡翅',a:['chicken wing','鸡翅膀'],k:194,p:18,c:0,f:13,ca:12,mg:18,zn:1.3},
+{id:'f52',n:'羊肉',a:['lamb','mutton','羊腿肉'],k:118,p:20,c:0,f:4,ca:9,mg:22,zn:3.2},
+{id:'f53',n:'鲈鱼',a:['bass','seabass','鲈鱼肉'],k:105,p:18,c:0,f:3.4,ca:138,mg:33,zn:2},
+{id:'f54',n:'鱿鱼',a:['squid','鱿鱼须'],k:92,p:15,c:3,f:1.4,ca:43,mg:33,zn:1.5},
+{id:'f55',n:'扇贝',a:['scallop','带子'],k:88,p:17,c:2.4,f:.8,ca:48,mg:56,zn:1.6},
+{id:'f56',n:'奶酪',a:['cheese','芝士','起司'],k:403,p:25,c:1.3,f:33,ca:721,mg:28,zn:3.1},
+{id:'f57',n:'黄油',a:['butter'],k:717,p:.9,c:.1,f:81,ca:24,mg:2,zn:.1},
+{id:'f58',n:'腰果',a:['cashew'],k:553,p:18,c:30,f:44,ca:37,mg:292,zn:5.8},
+{id:'f59',n:'葡萄',a:['grape','提子'],k:69,p:.7,c:18,f:.2,ca:10,mg:7,zn:.1},
+{id:'f60',n:'橙子',a:['orange','橙','脐橙'],k:47,p:.9,c:12,f:.1,ca:40,mg:10,zn:.1},
+{id:'f61',n:'西瓜',a:['watermelon'],k:30,p:.6,c:8,f:.2,ca:7,mg:10,zn:.1},
+{id:'f62',n:'芒果',a:['mango'],k:60,p:.8,c:15,f:.4,ca:11,mg:10,zn:.1},
+];
+var SUPPS=[
+{id:'s1',n:'钙片',a:['钙','calcium'],unit:'片',k:0,p:0,c:0,f:0,ca:500,mg:0,zn:0,isSupp:true},
+{id:'s2',n:'钙镁锌片',a:['钙镁锌','cmz'],unit:'片',k:0,p:0,c:0,f:0,ca:300,mg:150,zn:5,isSupp:true},
+{id:'s3',n:'ZMA',a:['zma'],unit:'粒',k:0,p:0,c:0,f:0,ca:0,mg:450,zn:11,isSupp:true},
+{id:'s4',n:'氧化镁片',a:['镁片','magnesium'],unit:'片',k:0,p:0,c:0,f:0,ca:0,mg:400,zn:0,isSupp:true},
+{id:'s5',n:'葡萄糖酸锌',a:['锌片','zinc'],unit:'片',k:0,p:0,c:0,f:0,ca:0,mg:0,zn:10,isSupp:true},
+{id:'s6',n:'维D3+K2',a:['维d','vitd','vd3'],unit:'粒',k:0,p:0,c:0,f:0,ca:0,mg:0,zn:0,isSupp:true},
+];
+var ALL_FOODS=FOODS.concat(SUPPS);
+function getFood(id){
+  var ov=getJ('ironlog_food_overrides',{});
+  if(ov[id]){var base=ALL_FOODS.find(function(x){return x.id===id});return Object.assign({},base||{},ov[id],{id:id})}
+  var f=ALL_FOODS.find(function(x){return x.id===id});
+  if(f)return f;
+  return getJ('ironlog_custom_foods',[]).find(function(x){return x.id===id})||null;
+}
+function isHidden(id){return(getJ('ironlog_hidden_foods',[])).indexOf(id)>=0}
+
+// ── UTILS ──
+function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function pad(n){return String(n).padStart(2,'0')}
+function addD(s,n){var p=s.split('-').map(Number),d=new Date(p[0],p[1]-1,p[2]);d.setDate(d.getDate()+n);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function fmtLong(s){var p=s.split('-'),days=['日','一','二','三','四','五','六'],dt=new Date(+p[0],+p[1]-1,+p[2]);return p[0]+'年'+p[1]+'月'+p[2]+'日 周'+days[dt.getDay()]}
+function fmtShort(s){var p=s.split('-');return p[1]+'/'+p[2]}
+function getJ(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d}catch(e){return d}}
+function setJ(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2200)}
+function showMod(html){document.getElementById('mc').innerHTML=html;document.getElementById('mover').classList.add('on')}
+function closeMod(e){if(e.target===document.getElementById('mover'))document.getElementById('mover').classList.remove('on')}
+function closeModNow(){document.getElementById('mover').classList.remove('on')}
+function toggleTheme(){var c=document.documentElement.getAttribute('data-theme');var n=c==='light'?'':'light';document.documentElement.setAttribute('data-theme',n);localStorage.setItem('ironlog-theme',n||'dark')}
+function initTheme(){if(localStorage.getItem('ironlog-theme')==='light')document.documentElement.setAttribute('data-theme','light')}
+
+// ── ROUTER ──
+var TABS=['db','wo','dt','pr','hi'];
+var TABNAMES={db:'DASHBOARD',wo:'WORKOUT',dt:'DIET',pr:'PROFILE',hi:'HISTORY'};
+function showTab(id){
+  TABS.forEach(function(t){
+    document.getElementById('p-'+t).classList.toggle('active',t===id);
+    document.getElementById('nb-'+t).classList.toggle('active',t===id);
+  });
+  document.getElementById('hdrSub').textContent=TABNAMES[id]||id;
+  if(id==='db')D.render();
+  if(id==='wo'){W.renderPlans();W.renderSports();W.renderCardioWeek()}
+  if(id==='dt')DT.render();
+  if(id==='pr')PR.load();
+  if(id==='hi')HI.render();
+}
+
+// ── DASHBOARD ──
+var D={
+  date:today(),
+  prev:function(){this.date=addD(this.date,-1);this.render()},
+  next:function(){this.date=addD(this.date,1);this.render()},
+  saveW:function(){
+    var v=parseFloat(document.getElementById('db-wi').value);
+    if(!v||v<30||v>300){toast('请输入有效体重');return}
+    var r=getJ('ironlog_weight_records',[]).filter(function(x){return x.date!==D.date});
+    r.push({date:D.date,weight:v,ts:Date.now()});
+    r.sort(function(a,b){return a.date.localeCompare(b.date)});
+    setJ('ironlog_weight_records',r);toast('体重已保存 ✓');this.renderWeight();
+  },
+  renderWeight:function(){
+    var r=getJ('ironlog_weight_records',[]);
+    var td=r.find(function(x){return x.date===D.date});
+    var pv=r.filter(function(x){return x.date<D.date}).sort(function(a,b){return b.date.localeCompare(a.date)})[0];
+    var wi=document.getElementById('db-wi');
+    wi.value=td?td.weight:'';
+    var wp=document.getElementById('db-wp'),wd=document.getElementById('db-wd');
+    wp.textContent=pv?'上次 '+pv.date.slice(5)+' · '+pv.weight+'kg':'暂无历史';
+    if(td&&pv){var d=(td.weight-pv.weight).toFixed(1);wd.textContent=(d>0?'+':'')+d+'kg';wd.style.cssText=d>0?'background:rgba(224,82,82,.15);color:var(--rd);border-radius:3px;padding:1px 7px':d<0?'background:rgba(76,175,80,.15);color:var(--gn);border-radius:3px;padding:1px 7px':'color:var(--txd)'}else wd.textContent='';
+  },
+  render:function(){
+    document.getElementById('db-ds').textContent=fmtLong(this.date);
+    document.getElementById('db-tc').style.display=this.date===today()?'inline':'none';
+    var prof=getJ('ironlog_profile',null);
+    var diet=getJ('ironlog_diet_logs',{})[this.date]||{meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    var wLogs=getJ('ironlog_workout_logs',[]).filter(function(l){return(l.date||'').startsWith(D.date)});
+    var cLogs=getJ('ironlog_cardio_logs',[]).filter(function(l){return(l.date||'').startsWith(D.date)});
+    this.renderWeight();
+    this.renderCals(prof,diet,wLogs,cLogs);
+  },
+  renderCals:function(prof,diet,wLogs,cLogs){
+    var tgt=prof?(prof.targetKcal||prof.tdee||0):0;
+    var kcal=0,p=0,c=0,f=0,ca=0,mg=0,zn=0;
+    Object.values(diet.meals||{}).forEach(function(items){
+      (items||[]).forEach(function(it){kcal+=it.kcal||0;p+=it.protein||0;c+=it.carbs||0;f+=it.fat||0;ca+=it.ca||0;mg+=it.mg||0;zn+=it.zn||0});
+    });
+    var net=Math.round(kcal*.9);
+    var wk=wLogs.reduce(function(s,l){return s+(l.kcal||0)},0);
+    var ck=cLogs.reduce(function(s,l){return s+(l.kcal||0)},0);
+    var burn=Math.round(wk+ck);
+    var def=tgt>0?Math.round(tgt-net+burn):null;
+    document.getElementById('db-tgt').textContent=tgt>0?Math.round(tgt):'—';
+    document.getElementById('db-act').textContent=net;
+    var bar=document.getElementById('db-ab'),pct=tgt>0?Math.min((net/tgt)*100,120):0;
+    bar.style.width=pct+'%';bar.className='pf'+(pct>110?' rd':pct>90?' or':'');
+    document.getElementById('db-brn').textContent=burn;
+    document.getElementById('db-bd').textContent='力量'+Math.round(wk)+' + 有氧'+Math.round(ck);
+    var de=document.getElementById('db-def'),dn=document.getElementById('db-dn');
+    if(def!==null){de.textContent=Math.abs(def);de.className='sv'+(def>=0?' gn':' rd');dn.textContent=def>=0?'▼ KCAL 缺口':'▲ KCAL 盈余'}
+    else{de.textContent='—';de.className='sv';dn.textContent='未设目标'}
+    var pt=prof?(prof.proteinTarget||0):0,ct2=prof?(prof.carbTarget||0):0,ft=prof?(prof.fatTarget||0):0;
+    document.getElementById('db-mp').textContent=Math.round(p)+'g';
+    document.getElementById('db-mc').textContent=Math.round(c)+'g';
+    document.getElementById('db-mf').textContent=Math.round(f)+'g';
+    document.getElementById('db-mpt').textContent=pt>0?'目标'+Math.round(pt)+'g':'—';
+    document.getElementById('db-mct').textContent=ct2>0?'目标'+Math.round(ct2)+'g':'—';
+    document.getElementById('db-mft').textContent=ft>0?'目标'+Math.round(ft)+'g':'—';
+    if(pt>0)document.getElementById('db-mpb').style.width=Math.min((p/pt)*100,110)+'%';
+    if(ct2>0)document.getElementById('db-mcb').style.width=Math.min((c/ct2)*100,110)+'%';
+    if(ft>0)document.getElementById('db-mfb').style.width=Math.min((f/ft)*100,110)+'%';
+    D.micro('ca',ca,1000,'db-ca','db-cap','db-cav');
+    D.micro('mga',mg,400,'db-mga','db-mgp','db-mgv');
+    D.micro('zna',zn,11,'db-zna','db-znp','db-znv');
+    var wEl=document.getElementById('db-wl'),cEl=document.getElementById('db-cl');
+    wEl.innerHTML=!wLogs.length?'<div class="nodata" style="padding:10px 0">今日无力量训练</div>':
+      wLogs.map(function(l){return'<div class="dn2" style="margin-bottom:6px"><span>🏋️ '+(l.planName||'力量训练')+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--ac)">'+Math.round(l.kcal||0)+' kcal</span></div>'}).join('');
+    cEl.innerHTML=!cLogs.length?'<div class="nodata" style="padding:10px 0">今日无有氧记录</div>':
+      cLogs.map(function(l){return'<div class="dn2" style="margin-bottom:6px"><span>'+(l.icon||'🏃')+' '+(l.sport||'有氧')+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--ac)">'+Math.round(l.kcal||0)+' kcal</span></div>'}).join('');
+    var si=document.getElementById('db-si'),st=document.getElementById('db-st'),pr2=document.getElementById('db-pr');
+    if(!prof){si.textContent='⚙️';st.innerHTML='请先在<b>档案</b>中完善个人信息';pr2.innerHTML='';return}
+    if(net===0&&burn===0&&this.date===today()){si.textContent='🌄';st.innerHTML='今日尚无记录，目标 <b>'+(tgt>0?Math.round(tgt):'—')+' KCAL</b>';pr2.innerHTML='';return}
+    var pills=[],msg='';
+    if(def!==null){
+      if(def>=300&&def<=700){pills.push(['缺口理想','gn']);msg='热量缺口 <b>'+def+' KCAL</b>，节奏完美。'}
+      else if(def>700){pills.push(['缺口偏大','or']);msg='缺口 <b>'+def+' KCAL</b> 偏大，注意蛋白质。'}
+      else if(def>=0){pills.push(['缺口偏小','txd']);msg='缺口 <b>'+def+' KCAL</b>，可适当增加运动。'}
+      else{pills.push(['热量盈余','rd']);msg='盈余 <b>'+Math.abs(def)+' KCAL</b>，注意控制饮食。'}
+    }
+    if(pt>0){var r2=p/pt;if(r2>=.9)pills.push(['蛋白达标','gn']);else if(r2>=.6)pills.push(['蛋白不足','or']);else pills.push(['蛋白极低','rd'])}
+    if(burn>0)pills.push(['已完成训练','gn']);
+    si.textContent=def<0?'⚠️':def>400?'💪':'📊';
+    st.innerHTML=msg||'摄入 <b>'+net+' KCAL</b>，消耗 <b>'+burn+' KCAL</b>';
+    pr2.innerHTML=pills.map(function(x){return'<span style="font-family:IBM Plex Mono,monospace;font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:3px;border:1px solid var(--'+x[1]+');color:var(--'+x[1]+')">'+x[0]+'</span>'}).join('');
+  },
+  micro:function(key,val,rda,bid,pid,vid){
+    var pct=Math.min((val/rda)*100,120);
+    var bar=document.getElementById(bid);
+    bar.style.width=Math.min(pct,100)+'%';
+    bar.className='pf'+(pct>=110?' rd':pct>=80?' gn':pct>=50?'':' or');
+    document.getElementById(pid).textContent=Math.round(pct)+'%';
+    document.getElementById(vid).textContent=Math.round(val)+'/'+rda+'mg';
+  }
+};
+
+// ── WORKOUT ──
+var PLAN_DEFAULTS=[
+  {id:'p1',name:'推A - 胸肩三头',builtin:true,exercises:[
+    {name:'杠铃卧推',muscle:'chest',rest:180},{name:'上斜哑铃卧推',muscle:'chest',rest:180},
+    {name:'哑铃肩推',muscle:'shoulder',rest:120},{name:'侧平举',muscle:'shoulder',rest:90},
+    {name:'绳索下压',muscle:'arm',rest:90}]},
+  {id:'p2',name:'拉B - 背二头',builtin:true,exercises:[
+    {name:'引体向上',muscle:'back',rest:180},{name:'杠铃划船',muscle:'back',rest:180},
+    {name:'高位下拉',muscle:'back',rest:180},{name:'哑铃弯举',muscle:'arm',rest:90},
+    {name:'锤式弯举',muscle:'arm',rest:90}]},
+  {id:'p3',name:'腿C',builtin:true,exercises:[
+    {name:'深蹲',muscle:'leg',rest:240},{name:'腿举',muscle:'leg',rest:240},
+    {name:'腿弯举',muscle:'leg',rest:180},{name:'腿伸',muscle:'leg',rest:180},
+    {name:'站姿提踵',muscle:'leg',rest:120}]}
+];
+var MUSCLE_TAG={leg:'腿',chest:'胸',back:'背',shoulder:'肩',arm:'手臂',core:'核心'};
+var MUSCLE_REV={'腿':'leg','胸':'chest','背':'back','肩':'shoulder','手臂':'arm','臂':'arm','核心':'core','腹':'core'};
+function parseExLine(line){var p=line.trim().split(/\s+/);if(p.length>=2&&MUSCLE_REV[p[p.length-1]])return{name:p.slice(0,-1).join(' '),muscle:MUSCLE_REV[p[p.length-1]]};return{name:line.trim(),muscle:null}}
+var SPORTS=[
+  {n:'跑步',icon:'🏃',met:8},{n:'快走',icon:'🚶',met:4.5},{n:'骑行',icon:'🚴',met:7.5},
+  {n:'游泳',icon:'🏊',met:8},{n:'跳绳',icon:'🪢',met:10},{n:'椭圆机',icon:'⚙️',met:5},
+  {n:'划船机',icon:'🚣',met:7},{n:'HIIT',icon:'⚡',met:8.5},{n:'瑜伽',icon:'🧘',met:2.5},
+  {n:'爬楼梯',icon:'🪜',met:6}
+];
+var W={
+  curSub:1,curSport:0,swInt:null,swSec:0,swOn:false,
+  restInt:null,restSec:0,activeWk:null,wkInt:null,wkSec:0,
+  sub:function(n){
+    this.curSub=n;
+    document.getElementById('wo-t1').className='btn sm'+(n===1?' on':'');
+    document.getElementById('wo-t2').className='btn sm'+(n===2?' on':'');
+    document.getElementById('wo-plans').style.display=n===1?'block':'none';
+    document.getElementById('wo-active').style.display='none';
+    document.getElementById('wo-cardio').style.display=n===2?'block':'none';
+    if(n===1)this.renderPlans();
+    if(n===2){this.renderSports();this.renderCardioWeek();}
+  },
+  getPlans:function(){
+    var saved=getJ('ironlog_plans',[]);
+    var map={};saved.forEach(function(p){map[p.id]=p;});
+    var r=PLAN_DEFAULTS.map(function(p){return map[p.id]||p;});
+    var dids=PLAN_DEFAULTS.map(function(p){return p.id;});
+    saved.forEach(function(p){if(dids.indexOf(p.id)<0)r.push(p);});
+    return r;
+  },
+  renderPlans:function(){
+    var plans=this.getPlans();var self=this;
+    document.getElementById('wo-plist').innerHTML=plans.map(function(p){
+      var saved=getJ('ironlog_plans',[]);
+      var isOvr=saved.some(function(s){return s.id===p.id;});
+      var tag=p.builtin?(isOvr?'内置(已修改)' : '内置'):'自定义';
+      var delBtn=!p.builtin?' &nbsp;<span style="cursor:pointer;color:var(--rd)" onclick="W.delPlan(\''+p.id+'\')">删除</span>':'' ;
+      var chips=p.exercises.map(function(e){return '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;background:var(--sf3);border:1px solid var(--bd);border-radius:3px;padding:2px 5px;color:var(--txd)">'+e.name+'</span>';}).join(' ');
+      return '<div class="card" style="margin-bottom:6px">'+
+        '<div class="row sb" style="margin-bottom:7px">'+
+        '<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+p.name+'</div>'+
+        '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd);margin-top:2px">'+p.exercises.length+' 个动作 · '+tag+delBtn+'</div></div>'+
+        '<div style="display:flex;gap:6px">'+
+        '<button class="btn sm" onclick="W.editPlan(\''+p.id+'\')">编辑</button>'+
+        '<button class="btn sm pr" onclick="W.startWk(\''+p.id+'\')">开始</button></div></div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px">'+chips+'</div></div>';
+    }).join('')+'<button class="btn" style="width:100%;margin-top:6px" onclick="W.newPlan()">+ 新建计划</button>';
+    this.renderLogs();
+  },
+  delPlan:function(id){setJ('ironlog_plans',getJ('ironlog_plans',[]).filter(function(p){return p.id!==id}));this.renderPlans()},
+  startWk:function(id){
+    var plan=this.getPlans().find(function(p){return p.id===id});if(!plan)return;
+    var _awk={plan:plan,sets:{},vol:0,startTs:Date.now()};
+    plan.exercises.forEach(function(ex){_awk.sets[ex.name]=[{w:0,r:8}];});
+    this.activeWk=_awk;this.saveActive();this._enterActive();
+  },
+  _enterActive:function(){
+    var plan=this.activeWk.plan,self=this;
+    document.getElementById('wo-plans').style.display='none';
+    document.getElementById('wo-active').style.display='block';
+    document.getElementById('wo-aname').textContent=plan.name;
+    if(this.wkInt)clearInterval(this.wkInt);
+    this.wkSec=Math.floor((Date.now()-this.activeWk.startTs)/1000);
+    this.wkInt=setInterval(function(){self.wkSec=Math.floor((Date.now()-self.activeWk.startTs)/1000);var m=Math.floor(self.wkSec/60),s=self.wkSec%60;document.getElementById('wo-timer').textContent=pad(m)+':'+pad(s)},1000);
+    var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=s.w*s.r})});
+    this.activeWk.vol=vol;document.getElementById('wo-vol').textContent='容量 '+Math.round(vol)+' kg';
+    this.renderExercises();
+  },
+  saveActive:function(){
+    if(this.activeWk)setJ('ironlog_active_workout',{plan:this.activeWk.plan,sets:this.activeWk.sets,startTs:this.activeWk.startTs});
+  },
+  resumeActive:function(){
+    var s=getJ('ironlog_active_workout',null);if(!s||!s.plan)return;
+    this.activeWk={plan:s.plan,sets:s.sets||{},vol:0,startTs:s.startTs||Date.now()};
+    this._enterActive();toast('已恢复未完成的训练');
+  },
+  abort:function(){
+    if(!confirm('确定放弃本次训练？记录不会保存'))return;
+    if(this.wkInt)clearInterval(this.wkInt);if(this.restInt)clearInterval(this.restInt);
+    this.activeWk=null;localStorage.removeItem('ironlog_active_workout');
+    document.getElementById('wo-active').style.display='none';
+    document.getElementById('wo-plans').style.display='block';
+    document.getElementById('wo-restCard').style.display='none';
+    this.renderPlans();toast('已放弃训练');
+  },
+  renderExercises:function(){
+    if(!this.activeWk)return;
+    var plan=this.activeWk.plan,self=this;
+    document.getElementById('wo-exlist').innerHTML=plan.exercises.map(function(ex){
+      var sets=self.activeWk.sets[ex.name]||[];
+      var tag='<span class="tag m-'+ex.muscle+'">'+MUSCLE_TAG[ex.muscle]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';
+      var rows=sets.map(function(s,si){
+        return '<div class="dn" style="padding:5px 0">'+
+          '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);width:22px">'+pad(si+1)+'</span>'+
+          '<input type="number" value="'+s.w+'" style="width:60px;text-align:center;padding:4px 6px;font-size:13px" placeholder="kg" onchange="W.updSet(\''+ex.name+'\','+si+',\'w\',this.value)">'+
+          '<input type="number" value="'+s.r+'" style="width:48px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">'+
+          '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+Math.round(s.w*s.r)+'kg</span>'+
+          '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
+      }).join('');
+      return '<div class="card" style="margin-bottom:6px">'+
+        '<div class="row sb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div><div style="margin-top:3px">'+tag+prHtml+'</div></div></div>'+
+        rows+'<button class="btn sm" style="margin-top:6px" onclick="W.addSet(\''+ex.name+'\','+ex.rest+')">+ 加组</button></div>';
+    }).join('');
+  },
+  addSet:function(name,rest){
+    if(!this.activeWk)return;
+    if(!this.activeWk.sets[name])this.activeWk.sets[name]=[];
+    var prev=this.activeWk.sets[name];
+    this.activeWk.sets[name].push({w:prev.length?prev[prev.length-1].w:0,r:prev.length?prev[prev.length-1].r:8});
+    this.renderExercises();this.saveActive();this.startRest(rest||120);
+  },
+  updSet:function(name,idx,field,val){
+    if(!this.activeWk||!this.activeWk.sets[name])return;
+    this.activeWk.sets[name][idx][field]=parseFloat(val)||0;
+    var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=s.w*s.r})});
+    this.activeWk.vol=vol;document.getElementById('wo-vol').textContent='容量 '+Math.round(vol)+' kg';
+    this.renderExercises();this.saveActive();
+  },
+  rmSet:function(name,idx){if(this.activeWk){this.activeWk.sets[name].splice(idx,1);this.renderExercises();this.saveActive()}},
+  startRest:function(sec){
+    if(this.restInt)clearInterval(this.restInt);
+    this.restSec=sec;document.getElementById('wo-restCard').style.display='block';this.showRest();
+    var self=this;
+    this.restInt=setInterval(function(){self.restSec--;if(self.restSec<=0){clearInterval(self.restInt);document.getElementById('wo-restCard').style.display='none';toast('休息结束 ✓')}else self.showRest()},1000);
+  },
+  showRest:function(){var m=Math.floor(this.restSec/60),s=this.restSec%60;document.getElementById('wo-rt').textContent=pad(m)+':'+pad(s)},
+  addRest:function(n){this.restSec+=n;this.showRest()},
+  skipRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
+  resetRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
+  finish:function(){
+    if(!this.activeWk)return;
+    if(this.wkInt)clearInterval(this.wkInt);if(this.restInt)clearInterval(this.restInt);
+    var plan=this.activeWk.plan,vol=this.activeWk.vol,dur=Math.round(this.wkSec/60);
+    var kcal=Math.round(vol*.04+dur*3.5);
+    var sets=this.activeWk.sets;
+    var prs=getJ('ironlog_prs',{}),newPR=0;
+    Object.keys(sets).forEach(function(name){sets[name].forEach(function(s){
+      if(s.w>0&&s.r>0){var e=Math.round(s.w*(1+s.r/30));if(!prs[name]||e>prs[name].e1rm){prs[name]={w:s.w,r:s.r,e1rm:e,date:today()};newPR++}}
+    })});
+    setJ('ironlog_prs',prs);
+    var log={id:Date.now(),date:today(),planId:plan.id,planName:plan.name,duration:dur,
+      totalSets:Object.values(sets).reduce(function(s,x){return s+x.length},0),volume:vol,kcal:kcal};
+    var logs=getJ('ironlog_workout_logs',[]);logs.push(log);setJ('ironlog_workout_logs',logs);
+    this.activeWk=null;localStorage.removeItem('ironlog_active_workout');
+    document.getElementById('wo-active').style.display='none';document.getElementById('wo-plans').style.display='block';
+    document.getElementById('wo-restCard').style.display='none';
+    this.renderPlans();toast('训练完成！消耗 '+kcal+' kcal'+(newPR?' · '+newPR+'项新PR 🏆':' ✓'));
+  },
+  newPlan:function(){
+    showMod('<div class="mtitle">新建训练计划</div><div class="col">'+
+      '<label class="lb">计划名称</label><input type="text" id="np-n" placeholder="如：推A">'+
+      '<label class="lb" style="margin-top:8px">动作（每行一个，可加肌群：如「深蹲 腿」）</label>'+
+      '<textarea id="np-e" rows="5" style="resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:8px;font-size:13px;width:100%;outline:none" placeholder="杠铃卧推 胸&#10;哑铃肩推 肩&#10;绳索下压 手臂"></textarea>'+
+      '<label class="lb" style="margin-top:8px">默认组间休息（秒）</label><input type="number" id="np-r" value="120" min="0" step="15" inputmode="numeric"></div>'+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="W.savePlan()">保存</button></div>');
+  },
+  savePlan:function(){
+    var name=document.getElementById('np-n').value.trim(),exStr=document.getElementById('np-e').value.trim();
+    if(!name||!exStr){toast('请填写名称和动作');return}
+    var rest=parseInt(document.getElementById('np-r').value)||120;
+    var plan={id:'u'+Date.now(),name:name,exercises:exStr.split('\n').filter(Boolean).map(function(e){var pe=parseExLine(e);return{name:pe.name,muscle:pe.muscle||'core',rest:rest}})};
+    var plans=getJ('ironlog_plans',[]);plans.push(plan);setJ('ironlog_plans',plans);
+    closeModNow();this.renderPlans();toast('计划已保存 ✓');
+  },
+  editPlan:function(id){
+    var plan=this.getPlans().find(function(p){return p.id===id;});if(!plan)return;
+    showMod('<div class="mtitle">编辑：'+plan.name+'</div><div class="col">'+
+      '<label class="lb">计划名称</label><input type="text" id="ep-n" value="'+plan.name+'">' +
+      '<label class="lb" style="margin-top:8px">动作列表（每行一个）</label>'+
+      '<textarea id="ep-e" rows="9" style="resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:8px;font-size:13px;width:100%;outline:none">'+
+      plan.exercises.map(function(e){return e.name+(e.muscle&&e.muscle!=='core'?' '+MUSCLE_TAG[e.muscle]:'');}).join('\n')+
+      '</textarea>'+
+      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="W.saveEditPlan(\''+id+'\')">保存</button></div>');
+  },
+  saveEditPlan:function(id){
+    var name=document.getElementById('ep-n').value.trim();
+    var exStr=document.getElementById('ep-e').value.trim();
+    if(!name||!exStr){toast('请填写名称和动作');return;}
+    var orig=this.getPlans().find(function(p){return p.id===id;});
+    var isBuiltin=PLAN_DEFAULTS.some(function(p){return p.id===id;});
+    var exercises=exStr.split('\n').filter(Boolean).map(function(line){
+      var pe=parseExLine(line);
+      var ox=orig?orig.exercises.find(function(e){return e.name===pe.name;}):null;
+      return {name:pe.name,muscle:pe.muscle||(ox?ox.muscle:'core'),rest:ox?ox.rest:120};
+    });
+    var saved=getJ('ironlog_plans',[]);
+    var idx=saved.findIndex(function(p){return p.id===id;});
+    var plan={id:id,name:name,exercises:exercises,builtin:isBuiltin};
+    if(idx>=0)saved[idx]=plan;else saved.push(plan);
+    setJ('ironlog_plans',saved);
+    closeModNow();this.renderPlans();toast('已保存 ✓');
+  },
+  renderLogs:function(){
+    var el=document.getElementById('wo-logs');if(!el)return;
+    var logs=getJ('ironlog_workout_logs',[]).slice().sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;}).slice(0,30);
+    if(!logs.length){el.innerHTML='';return;}
+    el.innerHTML='<div class="ct" style="margin-top:4px">训练记录</div>'+
+      logs.map(function(l){
+        return '<div class="dn2" style="margin-bottom:6px">'+
+          '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:12px;font-weight:600;color:var(--tx)">'+l.planName+'</div>'+
+          '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd);margin-top:2px">'+
+          l.date+' · '+l.duration+'min · '+(l.totalSets||0)+'组 · '+Math.round(l.volume||0)+'kg</div>'+
+          '</div>'+
+          '<div style="display:flex;gap:5px;align-items:center;flex-shrink:0">'+
+          '<span style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--ac)">'+l.kcal+'kcal</span>'+
+          '<button class="btn sm dn" onclick="W.delLog('+l.id+')">&#10005;</button>'+
+          '</div></div>';
+      }).join('')+
+      '<button class="btn" style="width:100%;margin-top:4px" onclick="W.addLogManual()">+ 手动添加记录</button>';
+  },
+  delLog:function(id){
+    setJ('ironlog_workout_logs',getJ('ironlog_workout_logs',[]).filter(function(l){return l.id!==id;}));
+    this.renderLogs();toast('记录已删除');
+  },
+  addLogManual:function(){
+    var plans=this.getPlans();
+    var opts=plans.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>';}).join('');
+    showMod('<div class="mtitle">手动添加记录</div><div class="col">'+
+      '<label class="lb">日期</label><input type="date" id="al-d" value="'+today()+'">' +
+      '<label class="lb" style="margin-top:6px">训练计划</label>'+
+      '<select id="al-p"><option value="">-- 自定义 --</option>'+opts+'</select>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
+      '<div><label class="lb">时长（分钟）</label><input type="number" id="al-dur" placeholder="60" min="1"></div>'+
+      '<div><label class="lb">组数</label><input type="number" id="al-sets" placeholder="15" min="1"></div>'+
+      '</div>'+
+      '<label class="lb" style="margin-top:6px">训练容量（kg）</label><input type="number" id="al-vol" placeholder="2000" min="0">'+
+      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="W.saveLogManual()">保存</button></div>');
+  },
+  saveLogManual:function(){
+    var d=document.getElementById('al-d').value||today();
+    var pid=document.getElementById('al-p').value;
+    var dur=parseFloat(document.getElementById('al-dur').value)||0;
+    var sets=parseInt(document.getElementById('al-sets').value)||0;
+    var vol=parseFloat(document.getElementById('al-vol').value)||0;
+    if(!dur){toast('请填写时长');return;}
+    var pName=pid?(this.getPlans().find(function(p){return p.id===pid;})||{name:'自定义'}).name:'自定义';
+    var kcal=Math.round(vol*0.04+dur*3.5);
+    var log={id:Date.now(),date:d,planId:pid,planName:pName,duration:dur,totalSets:sets,volume:vol,kcal:kcal};
+    var logs=getJ('ironlog_workout_logs',[]);logs.push(log);
+    logs.sort(function(a,b){return a.date.localeCompare(b.date);});
+    setJ('ironlog_workout_logs',logs);
+    closeModNow();this.renderLogs();toast('记录已添加 ✓');
+  },
+  renderSports:function(){
+    var self=this;
+    document.getElementById('wo-spts').innerHTML=SPORTS.map(function(s,i){
+      return '<div class="spt'+(i===self.curSport?' on':'')+'" onclick="W.pickSport('+i+')">'+
+        '<div class="spt-ico">'+s.icon+'</div><div class="spt-nm">'+s.n+'</div></div>';
+    }).join('');
+  },
+  pickSport:function(i){
+    this.curSport=i;this.renderSports();
+    document.getElementById('c-met').value=SPORTS[i].met;
+    var wr=getJ('ironlog_weight_records',[]).sort(function(a,b){return b.date.localeCompare(a.date)});
+    if(wr.length)document.getElementById('c-wt').value=wr[0].weight;
+    this.cPreview();
+  },
+  cmode:function(n){
+    document.getElementById('c-m1').className='sgb'+(n===1?' on':'');
+    document.getElementById('c-m2').className='sgb'+(n===2?' on':'');
+    document.getElementById('c-manual').style.display=n===1?'block':'none';
+    document.getElementById('c-timer').style.display=n===2?'block':'none';
+    if(n===1&&this.swInt){clearInterval(this.swInt);this.swOn=false;}
+  },
+  cPreview:function(){
+    var dur=parseFloat(document.getElementById('c-dur').value)||(this.swSec/60)||0;
+    var wt=parseFloat(document.getElementById('c-wt').value)||70;
+    var met=parseFloat(document.getElementById('c-met').value)||8;
+    document.getElementById('c-prev').textContent=(dur>0?Math.round(met*wt*(dur/60)):'—')+' kcal';
+  },
+  swToggle:function(){
+    var btn=document.getElementById('c-swb');
+    if(this.swOn){clearInterval(this.swInt);this.swOn=false;btn.textContent='继续'}
+    else{this.swOn=true;btn.textContent='暂停';var self=this;
+      this.swInt=setInterval(function(){self.swSec++;var m=Math.floor(self.swSec/60),s=self.swSec%60;
+        document.getElementById('c-sw').textContent=pad(m)+':'+pad(s);
+        document.getElementById('c-dur').value=(self.swSec/60).toFixed(1);self.cPreview()},1000);}
+  },
+  swReset:function(){if(this.swInt)clearInterval(this.swInt);this.swOn=false;this.swSec=0;document.getElementById('c-sw').textContent='00:00';document.getElementById('c-swb').textContent='开始';document.getElementById('c-dur').value=''},
+  saveCardio:function(){
+    var dur=parseFloat(document.getElementById('c-dur').value);if(!dur){toast('请输入时长');return}
+    var wt=parseFloat(document.getElementById('c-wt').value)||70;
+    var met=parseFloat(document.getElementById('c-met').value)||SPORTS[this.curSport].met;
+    var sp=SPORTS[this.curSport];
+    var log={id:Date.now(),date:today(),sport:sp.n,icon:sp.icon,met:met,duration:dur,weight:wt,kcal:Math.round(met*wt*(dur/60))};
+    var logs=getJ('ironlog_cardio_logs',[]);logs.push(log);setJ('ironlog_cardio_logs',logs);
+    toast('有氧记录保存 ✓ '+log.kcal+' kcal');this.swReset();document.getElementById('c-dur').value='';this.renderCardioWeek();
+  },
+  renderCardioWeek:function(){
+    var t=today(),week=[];for(var i=6;i>=0;i--)week.push(addD(t,-i));
+    var logs=getJ('ironlog_cardio_logs',[]).filter(function(l){return week.indexOf(l.date)>=0});
+    var sess=new Set(logs.map(function(l){return l.date})).size;
+    var dur=Math.round(logs.reduce(function(s,l){return s+(l.duration||0)},0));
+    var kk=Math.round(logs.reduce(function(s,l){return s+(l.kcal||0)},0));
+    document.getElementById('wo-cwk').innerHTML=
+      '<div class="si"><div class="sl2">有氧次数</div><div class="sv gn">'+sess+'</div><div class="su">次</div></div>'+
+      '<div class="si"><div class="sl2">总时长</div><div class="sv ac">'+dur+'</div><div class="su">分钟</div></div>'+
+      '<div class="si"><div class="sl2">总消耗</div><div class="sv">'+kk+'</div><div class="su">kcal</div></div>';
+  }
+};
+
+// ── DIET ──
+var MEAL_NAMES=['早餐','午餐','晚餐','加餐'];
+var MEAL_KEYS=['breakfast','lunch','dinner','snack'];
+var DT={
+  date:today(),curMeal:0,
+  prev:function(){this.date=addD(this.date,-1);this.render()},
+  next:function(){this.date=addD(this.date,1);this.render()},
+  sub:function(n){
+    document.getElementById('dt-t1').className='btn sm'+(n===1?' on':'');
+    document.getElementById('dt-t2').className='btn sm'+(n===2?' on':'');
+    document.getElementById('dt-t3').className='btn sm'+(n===3?' on':'');
+    document.getElementById('dt-log').style.display=n===1?'block':'none';
+    document.getElementById('dt-rc').style.display=n===2?'block':'none';
+    document.getElementById('dt-fl').style.display=n===3?'block':'none';
+    if(n===2)RC.render();
+    if(n===3)FL.render();
+  },
+  setMeal:function(n){
+    this.curMeal=n;
+    for(var i=0;i<4;i++)document.getElementById('dt-mb'+i).className='btn sm'+(i===n?' on':'');
+  },
+  search:function(q){
+    var res=document.getElementById('dt-sr');
+    if(!q||q.length<1){res.style.display='none';return}
+    var term=q.toLowerCase();
+    var custom=getJ('ironlog_custom_foods',[]);
+    var hidden=getJ('ironlog_hidden_foods',[]);
+var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});return ov[f.id]?Object.assign({},f,ov[f.id]):f}).concat(custom).filter(function(f){return hidden.indexOf(f.id)<0}).filter(function(f){
+      return f.n.toLowerCase().indexOf(term)>=0||(f.a&&f.a.some(function(a){return a.toLowerCase().indexOf(term)>=0}));
+    }).slice(0,12);
+    if(!matches.length){res.style.display='none';return}
+    res.style.display='block';
+    var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+    res.innerHTML=matches.map(function(f){
+      return '<div class="sri" onclick="DT.addFood(\''+f.id+'\')">'+
+        f.n.replace(re,'<mark>$1</mark>')+
+        ' <span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">'+(f.isSupp?'per '+(f.unit||'片'):f.k+'kcal/100g')+'</span></div>';
+    }).join('');
+  },
+  addFood:function(id){
+    var f=getFood(id);
+    if(!f)return;
+    document.getElementById('dt-sr').style.display='none';document.getElementById('dt-si').value='';
+    showMod('<div class="mtitle">'+f.n+'</div><div class="col">'+
+      '<label class="lb">'+(f.isSupp?'数量（'+(f.unit||'片')+'）':'重量（克，生重）')+'</label>'+
+      '<input type="number" id="fa-amt" value="'+(f.isSupp?'1':'100')+'" min="0.1" step="'+(f.isSupp?'1':'5')+'">'+
+      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="DT.confirmAdd(\''+id+'\')">加入'+MEAL_NAMES[DT.curMeal]+'</button></div>');
+  },
+  confirmAdd:function(id){
+    var f=getFood(id);
+    var amt=parseFloat(document.getElementById('fa-amt').value)||0;
+    if(!amt||!f){closeModNow();return}
+    var r=f.isSupp?1:(amt/100);
+    var item={id:Date.now(),foodId:id,name:f.n,amount:amt,unit:f.isSupp?(f.unit||'片'):'g',
+      kcal:Math.round(f.k*r),protein:+(f.p*r).toFixed(1),carbs:+(f.c*r).toFixed(1),
+      fat:+(f.f*r).toFixed(1),ca:+(f.ca*r).toFixed(1),mg:+(f.mg*r).toFixed(1),
+      zn:+(f.zn*r).toFixed(2),isSupp:!!f.isSupp};
+    var all=getJ('ironlog_diet_logs',{});
+    if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    all[this.date].meals[MEAL_KEYS[this.curMeal]].push(item);
+    setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(f.n+' 已加入'+MEAL_NAMES[this.curMeal]+' ✓');
+  },
+  showFoodInfo:function(meal,idx){
+    var data=getJ('ironlog_diet_logs',{})[this.date]||{meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    var it=(data.meals[meal]||[])[idx];if(!it)return;
+    var u=it.unit||'g';
+    showMod('<div class="mtitle">'+it.name+'</div>'+
+      '<div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--txd);margin-bottom:10px">'+it.amount+u+(it.isSupp?' 💊':'')+'</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center">'+
+      '<div style="background:var(--sf2);padding:8px;border-radius:8px"><div style="font-size:9px;color:var(--txd)">KCAL</div><div style="font-family:IBM Plex Mono,monospace;font-size:16px;color:var(--ac)">'+Math.round(it.kcal)+'</div></div>'+
+      '<div style="background:var(--sf2);padding:8px;border-radius:8px"><div style="font-size:9px;color:var(--txd)">PROTEIN</div><div style="font-family:IBM Plex Mono,monospace;font-size:16px;color:var(--tx)">'+it.protein.toFixed(1)+'g</div></div>'+
+      '<div style="background:var(--sf2);padding:8px;border-radius:8px"><div style="font-size:9px;color:var(--txd)">CARBS</div><div style="font-family:IBM Plex Mono,monospace;font-size:16px;color:var(--tx)">'+it.carbs.toFixed(1)+'g</div></div>'+
+      '<div style="background:var(--sf2);padding:8px;border-radius:8px"><div style="font-size:9px;color:var(--txd)">FAT</div><div style="font-family:IBM Plex Mono,monospace;font-size:16px;color:var(--tx)">'+it.fat.toFixed(1)+'g</div></div>'+
+      '<div style="background:var(--sf2);padding:8px;border-radius:8px"><div style="font-size:9px;color:var(--txd)">Ca</div><div style="font-family:IBM Plex Mono,monospace;font-size:16px;color:var(--tx)">'+Math.round(it.ca||0)+'mg</div></div>'+
+      '<div style="background:var(--sf2);padding:8px;border-radius:8px"><div style="font-size:9px;color:var(--txd)">Mg/Zn</div><div style="font-family:IBM Plex Mono,monospace;font-size:16px;color:var(--tx)">'+Math.round(it.mg||0)+'/'+((it.zn||0)).toFixed(1)+'</div></div>'+
+      '</div>'+
+      '<div class="row" style="margin-top:12px;gap:6px;flex-wrap:wrap;justify-content:center">'+
+      '<button class="btn sm" onclick="DT.editAmount(\x27'+meal+'\x27,'+idx+')">修改分量</button>'+
+      MEAL_KEYS.map(function(m,mi){return m===meal?'':'<button class="btn sm" onclick="DT.moveFood(\x27'+meal+'\x27,'+idx+',\x27'+m+'\x27)">→'+MEAL_NAMES[mi]+'</button>'}).join('')+
+      '</div>'+
+      '<div class="row" style="margin-top:8px;justify-content:center"><button class="btn" onclick="closeModNow()">关闭</button></div>');
+  },
+  editAmount:function(meal,idx){
+    var data=getJ('ironlog_diet_logs',{})[this.date];if(!data)return;
+    var it=(data.meals[meal]||[])[idx];if(!it)return;
+    var u=it.unit||'g';
+    showMod('<div class="mtitle">修改分量 · '+it.name+'</div><div class="col">'+
+      '<label class="lb">'+(it.isSupp?'数量（'+u+'）':'重量（'+u+'，生重）')+'</label>'+
+      '<input type="number" id="ea-amt" value="'+it.amount+'" min="0.1" step="'+(it.isSupp?'1':'5')+'" inputmode="decimal"></div>'+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="DT.saveAmount(\x27'+meal+'\x27,'+idx+')">保存</button></div>');
+  },
+  saveAmount:function(meal,idx){
+    var newAmt=parseFloat(document.getElementById('ea-amt').value)||0;
+    if(newAmt<=0){toast('请输入有效分量');return}
+    var all=getJ('ironlog_diet_logs',{});var it=((all[this.date]||{meals:{}}).meals[meal]||[])[idx];if(!it)return;
+    var r=newAmt/it.amount;
+    it.kcal=Math.round(it.kcal*r);
+    it.protein=+(it.protein*r).toFixed(1);it.carbs=+(it.carbs*r).toFixed(1);it.fat=+(it.fat*r).toFixed(1);
+    it.ca=+(it.ca*r).toFixed(1);it.mg=+(it.mg*r).toFixed(1);it.zn=+(it.zn*r).toFixed(2);
+    it.amount=newAmt;
+    setJ('ironlog_diet_logs',all);closeModNow();this.render();toast('已更新分量 ✓');
+  },
+  moveFood:function(meal,idx,target){
+    var all=getJ('ironlog_diet_logs',{});var data=all[this.date];if(!data)return;
+    var it=data.meals[meal].splice(idx,1)[0];if(!it)return;
+    if(!data.meals[target])data.meals[target]=[];
+    data.meals[target].push(it);
+    setJ('ironlog_diet_logs',all);closeModNow();this.render();toast('已移至'+MEAL_NAMES[MEAL_KEYS.indexOf(target)]+' ✓');
+  },
+  copyYesterday:function(){
+    var prev=addD(this.date,-1);var all=getJ('ironlog_diet_logs',{});var src=all[prev];
+    if(!src||!Object.values(src.meals).some(function(m){return m&&m.length})){toast('昨日无饮食记录');return}
+    if(!confirm('将昨日饮食追加到今日？'))return;
+    if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    MEAL_KEYS.forEach(function(k){(src.meals[k]||[]).forEach(function(it){
+      all[DT.date].meals[k].push(Object.assign({},it,{id:Date.now()+Math.floor(Math.random()*1e6)}));
+    })});
+    setJ('ironlog_diet_logs',all);this.render();toast('已复制昨日饮食 ✓');
+  },
+  rmFood:function(meal,idx){
+    var all=getJ('ironlog_diet_logs',{});
+    if(all[this.date]&&all[this.date].meals[meal])all[this.date].meals[meal].splice(idx,1);
+    setJ('ironlog_diet_logs',all);this.render();
+  },
+  render:function(){
+    document.getElementById('dt-ds').textContent=fmtLong(this.date);
+    document.getElementById('dt-tc').style.display=this.date===today()?'inline':'none';
+    var data=getJ('ironlog_diet_logs',{})[this.date]||{meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    var kcal=0,p=0,c=0,f=0,ca=0,mg=0,zn=0;
+    Object.values(data.meals).forEach(function(items){
+      (items||[]).forEach(function(it){kcal+=it.kcal||0;p+=it.protein||0;c+=it.carbs||0;f+=it.fat||0;ca+=it.ca||0;mg+=it.mg||0;zn+=it.zn||0});
+    });
+    document.getElementById('dt-tk').textContent=Math.round(kcal*.9);
+    document.getElementById('dt-tp').textContent=Math.round(p)+'g';
+    document.getElementById('dt-tc2').textContent=Math.round(c)+'g';
+    document.getElementById('dt-tf').textContent=Math.round(f)+'g';
+    document.getElementById('dt-ca').textContent=Math.round(ca);
+    document.getElementById('dt-mg').textContent=Math.round(mg);
+    document.getElementById('dt-zn').textContent=zn.toFixed(1);
+    document.getElementById('dt-mc').innerHTML=MEAL_KEYS.map(function(key,mi){
+      var items=data.meals[key]||[];
+      var mkcal=Math.round(items.reduce(function(s,it){return s+it.kcal},0));
+      var rows=items.map(function(it,idx){
+        return '<div class="dn"><div style="flex:1;cursor:pointer" onclick="DT.showFoodInfo(\x27'+key+'\x27,'+idx+')"><div style="font-size:12px;color:var(--tx)">'+it.name+(it.isSupp?' 💊':'')+
+          ' <span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">'+it.amount+it.unit+'</span></div>'+
+          '<div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txm)">P'+it.protein.toFixed(1)+' C'+it.carbs.toFixed(1)+' F'+it.fat.toFixed(1)+'</div></div>'+
+          '<span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--ac);margin-right:8px">'+it.kcal+'</span>'+
+          '<button class="btn sm dn" onclick="DT.rmFood(\''+key+'\','+idx+')">&#10005;</button></div>';
+      }).join('');
+      return '<div style="margin-bottom:10px">'+
+        '<div style="font-family:IBM Plex Mono,monospace;font-size:9px;letter-spacing:1.5px;color:var(--txd);text-transform:uppercase;padding:5px 0 4px;border-bottom:1px solid var(--bd);margin-bottom:6px;display:flex;justify-content:space-between">'+
+        '<span>'+MEAL_NAMES[mi]+'</span><span style="color:var(--ac)">'+mkcal+' kcal</span></div>'+
+        (rows||'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);padding:8px 0">暂无记录</div>')+'</div>';
+    }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="DT.copyYesterday()">📋 复制昨日饮食</button>';
+  }
+};
+
+// ── RECIPE ──
+var RC={
+  render:function(){
+    var recipes=getJ('ironlog_recipes',[]);
+    var el=document.getElementById('rc-list');
+    if(!recipes.length){el.innerHTML='<div class="nodata">暂无菜谱，点击 + 新建</div>';return}
+    el.innerHTML=recipes.map(function(r){
+      return '<div class="card"><div class="row sb"><div>'+
+        '<div style="font-size:13px;font-weight:600;color:var(--tx)">'+r.name+'</div>'+
+        '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd);margin-top:2px">'+
+        Math.round(r.kcal)+' kcal · P'+Math.round(r.protein)+'g C'+Math.round(r.carbs)+'g F'+Math.round(r.fat)+'g</div></div>'+
+        '<div class="row" style="gap:6px">'+
+        '<button class="btn sm pr" onclick="RC.recordToday(\''+r.id+'\')">记录今日</button>'+
+        '<button class="btn sm dn" onclick="RC.del(\''+r.id+'\')">删除</button></div></div></div>';
+    }).join('');
+  },
+  newRecipe:function(){
+    showMod('<div class="mtitle">新建菜谱</div><div class="col">'+
+      '<label class="lb">菜谱名称</label><input type="text" id="rc-n" placeholder="如：鸡胸炒西兰花">'+
+      '<label class="lb" style="margin-top:8px">热量 (kcal)</label><input type="number" id="rc-k" placeholder="500">'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">'+
+      '<div><label class="lb">蛋白(g)</label><input type="number" id="rc-p" placeholder="30"></div>'+
+      '<div><label class="lb">碳水(g)</label><input type="number" id="rc-c" placeholder="40"></div>'+
+      '<div><label class="lb">脂肪(g)</label><input type="number" id="rc-f" placeholder="10"></div></div></div>'+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="RC.save()">保存</button></div>');
+  },
+  save:function(){
+    var name=document.getElementById('rc-n').value.trim(),k=parseFloat(document.getElementById('rc-k').value)||0;
+    if(!name||!k){toast('请填写名称和热量');return}
+    var r={id:'r'+Date.now(),name:name,kcal:k,
+      protein:parseFloat(document.getElementById('rc-p').value)||0,
+      carbs:parseFloat(document.getElementById('rc-c').value)||0,
+      fat:parseFloat(document.getElementById('rc-f').value)||0};
+    var recs=getJ('ironlog_recipes',[]);recs.push(r);setJ('ironlog_recipes',recs);
+    closeModNow();this.render();toast('菜谱已保存 ✓');
+  },
+  del:function(id){setJ('ironlog_recipes',getJ('ironlog_recipes',[]).filter(function(r){return r.id!==id}));this.render()},
+  recordToday:function(id){
+    var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});if(!r)return;
+    var item={id:Date.now(),foodId:id,name:r.name,amount:1,unit:'份',kcal:Math.round(r.kcal),protein:r.protein,carbs:r.carbs,fat:r.fat,ca:0,mg:0,zn:0};
+    var all=getJ('ironlog_diet_logs',{}),t=DT.date;
+    if(!all[t])all[t]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    all[t].meals.snack.push(item);setJ('ironlog_diet_logs',all);
+    toast(r.name+' 已记录到加餐 ✓');DT.render();
+  }
+};
+
+	// ── FOOD LIBRARY ──
+	var FL={
+	  render:function(filter){
+	    var hidden=getJ('ironlog_hidden_foods',[]);var overrides=getJ('ironlog_food_overrides',{});
+	    var all=FOODS.concat(SUPPS).map(function(f){return overrides[f.id]?Object.assign({},f,overrides[f.id]):f}).filter(function(f){return hidden.indexOf(f.id)<0}).concat(getJ('ironlog_custom_foods',[]));
+	    var el=document.getElementById('fl-list');
+	    if(!el)return;
+	    var q=(filter||'').toLowerCase();
+	    if(q)all=all.filter(function(f){return f.n.toLowerCase().indexOf(q)>=0||(f.a||[]).some(function(a){return a.toLowerCase().indexOf(q)>=0})});
+	    if(!all.length){el.innerHTML='<div class="nodata">暂无食物</div>';return}
+	    el.innerHTML=all.map(function(f){
+	      var isCustom=!FOODS.some(function(x){return x.id===f.id})&&!SUPPS.some(function(x){return x.id===f.id});var isBuiltin=!isCustom;
+	      var tag=f.isSupp?'补剂':isCustom?'自定义':'内置';
+	      var tc=f.isSupp?'var(--bl)':isCustom?'var(--or)':'var(--txm)';
+	      var per=f.isSupp?'per '+(f.unit||'片'):'per 100g';
+	      var acts='<button class="btn sm" onclick="FL.edit(\x27'+f.id+'\x27,'+isBuiltin+')" style="margin-right:4px">✏️</button><button class="btn sm dn" onclick="FL.del(\x27'+f.id+'\x27,'+isBuiltin+')">🗑️</button>';
+	      return '<div class="card" style="margin-bottom:6px">'+
+	        '<div class="row sb" style="margin-bottom:6px">'+
+	        '<div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+f.n+'</div>'+
+	        '<div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:'+tc+';margin-top:2px">'+tag+' · '+per+'</div></div>'+
+	        '<div style="display:flex;gap:4px;align-items:center">'+acts+
+	        '<button class="btn sm pr" onclick="DT.addFood(\''+f.id+'\')">+ 记录</button></div></div>'+
+	        '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;text-align:center">'+
+	        '<div class="si" style="padding:6px 2px"><div class="sl2">kcal</div><div style="font-family:Bebas Neue,sans-serif;font-size:16px;color:var(--ac)">'+f.k+'</div></div>'+
+	        '<div class="si" style="padding:6px 2px"><div class="sl2">P</div><div style="font-family:Bebas Neue,sans-serif;font-size:16px;color:#e06060">'+f.p+'g</div></div>'+
+	        '<div class="si" style="padding:6px 2px"><div class="sl2">C</div><div style="font-family:Bebas Neue,sans-serif;font-size:16px;color:#60a0e0">'+f.c+'g</div></div>'+
+	        '<div class="si" style="padding:6px 2px"><div class="sl2">F</div><div style="font-family:Bebas Neue,sans-serif;font-size:16px;color:#e0b040">'+f.f+'g</div></div>'+
+	        '<div class="si" style="padding:6px 2px"><div class="sl2">Ca</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:var(--txd)">'+f.ca+'mg</div></div>'+
+	        '<div class="si" style="padding:6px 2px"><div class="sl2">Mg/Zn</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:var(--txd)">'+f.mg+'/'+f.zn+'</div></div></div></div>';
+	    }).join('');
+	  },
+	  search:function(q){this.render(q)},
+	  add:function(){
+	    showMod('<div class="mtitle">添加自定义食物</div><div class="col">'+
+	      '<label class="lb">食物名称</label><input type="text" id="cf-n" placeholder="如：鸡胸肉">'+
+	      '<label class="lb" style="margin-top:6px">别名（逗号分隔，可选）</label><input type="text" id="cf-a" placeholder="如：breast,chicken">'+
+	      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
+	      '<div><label class="lb">热量/100g</label><input type="number" id="cf-k" placeholder="165"></div>'+
+	      '<div><label class="lb">蛋白/100g</label><input type="number" id="cf-p" placeholder="31" step=".1"></div>'+
+	      '<div><label class="lb">碳水/100g</label><input type="number" id="cf-c" placeholder="0" step=".1"></div>'+
+	      '<div><label class="lb">脂肪/100g</label><input type="number" id="cf-f" placeholder="3.6" step=".1"></div></div>'+
+	      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">'+
+	      '<div><label class="lb">钙 mg</label><input type="number" id="cf-ca" placeholder="11"></div>'+
+	      '<div><label class="lb">镁 mg</label><input type="number" id="cf-mg" placeholder="29"></div>'+
+	      '<div><label class="lb">锌 mg</label><input type="number" id="cf-zn" placeholder="0.9" step=".1"></div></div>'+
+	      '<div style="margin-top:6px"><label class="lb"><input type="checkbox" id="cf-supp" onchange="FL.toggleSupp()"> 这是补剂</label></div>'+
+	      '<div id="cf-supp-extra" style="display:none;margin-top:4px"><label class="lb">单位</label><input type="text" id="cf-unit" placeholder="片" value="片"></div>'+
+	      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+	      '<button class="btn" onclick="closeModNow()">取消</button>'+
+	      '<button class="btn pr" onclick="FL.save()">保存</button></div>');
+	  },
+	  toggleSupp:function(){
+	    document.getElementById('cf-supp-extra').style.display=document.getElementById('cf-supp').checked?'block':'none';
+	  },
+	  save:function(){
+	    var n=document.getElementById('cf-n').value.trim();
+	    if(!n){toast('请输入食物名称');return}
+	    var aStr=document.getElementById('cf-a').value.trim();
+	    var isSupp=document.getElementById('cf-supp').checked;
+	    var food={id:'c'+Date.now(),n:n,
+	      a:aStr?aStr.split(/[,，]/).map(function(s){return s.trim()}).filter(Boolean):[],
+	      k:parseFloat(document.getElementById('cf-k').value)||0,
+	      p:parseFloat(document.getElementById('cf-p').value)||0,
+	      c:parseFloat(document.getElementById('cf-c').value)||0,
+	      f:parseFloat(document.getElementById('cf-f').value)||0,
+	      ca:parseFloat(document.getElementById('cf-ca').value)||0,
+	      mg:parseFloat(document.getElementById('cf-mg').value)||0,
+	      zn:parseFloat(document.getElementById('cf-zn').value)||0};
+	    if(isSupp){food.isSupp=true;food.unit=document.getElementById('cf-unit').value.trim()||'片'}
+	    var c=getJ('ironlog_custom_foods',[]);c.push(food);setJ('ironlog_custom_foods',c);
+	    closeModNow();this.render();toast('已添加：'+n+' ✓');
+	  },
+	  edit:function(id,isBuiltin){
+	    var f;
+	    if(isBuiltin){var base=ALL_FOODS.find(function(x){return x.id===id});var ov=getJ('ironlog_food_overrides',{})[id]||{};f=Object.assign({},base,ov)}
+	    else{f=getJ('ironlog_custom_foods',[]).find(function(x){return x.id===id})}
+	    if(!f){toast('找不到该食物');return}
+	    var isOverridden=isBuiltin&&!!getJ('ironlog_food_overrides',{})[id];
+	    showMod('<div class="mtitle">'+(isBuiltin?'编辑食物':'编辑自定义食物')+'</div><div class="col">'+
+	      '<label class="lb">食物名称</label><input type="text" id="cf-n" value="'+f.n+'">'+
+	      '<label class="lb" style="margin-top:6px">别名</label><input type="text" id="cf-a" value="'+((f.a||[]).join(', '))+'">'+
+	      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
+	      '<div><label class="lb">热量/100g</label><input type="number" id="cf-k" value="'+f.k+'"></div>'+
+	      '<div><label class="lb">蛋白/100g</label><input type="number" id="cf-p" value="'+f.p+'" step=".1"></div>'+
+	      '<div><label class="lb">碳水/100g</label><input type="number" id="cf-c" value="'+f.c+'" step=".1"></div>'+
+	      '<div><label class="lb">脂肪/100g</label><input type="number" id="cf-f" value="'+f.f+'" step=".1"></div></div>'+
+	      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">'+
+	      '<div><label class="lb">钙 mg</label><input type="number" id="cf-ca" value="'+f.ca+'"></div>'+
+	      '<div><label class="lb">镁 mg</label><input type="number" id="cf-mg" value="'+f.mg+'"></div>'+
+	      '<div><label class="lb">锌 mg</label><input type="number" id="cf-zn" value="'+f.zn+'" step=".1"></div></div>'+
+	      (f.isSupp?'<div style="margin-top:6px"><label class="lb">单位</label><input type="text" id="cf-unit" value="'+(f.unit||'片')+'"></div>':'')+
+	      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+	      (isBuiltin&&isOverridden?'<button class="btn" onclick="FL.resetFood(\x27'+id+'\x27)">恢复默认</button>':'')+
+	      '<button class="btn" onclick="closeModNow()">取消</button>'+
+	      '<button class="btn pr" onclick="FL.saveEdit(\''+id+'\')">保存</button></div>');
+	  },
+	  saveEdit:function(id){
+	    var isBuiltin=ALL_FOODS.some(function(x){return x.id===id});
+	    var n=document.getElementById('cf-n').value.trim();
+	    if(!n){toast('请输入食物名称');return}
+	    var aStr=document.getElementById('cf-a').value.trim();
+	    var upd={n:n,a:aStr?aStr.split(/[,，]/).map(function(s){return s.trim()}).filter(Boolean):[],
+	      k:parseFloat(document.getElementById('cf-k').value)||0,p:parseFloat(document.getElementById('cf-p').value)||0,
+	      c:parseFloat(document.getElementById('cf-c').value)||0,f:parseFloat(document.getElementById('cf-f').value)||0,
+	      ca:parseFloat(document.getElementById('cf-ca').value)||0,mg:parseFloat(document.getElementById('cf-mg').value)||0,
+	      zn:parseFloat(document.getElementById('cf-zn').value)||0};
+	    var unitEl=document.getElementById('cf-unit');if(unitEl)upd.unit=unitEl.value.trim()||'片';
+	    if(isBuiltin){var ov=getJ('ironlog_food_overrides',{});ov[id]=upd;setJ('ironlog_food_overrides',ov)}
+	    else{var cc=getJ('ironlog_custom_foods',[]);var idx=cc.findIndex(function(x){return x.id===id});if(idx<0)return;Object.assign(cc[idx],upd);setJ('ironlog_custom_foods',cc)}
+	    closeModNow();this.render();toast('已更新 ✓');
+	  },
+	  del:function(id,isBuiltin){
+	    if(isBuiltin){
+	      if(!confirm('确定隐藏该食物？'))return;
+	      var h=getJ('ironlog_hidden_foods',[]);h.push(id);setJ('ironlog_hidden_foods',h);
+	      var ov=getJ('ironlog_food_overrides',{});delete ov[id];setJ('ironlog_food_overrides',ov);
+	    }else{
+	      if(!confirm('确定删除该自定义食物？'))return;
+	      setJ('ironlog_custom_foods',getJ('ironlog_custom_foods',[]).filter(function(x){return x.id!==id}));
+	    }
+	    this.render();toast('已删除');
+	  },
+	  restoreHidden:function(){
+	    var h=getJ('ironlog_hidden_foods',[]);
+	    if(!h.length){toast('没有隐藏的食物');return}
+	    var names=h.map(function(id){var f=ALL_FOODS.find(function(x){return x.id===id});return f?f.n:id});
+	    showMod('<div class="mtitle">恢复隐藏食物</div>'+
+	      '<div class="col">'+names.map(function(n,i){return '<div class="dn2" style="margin-bottom:4px"><span style="font-size:12px">'+n+'</span><button class="btn sm pr" onclick="FL.unhide('+i+')">恢复</button></div>'}).join('')+'</div>'+
+	      '<div class="row" style="margin-top:12px;justify-content:center"><button class="btn" onclick="closeModNow()">关闭</button></div>');
+	  },
+	  unhide:function(i){
+	    var h=getJ('ironlog_hidden_foods',[]);h.splice(i,1);setJ('ironlog_hidden_foods',h);
+	    closeModNow();this.render();toast('已恢复');
+	  },
+	  resetFood:function(id){
+	    var ov=getJ('ironlog_food_overrides',{});delete ov[id];setJ('ironlog_food_overrides',ov);
+	    closeModNow();this.render();toast('已恢复默认值');
+	  }
+	};
+
+var ACT_INFO=['每周0次，办公室工作','每周1-3次轻度运动','每周3-5次中等运动','每天高强度训练'];
+var ACT_MULT=[1.2,1.375,1.55,1.725];
+var PR={
+  sex:0,act:0,goal:0,_cache:null,
+  setSex:function(n){this.sex=n;document.getElementById('pr-m').className='sgb'+(n===0?' on':'');document.getElementById('pr-f').className='sgb'+(n===1?' on':'');this.calc()},
+  setAct:function(n){this.act=n;for(var i=0;i<4;i++)document.getElementById('pr-a'+i).className='sgb'+(i===n?' on':'');document.getElementById('pr-ad').textContent=ACT_INFO[n];this.calc()},
+  setGoal:function(n){this.goal=n;for(var i=0;i<3;i++)document.getElementById('pr-g'+i).className='sgb'+(i===n?' on':'');this.calc()},
+  calc:function(){
+    var wt=parseFloat(document.getElementById('pr-wt').value)||0;
+    var ht=parseFloat(document.getElementById('pr-ht').value)||0;
+    var age=parseFloat(document.getElementById('pr-age').value)||0;
+    if(!wt||!ht||!age){document.getElementById('pr-grid').innerHTML='<div class="si" style="grid-column:1/-1"><div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--txm);text-align:center;padding:8px 0">请填写身高、体重、年龄</div></div>';return}
+    var bmr=this.sex===0?(10*wt+6.25*ht-5*age+5):(10*wt+6.25*ht-5*age-161);
+    var tdee=Math.round(bmr*ACT_MULT[this.act]);
+    var goalDelta=[-500,0,300][this.goal];
+    var targetKcal=tdee+goalDelta;
+    var protein=Math.round(wt*[2.4,2,2.2][this.goal]);
+    var fat=Math.round(targetKcal*.25/9);
+    var carbs=Math.round((targetKcal-protein*4-fat*9)/4);
+    var tw=parseFloat(document.getElementById('pr-tw').value)||0;
+    var predict='—';
+    if(tw&&goalDelta!==0){var diff=(tw-wt)*7700,days=Math.round(Math.abs(diff/goalDelta));predict=days>730?'>2年':days+' 天'}
+    document.getElementById('pr-grid').innerHTML=
+      '<div class="si"><div class="sl2">BMR</div><div class="sv">'+Math.round(bmr)+'</div><div class="su">kcal/天</div></div>'+
+      '<div class="si"><div class="sl2">TDEE</div><div class="sv ac">'+tdee+'</div><div class="su">kcal/天</div></div>'+
+      '<div class="si"><div class="sl2">目标摄入</div><div class="sv gn">'+targetKcal+'</div><div class="su">kcal/天</div></div>'+
+      '<div class="si"><div class="sl2">预测周期</div><div class="sv sm">'+predict+'</div></div>';
+    document.getElementById('pr-mb').innerHTML='蛋白质 <b>'+protein+'g</b> · 碳水 <b>'+carbs+'g</b> · 脂肪 <b>'+fat+'g</b><br>Mifflin-St Jeor BMR × '+ACT_MULT[this.act];
+    this._cache={bmr:Math.round(bmr),tdee:tdee,targetKcal:targetKcal,proteinTarget:protein,carbTarget:carbs,fatTarget:fat};
+  },
+  load:function(){
+    var p=getJ('ironlog_profile',null);if(!p)return;
+    this.setSex(p.sex||0);this.setAct(p.act||0);this.setGoal({cut:0,maintain:1,bulk:2}[p.goal]||0);
+    ['age','wt','ht','tw','td'].forEach(function(f,i){var key=['age','weight','height','targetWeight','targetDate'][i];if(p[key])document.getElementById('pr-'+f).value=p[key]});
+    this.calc();
+  },
+  save:function(){
+    var wt=parseFloat(document.getElementById('pr-wt').value)||0;
+    var ht=parseFloat(document.getElementById('pr-ht').value)||0;
+    var age=parseFloat(document.getElementById('pr-age').value)||0;
+    if(!wt||!ht||!age){toast('请填写完整信息');return}
+    var c=this._cache||{},goalKeys=['cut','maintain','bulk'];
+    var p={sex:this.sex,act:this.act,goal:goalKeys[this.goal],age:age,weight:wt,height:ht,
+      targetWeight:parseFloat(document.getElementById('pr-tw').value)||0,
+      targetDate:document.getElementById('pr-td').value,
+      bmr:c.bmr||0,tdee:c.tdee||0,targetKcal:c.targetKcal||0,
+      proteinTarget:c.proteinTarget||0,carbTarget:c.carbTarget||0,fatTarget:c.fatTarget||0};
+    setJ('ironlog_profile',p);
+    if(wt){var wr=getJ('ironlog_weight_records',[]).filter(function(x){return x.date!==today()});wr.push({date:today(),weight:wt,ts:Date.now()});wr.sort(function(a,b){return a.date.localeCompare(b.date)});setJ('ironlog_weight_records',wr)}
+    toast('档案已保存 ✓');
+  }
+};
+
+// ── BACKUP ──
+var BAK={
+  collect:function(){
+    var data={};
+    for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ironlog_')===0)data[k]=getJ(k,null);}
+    data.__version=1;data.__date=today();
+    return JSON.stringify(data,null,2);
+  },
+  copy:function(){
+    var s=this.collect();
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(s).then(function(){toast('已复制到剪贴板 ✓')}).catch(function(){BAK._fallback(s);});
+    } else {this._fallback(s);}
+  },
+  _fallback:function(s){
+    var ta=document.createElement('textarea');ta.value=s;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('已复制到剪贴板 ✓');}catch(e){toast('请手动复制');}
+    document.body.removeChild(ta);
+  },
+  download:function(){
+    var s=this.collect();
+    var blob=new Blob([s],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download='ironlog-'+today()+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    toast('下载中 ⬇');
+  },
+  restore:function(){
+    var s=document.getElementById('bak-in').value.trim();
+    if(!s){toast('请粘贴备份JSON');return;}
+    try{
+      var data=JSON.parse(s);var n=0;
+      Object.keys(data).forEach(function(k){if(k.indexOf('ironlog_')===0){setJ(k,data[k]);n++;}});
+      toast('已恢复 '+n+' 项，请刷新页面');
+      document.getElementById('bak-in').value='';
+    }catch(e){toast('JSON格式错误');}
+  }
+};
+
+// ── HISTORY ──
+var HI={
+  days:7,
+  period:function(n,btn){this.days=n;document.querySelectorAll('.pbb').forEach(function(b){b.classList.remove('on')});btn.classList.add('on');this.render()},
+  dateRange:function(){var arr=[],t=today();for(var i=this.days-1;i>=0;i--)arr.push(addD(t,-i));return arr},
+  render:function(){var dates=this.dateRange();this.weekReport();this.weightChart(dates);this.calChart(dates);this.burnChart(dates)},
+  weekReport:function(){
+    var t=today(),tw=[],lw=[];
+    for(var i=6;i>=0;i--)tw.push(addD(t,-i));for(var i=13;i>=7;i--)lw.push(addD(t,-i));
+    var all=getJ('ironlog_diet_logs',{}),wr=getJ('ironlog_weight_records',[]);
+    var wkLogs=getJ('ironlog_workout_logs',[]),cLogs=getJ('ironlog_cardio_logs',[]);
+    function avgCal(dates){var days=0,tot=0;dates.forEach(function(d){var k=0;Object.values((all[d]||{meals:{}}).meals||{}).forEach(function(items){(items||[]).forEach(function(it){k+=it.kcal||0})});if(k>0){tot+=k*.9;days++}});return days>0?Math.round(tot/days):null}
+    function avgWt(dates){var map={};wr.forEach(function(r){map[r.date]=r.weight});var vals=dates.map(function(d){return map[d]||null}).filter(Boolean);return vals.length?(vals.reduce(function(s,v){return s+v},0)/vals.length).toFixed(1):null}
+    function sess(dates){return dates.filter(function(d){return wkLogs.some(function(l){return(l.date||'').startsWith(d)})}).length}
+    function cmin(dates){return Math.round(dates.reduce(function(s,d){return s+cLogs.filter(function(l){return(l.date||'').startsWith(d)}).reduce(function(ss,l){return ss+(l.duration||0)},0)},0))}
+    var tac=avgCal(tw),lac=avgCal(lw),taw=avgWt(tw),law=avgWt(lw),tse=sess(tw),lse=sess(lw),tcm=cmin(tw),lcm=cmin(lw);
+    function dlt(cur,prev,rev){if(cur===null||prev===null||cur===undefined||prev===undefined)return '';var d=(parseFloat(cur)-parseFloat(prev)).toFixed(1);if(d==0)return '';var good=rev?(d<0):(d>0);return '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;padding:1px 6px;border-radius:3px;display:inline-block;margin-top:3px;background:'+(good?'rgba(76,175,80,.1)':'rgba(224,82,82,.1)')+';color:var(--'+(good?'gn':'rd')+')">'+(d>0?'+':'')+d+'</div>'}
+    document.getElementById('hi-wk').innerHTML=
+      '<div class="si"><div class="sl2">日均热量</div><div class="sv ac">'+(tac!==null?tac:'—')+'</div><div class="su">'+(lac!==null?'上周 '+lac+' kcal':'kcal')+'</div>'+dlt(tac,lac,true)+'</div>'+
+      '<div class="si"><div class="sl2">平均体重</div><div class="sv">'+(taw||'—')+'</div><div class="su">'+(law?'上周 '+law+' kg':'kg')+'</div>'+dlt(taw,law,true)+'</div>'+
+      '<div class="si"><div class="sl2">训练次数</div><div class="sv gn">'+tse+'</div><div class="su">上周 '+lse+' 次</div>'+dlt(tse,lse,false)+'</div>'+
+      '<div class="si"><div class="sl2">有氧时长</div><div class="sv">'+tcm+'</div><div class="su">上周 '+lcm+' min</div>'+dlt(tcm,lcm,false)+'</div>';
+  },
+  svg:function(W,H,PL,PR2,PT,PB){return {W:W,H:H,PL:PL,PR:PR2,PT:PT,PB:PB,CW:W-PL-PR2,CH:H-PT-PB}},
+  grid:function(c,yMin,yMax,steps){var s='';for(var i=0;i<=steps;i++){var v=yMin+(yMax-yMin)*(i/steps),y=c.PT+c.CH-c.CH*(i/steps);s+='<line x1="'+c.PL+'" y1="'+y+'" x2="'+(c.PL+c.CW)+'" y2="'+y+'" stroke="var(--bd)" stroke-width="0.5"/><text x="'+(c.PL-3)+'" y="'+(y+3)+'" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="var(--txm)">'+v.toFixed(v<10?1:0)+'</text>'}return s},
+  xlabels:function(c,dates){var s='',n=dates.length,skip=n<=10?1:n<=31?5:10;for(var i=0;i<n;i++){if(i%skip!==0&&i!==n-1)continue;var x=c.PL+c.CW*(i/(n-1||1));s+='<text x="'+x+'" y="'+(c.H-5)+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="var(--txm)">'+fmtShort(dates[i])+'</text>'}return s},
+  weightChart:function(dates){
+    var wr=getJ('ironlog_weight_records',[]),map={};wr.forEach(function(r){map[r.date]=r.weight});
+    var series=dates.map(function(d){return{d:d,v:map[d]||null}});
+    var vals=series.filter(function(s){return s.v!==null}).map(function(s){return s.v});
+    var el=document.getElementById('hi-wc'),se=document.getElementById('hi-wstats');
+    if(!vals.length){el.innerHTML='<div class="nodata">暂无体重记录</div>';se.innerHTML='';return}
+    var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+    var p2=(mx-mn)<0.5?0.5:(mx-mn)*.15,yMin=mn-p2,yMax=mx+p2;
+    var avg=(vals.reduce(function(s,v){return s+v},0)/vals.length).toFixed(1);
+    var delta=(vals[vals.length-1]-vals[0]).toFixed(1);
+    se.innerHTML='<span>均值 <b>'+avg+'</b> kg</span><span>变化 <b style="color:var(-'+(delta<=0?'-gn':'--rd')+')">'+( delta>0?'+':'')+delta+'</b> kg</span>';
+    var c=this.svg(340,130,36,8,10,24),n=dates.length;
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,yMin,yMax,4)+this.xlabels(c,dates);
+    var pts=[],cirs='';
+    series.forEach(function(s,i){if(s.v===null)return;var x=c.PL+c.CW*(i/(n-1||1)),y=c.PT+c.CH-c.CH*((s.v-yMin)/(yMax-yMin));pts.push(x+','+y);cirs+='<circle cx="'+x+'" cy="'+y+'" r="2.5" fill="var(--ac)" stroke="var(--bg)" stroke-width="1.5"><title>'+s.d+': '+s.v+'kg</title></circle>'});
+    if(pts.length>1)svg+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/>';
+    el.innerHTML=svg+cirs+'</svg>';
+  },
+  calChart:function(dates){
+    var all=getJ('ironlog_diet_logs',{}),target=((getJ('ironlog_profile',null)||{}).targetKcal)||0;
+    var series=dates.map(function(d){var k=0;Object.values((all[d]||{meals:{}}).meals||{}).forEach(function(items){(items||[]).forEach(function(it){k+=it.kcal||0})});return{d:d,v:k>0?Math.round(k*.9):null}});
+    var el=document.getElementById('hi-cc');
+    if(!series.some(function(s){return s.v})){el.innerHTML='<div class="nodata">暂无饮食记录</div>';return}
+    var mx=Math.max.apply(null,series.map(function(s){return s.v||0}).concat(target||0))*1.1||500;
+    var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
+    if(target>0){var ty=c.PT+c.CH-c.CH*(target/mx);svg+='<line x1="'+c.PL+'" y1="'+ty+'" x2="'+(c.PL+c.CW)+'" y2="'+ty+'" stroke="var(--txd)" stroke-width="1" stroke-dasharray="4,3"/>'}
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="'+(target&&s.v>target*1.05?'var(--rd)':'var(--ac)')+'" rx="1" opacity=".85"><title>'+s.d+': '+s.v+' kcal</title></rect>'});
+    el.innerHTML=svg+'</svg>';
+  },
+  burnChart:function(dates){
+    var wL=getJ('ironlog_workout_logs',[]),cL=getJ('ironlog_cardio_logs',[]);
+    var series=dates.map(function(d){
+      var w=wL.filter(function(l){return(l.date||'').startsWith(d)}).reduce(function(s,l){return s+(l.kcal||0)},0);
+      var cv=cL.filter(function(l){return(l.date||'').startsWith(d)}).reduce(function(s,l){return s+(l.kcal||0)},0);
+      return{d:d,w:Math.round(w),c:Math.round(cv),v:Math.round(w+cv)};
+    });
+    var el=document.getElementById('hi-bc');
+    if(!series.some(function(s){return s.v>0})){el.innerHTML='<div class="nodata">暂无训练记录</div>';return}
+    var mx=Math.max.apply(null,series.map(function(s){return s.v}))*1.15||300;
+    var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,wH=c.CH*(s.w/mx),cvH=c.CH*(s.c/mx);if(wH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH)+'" width="'+bw+'" height="'+wH+'" fill="var(--gn)" rx="1" opacity=".85"/>';if(cvH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH-cvH)+'" width="'+bw+'" height="'+cvH+'" fill="var(--bl)" rx="1" opacity=".85"/>'});
+    el.innerHTML=svg+'</svg>';
+  }
+};
+
+// ── INIT ──
+initTheme();
+	FL.render();
+	D.render();
+W.renderPlans();
+W.renderSports();
+W.renderCardioWeek();
+W.resumeActive();
+DT.render();
+PR.load();
+window.addEventListener('storage',function(e){
+  if(!e.key||!e.key.startsWith('ironlog'))return;
+  var active=document.querySelector('.nb.active');
+  if(active)showTab(active.id.replace('nb-',''));
+});
+
+</script>
+</body>
+</html>
