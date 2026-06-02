@@ -373,6 +373,9 @@ svg.chart{width:100%;display:block}
       </div>
       <div id="hi-bc"></div>
     </div>
+    <div class="card"><div class="ct">蛋白质摄入</div><div id="hi-pc"></div></div>
+    <div class="card"><div class="ct">训练容量 (kg)</div><div id="hi-vc"></div></div>
+    <div class="card"><div class="row sb" style="margin-bottom:8px"><div class="ct" style="margin:0">力量进步 (e1RM)</div><select id="hi-sx" onchange="HI.strengthChart()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:4px 8px;font-size:12px;width:auto"></select></div><div id="hi-sc"></div></div>
   </div>
 </div>
 
@@ -748,7 +751,7 @@ var W={
     var plan=this.activeWk.plan,self=this;
     document.getElementById('wo-exlist').innerHTML=plan.exercises.map(function(ex){
       var sets=self.activeWk.sets[ex.name]||[];
-      var tag='<span class="tag m-'+ex.muscle+'">'+MUSCLE_TAG[ex.muscle]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';
+      var tag='<span class="tag m-'+ex.muscle+'">'+MUSCLE_TAG[ex.muscle]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';var _last=getJ('ironlog_last_sets',{})[ex.name];var lastHtml=_last&&_last.length?'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--bl);margin-top:4px">上次 '+_last.map(function(s){return s.w+'×'+s.r}).join(', ')+'</div>':'';
       var rows=sets.map(function(s,si){
         return '<div class="dn" style="padding:5px 0">'+
           '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);width:22px">'+pad(si+1)+'</span>'+
@@ -758,7 +761,7 @@ var W={
           '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
       }).join('');
       return '<div class="card" style="margin-bottom:6px">'+
-        '<div class="row sb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div><div style="margin-top:3px">'+tag+prHtml+'</div></div></div>'+
+        '<div class="row sb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div><div style="margin-top:3px">'+tag+prHtml+'</div></div></div>'+lastHtml+
         rows+'<button class="btn sm" style="margin-top:6px" onclick="W.addSet(\''+ex.name+'\','+ex.rest+')">+ 加组</button></div>';
     }).join('');
   },
@@ -779,12 +782,22 @@ var W={
   rmSet:function(name,idx){if(this.activeWk){this.activeWk.sets[name].splice(idx,1);this.renderExercises();this.saveActive()}},
   startRest:function(sec){
     if(this.restInt)clearInterval(this.restInt);
-    this.restSec=sec;document.getElementById('wo-restCard').style.display='block';this.showRest();
+    this.restEnd=Date.now()+sec*1000;
+    document.getElementById('wo-restCard').style.display='block';this.showRest();
     var self=this;
-    this.restInt=setInterval(function(){self.restSec--;if(self.restSec<=0){clearInterval(self.restInt);document.getElementById('wo-restCard').style.display='none';toast('休息结束 ✓')}else self.showRest()},1000);
+    this.restInt=setInterval(function(){self.showRest()},250);
   },
-  showRest:function(){var m=Math.floor(this.restSec/60),s=this.restSec%60;document.getElementById('wo-rt').textContent=pad(m)+':'+pad(s)},
-  addRest:function(n){this.restSec+=n;this.showRest()},
+  showRest:function(){
+    var left=Math.max(0,Math.round((this.restEnd-Date.now())/1000));this.restSec=left;
+    document.getElementById('wo-rt').textContent=pad(Math.floor(left/60))+':'+pad(left%60);
+    if(left<=0){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none';this.restAlert()}
+  },
+  addRest:function(n){this.restEnd+=n*1000;this.showRest()},
+  restAlert:function(){
+    toast('休息结束 ✓');
+    try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}
+    try{var AC=window.AudioContext||window.webkitAudioContext;if(AC){var ctx=new AC(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type='sine';o.frequency.value=880;g.gain.value=.12;o.start();setTimeout(function(){o.stop();ctx.close()},350)}}catch(e){}
+  },
   skipRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
   resetRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
   finish:function(){
@@ -798,6 +811,14 @@ var W={
       if(s.w>0&&s.r>0){var e=Math.round(s.w*(1+s.r/30));if(!prs[name]||e>prs[name].e1rm){prs[name]={w:s.w,r:s.r,e1rm:e,date:today()};newPR++}}
     })});
     setJ('ironlog_prs',prs);
+    var last=getJ('ironlog_last_sets',{}),hist=getJ('ironlog_strength_history',{}),td=today();
+    Object.keys(sets).forEach(function(name){
+      var done=sets[name].filter(function(s){return s.w>0||s.r>0});
+      if(done.length)last[name]=done.map(function(s){return {w:s.w,r:s.r}});
+      var best=0;sets[name].forEach(function(s){if(s.w>0&&s.r>0){var e=Math.round(s.w*(1+s.r/30));if(e>best)best=e}});
+      if(best>0){if(!hist[name])hist[name]=[];var h=hist[name][hist[name].length-1];if(h&&h.d===td)h.e=Math.max(h.e,best);else hist[name].push({d:td,e:best})}
+    });
+    setJ('ironlog_last_sets',last);setJ('ironlog_strength_history',hist);
     var log={id:Date.now(),date:today(),planId:plan.id,planName:plan.name,duration:dur,
       totalSets:Object.values(sets).reduce(function(s,x){return s+x.length},0),volume:vol,kcal:kcal};
     var logs=getJ('ironlog_workout_logs',[]);logs.push(log);setJ('ironlog_workout_logs',logs);
@@ -1415,7 +1436,7 @@ var HI={
   days:7,
   period:function(n,btn){this.days=n;document.querySelectorAll('.pbb').forEach(function(b){b.classList.remove('on')});btn.classList.add('on');this.render()},
   dateRange:function(){var arr=[],t=today();for(var i=this.days-1;i>=0;i--)arr.push(addD(t,-i));return arr},
-  render:function(){var dates=this.dateRange();this.weekReport();this.weightChart(dates);this.calChart(dates);this.burnChart(dates)},
+  render:function(){var dates=this.dateRange();this.weekReport();this.weightChart(dates);this.calChart(dates);this.burnChart(dates);this.proteinChart(dates);this.volumeChart(dates);this.fillStrengthSel();this.strengthChart()},
   weekReport:function(){
     var t=today(),tw=[],lw=[];
     for(var i=6;i>=0;i--)tw.push(addD(t,-i));for(var i=13;i>=7;i--)lw.push(addD(t,-i));
@@ -1483,6 +1504,52 @@ var HI={
     svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
     series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,wH=c.CH*(s.w/mx),cvH=c.CH*(s.c/mx);if(wH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH)+'" width="'+bw+'" height="'+wH+'" fill="var(--gn)" rx="1" opacity=".85"/>';if(cvH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH-cvH)+'" width="'+bw+'" height="'+cvH+'" fill="var(--bl)" rx="1" opacity=".85"/>'});
     el.innerHTML=svg+'</svg>';
+  },
+  proteinChart:function(dates){
+    var all=getJ('ironlog_diet_logs',{}),target=((getJ('ironlog_profile',null)||{}).proteinTarget)||0;
+    var series=dates.map(function(d){var p=0;Object.values((all[d]||{meals:{}}).meals||{}).forEach(function(items){(items||[]).forEach(function(it){p+=it.protein||0})});return{d:d,v:p>0?Math.round(p):null}});
+    var el=document.getElementById('hi-pc');
+    if(!series.some(function(s){return s.v})){el.innerHTML='<div class="nodata">暂无饮食记录</div>';return}
+    var mx=Math.max.apply(null,series.map(function(s){return s.v||0}).concat(target||0))*1.1||100;
+    var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
+    if(target>0){var ty=c.PT+c.CH-c.CH*(target/mx);svg+='<line x1="'+c.PL+'" y1="'+ty+'" x2="'+(c.PL+c.CW)+'" y2="'+ty+'" stroke="var(--txd)" stroke-width="1" stroke-dasharray="4,3"/>'}
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="'+(target&&s.v>=target*.9?'var(--gn)':'#e06060')+'" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'g</title></rect>'});
+    el.innerHTML=svg+'</svg>';
+  },
+  volumeChart:function(dates){
+    var wL=getJ('ironlog_workout_logs',[]);
+    var series=dates.map(function(d){var v=wL.filter(function(l){return(l.date||'').startsWith(d)}).reduce(function(s,l){return s+(l.volume||0)},0);return{d:d,v:Math.round(v)}});
+    var el=document.getElementById('hi-vc');
+    if(!series.some(function(s){return s.v>0})){el.innerHTML='<div class="nodata">暂无训练记录</div>';return}
+    var mx=Math.max.apply(null,series.map(function(s){return s.v}))*1.15||1000;
+    var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="var(--ac)" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'kg</title></rect>'});
+    el.innerHTML=svg+'</svg>';
+  },
+  fillStrengthSel:function(){
+    var sel=document.getElementById('hi-sx');if(!sel)return;
+    var names=Object.keys(getJ('ironlog_strength_history',{}));
+    if(!names.length){sel.innerHTML='<option>暂无数据</option>';return}
+    var cur=sel.value;
+    sel.innerHTML=names.map(function(nm){return '<option'+(nm===cur?' selected':'')+'>'+nm+'</option>'}).join('');
+  },
+  strengthChart:function(){
+    var sel=document.getElementById('hi-sx'),el=document.getElementById('hi-sc');if(!el)return;
+    var hist=(getJ('ironlog_strength_history',{})[sel?sel.value:''])||[];
+    if(!hist.length){el.innerHTML='<div class="nodata">完成训练后这里显示力量曲线</div>';return}
+    var vals=hist.map(function(h){return h.e}),mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+    var pad2=(mx-mn)<5?5:(mx-mn)*.2,yMin=Math.max(0,mn-pad2),yMax=mx+pad2;
+    var c=this.svg(340,130,36,8,10,24),n=hist.length,dts=hist.map(function(h){return h.d});
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,yMin,yMax,4)+this.xlabels(c,dts);
+    var pts=[],cirs='';
+    hist.forEach(function(h,i){var x=c.PL+c.CW*(i/(n-1||1)),y=c.PT+c.CH-c.CH*((h.e-yMin)/(yMax-yMin||1));pts.push(x+','+y);cirs+='<circle cx="'+x+'" cy="'+y+'" r="2.5" fill="var(--gn)" stroke="var(--bg)" stroke-width="1.5"><title>'+h.d+': '+h.e+'kg</title></circle>'});
+    if(pts.length>1)svg+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--gn)" stroke-width="2" stroke-linejoin="round"/>';
+    el.innerHTML=svg+cirs+'</svg>';
   }
 };
 
@@ -1501,7 +1568,9 @@ window.addEventListener('storage',function(e){
   var active=document.querySelector('.nb.active');
   if(active)showTab(active.id.replace('nb-',''));
 });
-
+if('serviceWorker' in navigator && location.protocol==='https:'){
+  navigator.serviceWorker.register('sw.js').catch(function(){});
+}
 </script>
 </body>
 </html>
