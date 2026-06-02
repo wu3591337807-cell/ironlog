@@ -275,11 +275,11 @@ svg.chart{width:100%;display:block}
   </div>
   </div>
   <div id="dt-rc" style="display:none">
-    <div class="ph" style="padding-top:9px"><span class="ptitle">菜谱</span><button class="btn sm pr" onclick="RC.newRecipe()">+ 新建</button></div>
+    <div class="ph" style="padding-top:9px"><span class="ptitle">菜谱</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="bulkImportRecipe()">批量导入</button><button class="btn sm pr" onclick="RC.newRecipe()">+ 新建</button></div></div>
     <div class="con" id="rc-list"></div>
   </div>
   <div id="dt-fl" style="display:none">
-      <div class="ph" style="padding-top:9px"><span class="ptitle">饮食库</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="FL.restoreHidden()">恢复隐藏</button><button class="btn sm pr" onclick="FL.add()">+ 添加</button></div></div>
+      <div class="ph" style="padding-top:9px"><span class="ptitle">饮食库</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="bulkImportFood()">批量导入</button><button class="btn sm" onclick="FL.restoreHidden()">恢复隐藏</button><button class="btn sm pr" onclick="FL.add()">+ 添加</button></div></div>
       <div class="con">
         <div class="card">
           <div class="ct">搜索食物库</div>
@@ -472,6 +472,48 @@ function getFood(id){
   return getJ('ironlog_custom_foods',[]).find(function(x){return x.id===id})||null;
 }
 function isHidden(id){return(getJ('ironlog_hidden_foods',[])).indexOf(id)>=0}
+function bulkImportFood(){
+  showMod('<div class="mtitle">批量导入食物</div>'+
+    '<div style="font-size:12px;color:var(--txd);margin-bottom:8px;line-height:1.7">每行一种，逗号分隔（每100g）：<br><b style="color:var(--tx)">名称,热量,蛋白,碳水,脂肪,钙,镁,锌</b><br>钙镁锌可省略。可让 Claude 估算后粘贴。</div>'+
+    '<textarea id="bulk-food" rows="7" style="resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:8px;font-size:13px;width:100%;outline:none" placeholder="葱油鸡饭,520,22,68,18&#10;牛肉面,480,25,62,14"></textarea>'+
+    '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+    '<button class="btn" onclick="closeModNow()">取消</button>'+
+    '<button class="btn pr" onclick="saveBulkFood()">导入</button></div>');
+}
+function saveBulkFood(){
+  var txt=document.getElementById('bulk-food').value.trim();
+  if(!txt){toast('请输入内容');return}
+  var cf=getJ('ironlog_custom_foods',[]),n=0;
+  txt.split('\n').forEach(function(line){
+    if(!line.trim())return;
+    var p=line.split(/[,，]/).map(function(s){return s.trim()});
+    if(p.length<5||!p[0])return;
+    cf.push({id:'c'+Date.now()+Math.floor(Math.random()*1e4),n:p[0],a:[],k:parseFloat(p[1])||0,p:parseFloat(p[2])||0,c:parseFloat(p[3])||0,f:parseFloat(p[4])||0,ca:parseFloat(p[5])||0,mg:parseFloat(p[6])||0,zn:parseFloat(p[7])||0});
+    n++;
+  });
+  setJ('ironlog_custom_foods',cf);closeModNow();FL.render();toast('已导入 '+n+' 种食物 ✓');
+}
+function bulkImportRecipe(){
+  showMod('<div class="mtitle">批量导入菜谱</div>'+
+    '<div style="font-size:12px;color:var(--txd);margin-bottom:8px;line-height:1.7">每行一个，逗号分隔（整份总量）：<br><b style="color:var(--tx)">名称,总热量,蛋白,碳水,脂肪</b><br>可让 Claude 估算后粘贴。</div>'+
+    '<textarea id="bulk-rec" rows="7" style="resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:8px;font-size:13px;width:100%;outline:none" placeholder="葱油鸡饭,650,28,82,22&#10;番茄牛腩饭,580,32,60,24"></textarea>'+
+    '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+    '<button class="btn" onclick="closeModNow()">取消</button>'+
+    '<button class="btn pr" onclick="saveBulkRecipe()">导入</button></div>');
+}
+function saveBulkRecipe(){
+  var txt=document.getElementById('bulk-rec').value.trim();
+  if(!txt){toast('请输入内容');return}
+  var recs=getJ('ironlog_recipes',[]),n=0;
+  txt.split('\n').forEach(function(line){
+    if(!line.trim())return;
+    var p=line.split(/[,，]/).map(function(s){return s.trim()});
+    if(p.length<5||!p[0])return;
+    recs.push({id:'r'+Date.now()+Math.floor(Math.random()*1e4),name:p[0],kcal:parseFloat(p[1])||0,protein:parseFloat(p[2])||0,carbs:parseFloat(p[3])||0,fat:parseFloat(p[4])||0});
+    n++;
+  });
+  setJ('ironlog_recipes',recs);closeModNow();RC.render();toast('已导入 '+n+' 个菜谱 ✓');
+}
 
 // ── UTILS ──
 function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
