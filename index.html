@@ -758,6 +758,7 @@ var W={
           '<input type="number" value="'+s.w+'" style="width:60px;text-align:center;padding:4px 6px;font-size:13px" placeholder="kg" onchange="W.updSet(\''+ex.name+'\','+si+',\'w\',this.value)">'+
           '<input type="number" value="'+s.r+'" style="width:48px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">'+
           '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+Math.round(s.w*s.r)+'kg</span>'+
+          '<button class="btn sm pr" style="font-size:11px" onclick="W.startRest('+(ex.rest||120)+')">&#10003; 休息</button>'+
           '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
       }).join('');
       return '<div class="card" style="margin-bottom:6px">'+
@@ -770,7 +771,7 @@ var W={
     if(!this.activeWk.sets[name])this.activeWk.sets[name]=[];
     var prev=this.activeWk.sets[name];
     this.activeWk.sets[name].push({w:prev.length?prev[prev.length-1].w:0,r:prev.length?prev[prev.length-1].r:8});
-    this.renderExercises();this.saveActive();this.startRest(rest||120);
+    this.renderExercises();this.saveActive();
   },
   updSet:function(name,idx,field,val){
     if(!this.activeWk||!this.activeWk.sets[name])return;
@@ -1016,11 +1017,16 @@ var DT={
     var hidden=getJ('ironlog_hidden_foods',[]);
 var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});return ov[f.id]?Object.assign({},f,ov[f.id]):f}).concat(custom).filter(function(f){return hidden.indexOf(f.id)<0}).filter(function(f){
       return f.n.toLowerCase().indexOf(term)>=0||(f.a&&f.a.some(function(a){return a.toLowerCase().indexOf(term)>=0}));
-    }).slice(0,12);
+    });
+    var recps=getJ('ironlog_recipes',[]).filter(function(r){return r.name.toLowerCase().indexOf(term)>=0}).map(function(r){return {_rc:true,id:r.id,n:r.name,k:Math.round(r.kcal)}});
+    matches=recps.concat(matches).slice(0,12);
     if(!matches.length){res.style.display='none';return}
     res.style.display='block';
     var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
     res.innerHTML=matches.map(function(f){
+      if(f._rc)return '<div class="sri" onclick="DT.addRecipe(\''+f.id+'\')">'+
+        f.n.replace(re,'<mark>$1</mark>')+
+        ' <span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--bl)">菜谱 '+f.k+'kcal/份</span></div>';
       return '<div class="sri" onclick="DT.addFood(\''+f.id+'\')">'+
         f.n.replace(re,'<mark>$1</mark>')+
         ' <span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">'+(f.isSupp?'per '+(f.unit||'片'):f.k+'kcal/100g')+'</span></div>';
@@ -1052,6 +1058,29 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
     if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
     all[this.date].meals[MEAL_KEYS[meal]].push(item);
     setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(f.n+' 已加入'+MEAL_NAMES[meal]+' ✓');
+  },
+  addRecipe:function(id){
+    var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});if(!r)return;
+    document.getElementById('dt-sr').style.display='none';document.getElementById('dt-si').value='';
+    showMod('<div class="mtitle">'+r.name+'</div><div class="col">'+
+      '<label class="lb">份数</label>'+
+      '<input type="number" id="fa-amt" value="1" min="0.1" step="0.5" inputmode="decimal">'+
+      '<label class="lb" style="margin-top:8px">加入哪一餐</label>'+
+      '<div class="sg" style="margin-top:2px">'+MEAL_NAMES.map(function(nm,i){return '<button class="sgb'+(i===DT.curMeal?' on':'')+'" onclick="DT.confirmAddRecipe(\''+id+'\','+i+')">'+nm+'</button>'}).join('')+'</div>'+
+      '</div><div class="row" style="margin-top:12px;justify-content:center">'+
+      '<button class="btn" onclick="closeModNow()">取消</button></div>');
+  },
+  confirmAddRecipe:function(id,meal){
+    var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});
+    var amt=parseFloat(document.getElementById('fa-amt').value)||0;
+    if(!amt||!r){closeModNow();return}
+    if(meal===undefined||meal===null)meal=this.curMeal;
+    var item={id:Date.now(),foodId:id,name:r.name,amount:amt,unit:'份',kcal:Math.round(r.kcal*amt),
+      protein:+(r.protein*amt).toFixed(1),carbs:+(r.carbs*amt).toFixed(1),fat:+(r.fat*amt).toFixed(1),ca:0,mg:0,zn:0};
+    var all=getJ('ironlog_diet_logs',{});
+    if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    all[this.date].meals[MEAL_KEYS[meal]].push(item);
+    setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(r.name+' 已加入'+MEAL_NAMES[meal]+' ✓');
   },
   showFoodInfo:function(meal,idx){
     var data=getJ('ironlog_diet_logs',{})[this.date]||{meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
@@ -1191,11 +1220,23 @@ var RC={
   del:function(id){setJ('ironlog_recipes',getJ('ironlog_recipes',[]).filter(function(r){return r.id!==id}));this.render()},
   recordToday:function(id){
     var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});if(!r)return;
-    var item={id:Date.now(),foodId:id,name:r.name,amount:1,unit:'份',kcal:Math.round(r.kcal),protein:r.protein,carbs:r.carbs,fat:r.fat,ca:0,mg:0,zn:0};
-    var all=getJ('ironlog_diet_logs',{}),t=DT.date;
-    if(!all[t])all[t]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
-    all[t].meals.snack.push(item);setJ('ironlog_diet_logs',all);
-    toast(r.name+' 已记录到加餐 ✓');DT.render();
+    showMod('<div class="mtitle">'+r.name+'</div><div class="col">'+
+      '<label class="lb">日期</label><input type="date" id="rc-rd" value="'+DT.date+'">'+
+      '<label class="lb" style="margin-top:8px">份数</label><input type="number" id="rc-ra" value="1" min="0.1" step="0.5" inputmode="decimal">'+
+      '<label class="lb" style="margin-top:8px">加入哪一餐</label>'+
+      '<div class="sg" style="margin-top:2px">'+MEAL_NAMES.map(function(nm,i){return '<button class="sgb'+(i===2?' on':'')+'" onclick="RC.doRecord(\''+id+'\','+i+')">'+nm+'</button>'}).join('')+'</div>'+
+      '</div><div class="row" style="margin-top:12px;justify-content:center"><button class="btn" onclick="closeModNow()">取消</button></div>');
+  },
+  doRecord:function(id,meal){
+    var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});if(!r)return;
+    var d=document.getElementById('rc-rd').value||DT.date;
+    var amt=parseFloat(document.getElementById('rc-ra').value)||1;
+    var item={id:Date.now(),foodId:id,name:r.name,amount:amt,unit:'份',kcal:Math.round(r.kcal*amt),
+      protein:+(r.protein*amt).toFixed(1),carbs:+(r.carbs*amt).toFixed(1),fat:+(r.fat*amt).toFixed(1),ca:0,mg:0,zn:0};
+    var all=getJ('ironlog_diet_logs',{});
+    if(!all[d])all[d]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    all[d].meals[MEAL_KEYS[meal]].push(item);setJ('ironlog_diet_logs',all);
+    closeModNow();DT.render();toast(r.name+' 已记录到 '+d+' '+MEAL_NAMES[meal]+' ✓');
   }
 };
 
