@@ -758,7 +758,7 @@ var W={
           '<input type="number" value="'+s.w+'" style="width:60px;text-align:center;padding:4px 6px;font-size:13px" placeholder="kg" onchange="W.updSet(\''+ex.name+'\','+si+',\'w\',this.value)">'+
           '<input type="number" value="'+s.r+'" style="width:48px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">'+
           '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+Math.round(s.w*s.r)+'kg</span>'+
-          '<button class="btn sm pr" style="font-size:11px" onclick="W.startRest('+(ex.rest||120)+')">&#10003; 休息</button>'+
+          '<button class="btn sm pr" style="font-size:11px" onclick="W.startRest('+(ex.rest||120)+')">&#10003; 完成</button>'+
           '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
       }).join('');
       return '<div class="card" style="margin-bottom:6px">'+
