@@ -178,11 +178,13 @@ svg.chart{width:100%;display:block}
           <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ac)" id="wo-vol">容量 0 kg</span>
         </div>
       </div>
-      <div class="card" id="wo-restCard" style="display:none">
-        <div class="ct">组间休息</div>
-        <div style="text-align:center;padding:6px 0">
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--ac);line-height:1" id="wo-rt">3:00</div>
-          <div class="row" style="justify-content:center;gap:7px;margin-top:9px">
+      <div class="card" id="wo-restCard" style="display:none;position:fixed;left:10px;right:10px;bottom:70px;z-index:210;box-shadow:0 4px 20px rgba(0,0,0,.4);background:var(--sf2)">
+        <div class="row sb">
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--txm);text-transform:uppercase">组间休息</span>
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--ac);line-height:1" id="wo-rt">3:00</span>
+          </div>
+          <div class="row" style="gap:6px">
             <button class="btn sm" onclick="W.addRest(30)">+30s</button>
             <button class="btn sm" onclick="W.skipRest()">跳过</button>
             <button class="btn sm" onclick="W.resetRest()">重置</button>
@@ -255,6 +257,7 @@ svg.chart{width:100%;display:block}
       <button class="btn sm" onclick="DT.prev()">◀</button>
       <span style="font-family:'IBM Plex Mono',monospace;font-size:12px" id="dt-ds"></span>
       <button class="btn sm" onclick="DT.next()">▶</button>
+      <button class="btn sm pr" id="dt-today" style="display:none" onclick="DT.goToday()">今天</button>
     </div>
     <div class="card">
       <div class="row sb" style="margin-bottom:8px">
@@ -527,6 +530,7 @@ function fmtShort(s){var p=s.split('-');return p[1]+'/'+p[2]}
 function getJ(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d}catch(e){return d}}
 function setJ(k,v){localStorage.setItem(k,JSON.stringify(v))}
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2200)}
+function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms||15)}catch(e){}}
 function showMod(html){document.getElementById('mc').innerHTML=html;document.getElementById('mover').classList.add('on')}
 function closeMod(e){if(e.target===document.getElementById('mover'))document.getElementById('mover').classList.remove('on')}
 function closeModNow(){document.getElementById('mover').classList.remove('on')}
@@ -544,7 +548,7 @@ function showTab(id){
   document.getElementById('hdrSub').textContent=TABNAMES[id]||id;
   if(id==='db')D.render();
   if(id==='wo'){W.renderPlans();W.renderSports();W.renderCardioWeek()}
-  if(id==='dt')DT.render();
+  if(id==='dt'){DT.autoMeal();DT.render()}
   if(id==='pr')PR.load();
   if(id==='hi')HI.render();
 }
@@ -671,7 +675,7 @@ var SPORTS=[
   {n:'爬楼梯',icon:'🪜',met:6}
 ];
 var W={
-  curSub:1,curSport:0,swInt:null,swSec:0,swOn:false,
+  curSub:1,curSport:0,swInt:null,swSec:0,swOn:false,swStart:0,swBase:0,
   restInt:null,restSec:0,activeWk:null,wkInt:null,wkSec:0,
   sub:function(n){
     this.curSub=n;
@@ -767,6 +771,7 @@ var W={
     }).join('');
   },
   addSet:function(name,rest){
+    vib(15);
     if(!this.activeWk)return;
     if(!this.activeWk.sets[name])this.activeWk.sets[name]=[];
     var prev=this.activeWk.sets[name];
@@ -782,6 +787,7 @@ var W={
   },
   rmSet:function(name,idx){if(this.activeWk){this.activeWk.sets[name].splice(idx,1);this.renderExercises();this.saveActive()}},
   startRest:function(sec){
+    vib(15);
     if(this.restInt)clearInterval(this.restInt);
     this.restEnd=Date.now()+sec*1000;
     document.getElementById('wo-restCard').style.display='block';this.showRest();
@@ -802,6 +808,7 @@ var W={
   skipRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
   resetRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
   finish:function(){
+    vib([15,40,15]);
     if(!this.activeWk)return;
     if(this.wkInt)clearInterval(this.wkInt);if(this.restInt)clearInterval(this.restInt);
     var plan=this.activeWk.plan,vol=this.activeWk.vol,dur=Math.round(this.wkSec/60);
@@ -949,23 +956,36 @@ var W={
     document.getElementById('c-m2').className='sgb'+(n===2?' on':'');
     document.getElementById('c-manual').style.display=n===1?'block':'none';
     document.getElementById('c-timer').style.display=n===2?'block':'none';
-    if(n===1&&this.swInt){clearInterval(this.swInt);this.swOn=false;}
+    if(n===1&&this.swOn){this.swBase=this.swNow();this.swOn=false;clearInterval(this.swInt);document.getElementById('c-swb').textContent='继续';this.swSave();}
   },
   cPreview:function(){
-    var dur=parseFloat(document.getElementById('c-dur').value)||(this.swSec/60)||0;
+    var dur=parseFloat(document.getElementById('c-dur').value)||(this.swNow()/60)||0;
     var wt=parseFloat(document.getElementById('c-wt').value)||70;
     var met=parseFloat(document.getElementById('c-met').value)||8;
     document.getElementById('c-prev').textContent=(dur>0?Math.round(met*wt*(dur/60)):'—')+' kcal';
   },
+  swNow:function(){return Math.floor(this.swBase+(this.swOn?(Date.now()-this.swStart)/1000:0))},
+  swSave:function(){setJ('ironlog_cardio_sw',{base:this.swBase,start:this.swStart,on:this.swOn})},
+  swTick:function(){var sec=this.swNow();document.getElementById('c-sw').textContent=pad(Math.floor(sec/60))+':'+pad(sec%60);
+    document.getElementById('c-dur').value=(sec/60).toFixed(1);this.cPreview()},
   swToggle:function(){
     var btn=document.getElementById('c-swb');
-    if(this.swOn){clearInterval(this.swInt);this.swOn=false;btn.textContent='继续'}
-    else{this.swOn=true;btn.textContent='暂停';var self=this;
-      this.swInt=setInterval(function(){self.swSec++;var m=Math.floor(self.swSec/60),s=self.swSec%60;
-        document.getElementById('c-sw').textContent=pad(m)+':'+pad(s);
-        document.getElementById('c-dur').value=(self.swSec/60).toFixed(1);self.cPreview()},1000);}
+    if(this.swOn){this.swBase=this.swNow();this.swOn=false;clearInterval(this.swInt);btn.textContent='继续'}
+    else{this.swStart=Date.now();this.swOn=true;btn.textContent='暂停';var self=this;
+      this.swInt=setInterval(function(){self.swTick()},1000);self.swTick()}
+    this.swSave();
   },
-  swReset:function(){if(this.swInt)clearInterval(this.swInt);this.swOn=false;this.swSec=0;document.getElementById('c-sw').textContent='00:00';document.getElementById('c-swb').textContent='开始';document.getElementById('c-dur').value=''},
+  swReset:function(){if(this.swInt)clearInterval(this.swInt);this.swOn=false;this.swBase=0;this.swStart=0;localStorage.removeItem('ironlog_cardio_sw');document.getElementById('c-sw').textContent='00:00';document.getElementById('c-swb').textContent='开始';document.getElementById('c-dur').value=''},
+  swResume:function(){
+    var s=getJ('ironlog_cardio_sw',null);if(!s)return;
+    this.swBase=s.base||0;this.swStart=s.start||Date.now();this.swOn=!!s.on;
+    var sec=this.swNow(),el=document.getElementById('c-sw');
+    if(el)el.textContent=pad(Math.floor(sec/60))+':'+pad(sec%60);
+    var dv=document.getElementById('c-dur');if(dv&&sec>0)dv.value=(sec/60).toFixed(1);
+    var btn=document.getElementById('c-swb');
+    if(this.swOn){if(btn)btn.textContent='暂停';var self=this;this.swInt=setInterval(function(){self.swTick()},1000)}
+    else if(btn&&sec>0)btn.textContent='继续';
+  },
   saveCardio:function(){
     var dur=parseFloat(document.getElementById('c-dur').value);if(!dur){toast('请输入时长');return}
     var wt=parseFloat(document.getElementById('c-wt').value)||70;
@@ -995,6 +1015,7 @@ var DT={
   date:today(),curMeal:0,
   prev:function(){this.date=addD(this.date,-1);this.render()},
   next:function(){this.date=addD(this.date,1);this.render()},
+  goToday:function(){this.date=today();this.render()},
   sub:function(n){
     document.getElementById('dt-t1').className='btn sm'+(n===1?' on':'');
     document.getElementById('dt-t2').className='btn sm'+(n===2?' on':'');
@@ -1006,8 +1027,13 @@ var DT={
     if(n===3)FL.render();
   },
   setMeal:function(n){
-    this.curMeal=n;
+    this.curMeal=n;this._mealTouched=true;
     for(var i=0;i<4;i++)document.getElementById('dt-mb'+i).className='btn sm'+(i===n?' on':'');
+  },
+  autoMeal:function(){
+    if(this._mealTouched)return;
+    var h=new Date().getHours();this.curMeal=h<10?0:h<15?1:h<21?2:3;
+    for(var i=0;i<4;i++)document.getElementById('dt-mb'+i).className='btn sm'+(i===this.curMeal?' on':'');
   },
   search:function(q){
     var res=document.getElementById('dt-sr');
@@ -1057,7 +1083,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
     var all=getJ('ironlog_diet_logs',{});
     if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
     all[this.date].meals[MEAL_KEYS[meal]].push(item);
-    setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(f.n+' 已加入'+MEAL_NAMES[meal]+' ✓');
+    vib(15);setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(f.n+' 已加入'+MEAL_NAMES[meal]+' ✓');
   },
   addRecipe:function(id){
     var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});if(!r)return;
@@ -1080,7 +1106,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
     var all=getJ('ironlog_diet_logs',{});
     if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
     all[this.date].meals[MEAL_KEYS[meal]].push(item);
-    setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(r.name+' 已加入'+MEAL_NAMES[meal]+' ✓');
+    vib(15);setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(r.name+' 已加入'+MEAL_NAMES[meal]+' ✓');
   },
   showFoodInfo:function(meal,idx){
     var data=getJ('ironlog_diet_logs',{})[this.date]||{meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
@@ -1149,6 +1175,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
   render:function(){
     document.getElementById('dt-ds').textContent=fmtLong(this.date);
     document.getElementById('dt-tc').style.display=this.date===today()?'inline':'none';
+    document.getElementById('dt-today').style.display=this.date===today()?'none':'inline-block';
     var data=getJ('ironlog_diet_logs',{})[this.date]||{meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
     var kcal=0,p=0,c=0,f=0,ca=0,mg=0,zn=0;
     Object.values(data.meals).forEach(function(items){
@@ -1184,7 +1211,7 @@ var RC={
   render:function(){
     var recipes=getJ('ironlog_recipes',[]);
     var el=document.getElementById('rc-list');
-    if(!recipes.length){el.innerHTML='<div class="nodata">暂无菜谱，点击 + 新建</div>';return}
+    if(!recipes.length){el.innerHTML='<div class="nodata" style="padding:20px 0">还没有菜谱<div class="row" style="justify-content:center;gap:8px;margin-top:12px"><button class="btn pr" onclick="RC.newRecipe()">+ 新建菜谱</button><button class="btn" onclick="bulkImportRecipe()">批量导入</button></div></div>';return}
     el.innerHTML=recipes.map(function(r){
       return '<div class="card"><div class="row sb"><div>'+
         '<div style="font-size:13px;font-weight:600;color:var(--tx)">'+r.name+'</div>'+
@@ -1603,9 +1630,14 @@ initTheme();
 W.renderPlans();
 W.renderSports();
 W.renderCardioWeek();
-W.resumeActive();
+W.resumeActive();W.swResume();
 DT.render();
 PR.load();
+(function(){var el=document.getElementById('dt-log'),x0=0,y0=0;
+ el.addEventListener('touchstart',function(e){x0=e.changedTouches[0].clientX;y0=e.changedTouches[0].clientY},{passive:true});
+ el.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){if(dx<0)DT.next();else DT.prev()}});
+})();
 window.addEventListener('storage',function(e){
   if(!e.key||!e.key.startsWith('ironlog'))return;
   var active=document.querySelector('.nb.active');
