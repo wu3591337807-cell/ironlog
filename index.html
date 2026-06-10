@@ -120,6 +120,12 @@ svg.chart{width:100%;display:block}
         <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;padding:1px 7px;border-radius:3px" id="db-wd"></span>
       </div>
     </div>
+    <div class="card" id="db-cdc" style="display:none">
+      <div class="row sb">
+        <div><div class="sl2" id="db-cdl">目标倒计时</div><div style="font-family:'Bebas Neue',sans-serif;font-size:31px;color:var(--ac)" id="db-cdd">—</div><div class="su">天</div></div>
+        <div style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);line-height:1.8" id="db-cdi"></div>
+      </div>
+    </div>
     <div class="card">
       <div class="ct">热量平衡</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -252,6 +258,7 @@ svg.chart{width:100%;display:block}
         <button class="btn sm" id="dt-mb2" onclick="DT.setMeal(2)">晚餐</button>
         <button class="btn sm" id="dt-mb3" onclick="DT.setMeal(3)">加餐</button>
       </div>
+      <div id="dt-freq" style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap"></div>
     </div>
     <div class="dn2">
       <button class="btn sm" onclick="DT.prev()">◀</button>
@@ -584,6 +591,7 @@ var D={
     var wLogs=getJ('ironlog_workout_logs',[]).filter(function(l){return(l.date||'').startsWith(D.date)});
     var cLogs=getJ('ironlog_cardio_logs',[]).filter(function(l){return(l.date||'').startsWith(D.date)});
     this.renderWeight();
+    this.renderCountdown(prof);
     this.renderCals(prof,diet,wLogs,cLogs);
   },
   renderCals:function(prof,diet,wLogs,cLogs){
@@ -621,7 +629,7 @@ var D={
     D.micro('zna',zn,11,'db-zna','db-znp','db-znv');
     var wEl=document.getElementById('db-wl'),cEl=document.getElementById('db-cl');
     wEl.innerHTML=!wLogs.length?'<div class="nodata" style="padding:10px 0">今日无力量训练</div>':
-      wLogs.map(function(l){return'<div class="dn2" style="margin-bottom:6px"><span>🏋️ '+(l.planName||'力量训练')+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--ac)">'+Math.round(l.kcal||0)+' kcal</span></div>'}).join('');
+      wLogs.map(function(l){return'<div class="dn2" style="margin-bottom:6px;cursor:pointer" onclick="D.editWk('+l.id+')"><span>🏋️ '+(l.planName||'力量训练')+' <span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">'+(l.duration||0)+'min ✏️</span></span><span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--ac)">'+Math.round(l.kcal||0)+' kcal</span></div>'}).join('');
     cEl.innerHTML=!cLogs.length?'<div class="nodata" style="padding:10px 0">今日无有氧记录</div>':
       cLogs.map(function(l){return'<div class="dn2" style="margin-bottom:6px"><span>'+(l.icon||'🏃')+' '+(l.sport||'有氧')+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--ac)">'+Math.round(l.kcal||0)+' kcal</span></div>'}).join('');
     var si=document.getElementById('db-si'),st=document.getElementById('db-st'),pr2=document.getElementById('db-pr');
@@ -647,6 +655,43 @@ var D={
     bar.className='pf'+(pct>=110?' rd':pct>=80?' gn':pct>=50?'':' or');
     document.getElementById(pid).textContent=Math.round(pct)+'%';
     document.getElementById(vid).textContent=Math.round(val)+'/'+rda+'mg';
+  },
+  renderCountdown:function(prof){
+    var card=document.getElementById('db-cdc');
+    var cd=prof&&prof.cd;
+    if(!cd||!cd.days){card.style.display='none';return}
+    card.style.display='block';
+    document.getElementById('db-cdl').textContent=(cd.goal==='cut'?'减脂':'增肌')+'倒计时';
+    var passed=Math.floor((new Date(today())-new Date(cd.start))/86400000);
+    var left=cd.days-passed;
+    var wr=getJ('ironlog_weight_records',[]);
+    var lw=wr.length?wr[wr.length-1].weight:0;
+    var done=lw>0&&(cd.goal==='cut'?lw<=cd.target:lw>=cd.target);
+    var num=document.getElementById('db-cdd'),info=document.getElementById('db-cdi');
+    if(done){num.textContent='🎉';info.innerHTML='目标 <b style="color:var(--gn)">'+cd.target+'kg</b> 已达成<br>用时 '+passed+' 天'}
+    else if(left<=0){num.textContent='0';info.innerHTML='已到期 · 目标 '+cd.target+'kg<br>可在档案中重设'}
+    else{num.textContent=left;info.innerHTML='第 '+(passed+1)+'/'+cd.days+' 天<br>目标 '+cd.target+'kg'}
+  },
+  editWk:function(id){
+    var l=getJ('ironlog_workout_logs',[]).find(function(x){return x.id===id});if(!l)return;
+    showMod('<div class="mtitle">编辑训练记录</div><div class="col">'+
+      '<label class="lb">'+(l.planName||'力量训练')+' · 时长（分钟）</label>'+
+      '<input type="number" id="ew-d" value="'+(l.duration||0)+'" min="1" inputmode="numeric"></div>'+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn dn" onclick="D.delWk('+id+')">删除</button>'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="D.saveWk('+id+')">保存</button></div>');
+  },
+  saveWk:function(id){
+    var logs=getJ('ironlog_workout_logs',[]);var l=logs.find(function(x){return x.id===id});if(!l)return;
+    var d=parseFloat(document.getElementById('ew-d').value)||0;if(!d){toast('请输入时长');return}
+    l.duration=Math.round(d);l.kcal=Math.round((l.volume||0)*.04+l.duration*3.5);
+    setJ('ironlog_workout_logs',logs);closeModNow();this.render();toast('已更新 ✓');
+  },
+  delWk:function(id){
+    if(!confirm('删除该条训练记录？'))return;
+    setJ('ironlog_workout_logs',getJ('ironlog_workout_logs',[]).filter(function(x){return x.id!==id}));
+    closeModNow();this.render();toast('已删除');
   }
 };
 
@@ -1203,6 +1248,26 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
         '<span>'+MEAL_NAMES[mi]+'</span><span style="color:var(--ac)">'+mkcal+' kcal</span></div>'+
         (rows||'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);padding:8px 0">暂无记录</div>')+'</div>';
     }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="DT.copyYesterday()">📋 复制昨日饮食</button>';
+    this.renderFreq();
+  },
+  renderFreq:function(){
+    var el=document.getElementById('dt-freq');if(!el)return;
+    var cnt={};
+    var all=getJ('ironlog_diet_logs',{});
+    Object.keys(all).forEach(function(d){
+      Object.values(all[d].meals||{}).forEach(function(items){
+        (items||[]).forEach(function(it){if(it.foodId)cnt[it.foodId]=(cnt[it.foodId]||0)+1});
+      });
+    });
+    var recipes=getJ('ironlog_recipes',[]);
+    var chips=Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]}).map(function(id){
+      var f=getFood(id);
+      if(f)return '<button class="btn sm" onclick="DT.addFood(\''+id+'\')">'+f.n+'</button>';
+      var r=recipes.find(function(x){return x.id===id});
+      if(r)return '<button class="btn sm" onclick="DT.addRecipe(\''+id+'\')">'+r.name+'</button>';
+      return null;
+    }).filter(Boolean).slice(0,8);
+    el.innerHTML=chips.length?'<span style="font-family:\'IBM Plex Mono\',monospace;font-size:10px;color:var(--txm);align-self:center">常用：</span>'+chips.join(''):'';
   }
 };
 
@@ -1218,6 +1283,7 @@ var RC={
         '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd);margin-top:2px">'+
         Math.round(r.kcal)+' kcal · P'+Math.round(r.protein)+'g C'+Math.round(r.carbs)+'g F'+Math.round(r.fat)+'g</div></div>'+
         '<div class="row" style="gap:6px">'+
+        '<button class="btn sm" onclick="RC.edit(\''+r.id+'\')">编辑</button>'+
         '<button class="btn sm pr" onclick="RC.recordToday(\''+r.id+'\')">记录今日</button>'+
         '<button class="btn sm dn" onclick="RC.del(\''+r.id+'\')">删除</button></div></div></div>';
     }).join('');
@@ -1234,14 +1300,30 @@ var RC={
       '<button class="btn" onclick="closeModNow()">取消</button>'+
       '<button class="btn pr" onclick="RC.save()">保存</button></div>');
   },
-  save:function(){
+  edit:function(id){
+    var r=getJ('ironlog_recipes',[]).find(function(x){return x.id===id});if(!r)return;
+    showMod('<div class="mtitle">编辑菜谱</div><div class="col">'+
+      '<label class="lb">菜谱名称</label><input type="text" id="rc-n" value="'+r.name.replace(/"/g,'&quot;')+'">'+
+      '<label class="lb" style="margin-top:8px">热量 (kcal)</label><input type="number" id="rc-k" value="'+r.kcal+'">'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">'+
+      '<div><label class="lb">蛋白(g)</label><input type="number" id="rc-p" value="'+r.protein+'"></div>'+
+      '<div><label class="lb">碳水(g)</label><input type="number" id="rc-c" value="'+r.carbs+'"></div>'+
+      '<div><label class="lb">脂肪(g)</label><input type="number" id="rc-f" value="'+r.fat+'"></div></div></div>'+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">取消</button>'+
+      '<button class="btn pr" onclick="RC.save(\''+id+'\')">保存</button></div>');
+  },
+  save:function(id){
     var name=document.getElementById('rc-n').value.trim(),k=parseFloat(document.getElementById('rc-k').value)||0;
     if(!name||!k){toast('请填写名称和热量');return}
-    var r={id:'r'+Date.now(),name:name,kcal:k,
+    var vals={name:name,kcal:k,
       protein:parseFloat(document.getElementById('rc-p').value)||0,
       carbs:parseFloat(document.getElementById('rc-c').value)||0,
       fat:parseFloat(document.getElementById('rc-f').value)||0};
-    var recs=getJ('ironlog_recipes',[]);recs.push(r);setJ('ironlog_recipes',recs);
+    var recs=getJ('ironlog_recipes',[]);
+    if(id){var r=recs.find(function(x){return x.id===id});if(r)Object.assign(r,vals)}
+    else recs.push(Object.assign({id:'r'+Date.now()},vals));
+    setJ('ironlog_recipes',recs);
     closeModNow();this.render();toast('菜谱已保存 ✓');
   },
   del:function(id){setJ('ironlog_recipes',getJ('ironlog_recipes',[]).filter(function(r){return r.id!==id}));this.render()},
@@ -1423,7 +1505,7 @@ var PR={
     var tdee=Math.round(bmr*ACT_MULT[this.act]);
     var goalDelta=[-500,0,300][this.goal];
     var targetKcal=tdee+goalDelta;
-    var protein=Math.round(wt*[2.4,2,2.2][this.goal]);
+    var protein=Math.round(wt*[2.0,1.6,1.8][this.goal]);
     var fat=Math.round(targetKcal*.25/9);
     var carbs=Math.round((targetKcal-protein*4-fat*9)/4);
     var tw=parseFloat(document.getElementById('pr-tw').value)||0;
@@ -1454,6 +1536,13 @@ var PR={
       targetDate:document.getElementById('pr-td').value,
       bmr:c.bmr||0,tdee:c.tdee||0,targetKcal:c.targetKcal||0,
       proteinTarget:c.proteinTarget||0,carbTarget:c.carbTarget||0,fatTarget:c.fatTarget||0};
+    var gd=[-500,0,300][this.goal],tw2=p.targetWeight;
+    if(gd!==0&&tw2>0&&((gd<0&&tw2<wt)||(gd>0&&tw2>wt))){
+      var days=Math.round(Math.abs((tw2-wt)*7700/gd));
+      var old=getJ('ironlog_profile',null);
+      if(old&&old.cd&&old.cd.goal===p.goal&&old.cd.target===tw2)p.cd=old.cd;
+      else p.cd={start:today(),days:days,target:tw2,goal:p.goal};
+    }else p.cd=null;
     setJ('ironlog_profile',p);
     if(wt){var wr=getJ('ironlog_weight_records',[]).filter(function(x){return x.date!==today()});wr.push({date:today(),weight:wt,ts:Date.now()});wr.sort(function(a,b){return a.date.localeCompare(b.date)});setJ('ironlog_weight_records',wr)}
     toast('档案已保存 ✓');
