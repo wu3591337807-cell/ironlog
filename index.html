@@ -158,6 +158,10 @@ svg.chart{width:100%;display:block}
         <div class="row"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:26px">Zn</span><div class="pw" style="flex:1;height:6px"><div class="pf" id="db-zna" style="width:0%"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);width:32px;text-align:right" id="db-znp">0%</span><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--txm);width:64px;text-align:right" id="db-znv"></span></div>
       </div>
     </div>
+    <div class="card" id="db-cal-card">
+      <div class="ct">训练日历</div>
+      <div id="db-cal"></div>
+    </div>
     <div style="background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:var(--r);padding:11px 13px;display:flex;align-items:flex-start;gap:10px">
       <span style="font-size:18px;margin-top:2px" id="db-si">&#128203;</span>
       <div><div style="font-size:13px;line-height:1.6" id="db-st"></div><div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px" id="db-pr"></div></div>
@@ -569,6 +573,36 @@ var D={
   date:today(),
   prev:function(){this.date=addD(this.date,-1);this.render()},
   next:function(){this.date=addD(this.date,1);this.render()},
+  calMonth:today().slice(0,7),
+  goDate:function(d){this.date=d;this.render();},
+  calNav:function(n){var p=this.calMonth.split('-').map(Number),d=new Date(p[0],p[1]-1+n,1);this.calMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);this.renderCal();},
+  renderCal:function(){
+    var el=document.getElementById('db-cal');if(!el)return;
+    var p=this.calMonth.split('-').map(Number),y=p[0],m=p[1];
+    var fw=new Date(y,m-1,1).getDay(),days=new Date(y,m,0).getDate();
+    var wSet={},cSet={};
+    getJ('ironlog_workout_logs',[]).forEach(function(l){if(l.date)wSet[l.date]=1;});
+    getJ('ironlog_cardio_logs',[]).forEach(function(l){if(l.date)cSet[l.date]=1;});
+    var td=today();
+    var h='<div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">'+
+      '<button class="btn sm" onclick="D.calNav(-1)">\u2039</button>'+
+      '<span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--tx)">'+y+'-'+pad(m)+'</span>'+
+      '<button class="btn sm" onclick="D.calNav(1)">\u203a</button></div>';
+    h+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center">';
+    ['日','一','二','三','四','五','六'].forEach(function(w){h+='<div style="font-size:9px;color:var(--txm);padding:2px 0">'+w+'</div>';});
+    for(var i=0;i<fw;i++)h+='<div></div>';
+    for(var d=1;d<=days;d++){
+      var ds=y+'-'+pad(m)+'-'+pad(d);
+      var hasW=wSet[ds],hasC=cSet[ds];
+      var bg=hasW?'#3b82f6':(hasC?'#f90':'var(--sf)');
+      var col=(hasW||hasC)?'#fff':'var(--txd)';
+      var bd=ds===td?'border:1.5px solid #fff;':'border:1px solid var(--bd);';
+      var dot=(hasW&&hasC)?'<span style="position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:#f90"></span>':'';
+      h+='<div onclick="D.goDate(\''+ds+'\')" style="position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:11px;cursor:pointer;background:'+bg+';color:'+col+';'+bd+'">'+d+dot+'</div>';
+    }
+    h+='</div>';
+    el.innerHTML=h;
+  },
   saveW:function(){
     var v=parseFloat(document.getElementById('db-wi').value);
     if(!v||v<30||v>300){toast('请输入有效体重');return}
@@ -597,6 +631,7 @@ var D={
     this.renderWeight();
     this.renderCountdown(prof);
     this.renderCals(prof,diet,wLogs,cLogs);
+    this.renderCal();
   },
   renderCals:function(prof,diet,wLogs,cLogs){
     var tgt=prof?(prof.targetKcal||prof.tdee||0):0;
@@ -718,21 +753,21 @@ var MUSCLE_TAG={leg:'腿',chest:'胸',back:'背',shoulder:'肩',arm:'手臂',cor
 var MUSCLE_REV={'腿':'leg','胸':'chest','背':'back','肩':'shoulder','手臂':'arm','臂':'arm','核心':'core','腹':'core'};
 var EX_LIB_DEFAULTS=[
   {name:'杠铃卧推',muscle:'chest',met:5.5,rest:180},{name:'上斜哑铃卧推',muscle:'chest',met:5,rest:180},
-  {name:'哑铃飞鸟',muscle:'chest',met:4,rest:90},{name:'俯卧撑',muscle:'chest',met:4.5,rest:60},
+  {name:'哑铃飞鸟',muscle:'chest',met:4,rest:90},{name:'俯卧撑',muscle:'chest',met:4.5,rest:60,mode:'bw'},
   {name:'哑铃肩推',muscle:'shoulder',met:5,rest:120},{name:'侧平举',muscle:'shoulder',met:3.5,rest:90},
   {name:'前平举',muscle:'shoulder',met:3.5,rest:90},{name:'俯身飞鸟',muscle:'shoulder',met:3.5,rest:90},
-  {name:'引体向上',muscle:'back',met:6,rest:180},{name:'杠铃划船',muscle:'back',met:6,rest:180},
+  {name:'引体向上',muscle:'back',met:6,rest:180,mode:'bw'},{name:'杠铃划船',muscle:'back',met:6,rest:180},
   {name:'高位下拉',muscle:'back',met:5,rest:150},{name:'硬拉',muscle:'back',met:6.5,rest:240},
   {name:'坐姿划船',muscle:'back',met:5,rest:150},{name:'单臂哑铃划船',muscle:'back',met:5,rest:120},
   {name:'哑铃弯举',muscle:'arm',met:4,rest:90},{name:'锤式弯举',muscle:'arm',met:4,rest:90},
-  {name:'绳索下压',muscle:'arm',met:4,rest:90},{name:'臂屈伸',muscle:'arm',met:4.5,rest:90},
+  {name:'绳索下压',muscle:'arm',met:4,rest:90},{name:'臂屈伸',muscle:'arm',met:4.5,rest:90,mode:'bw'},
   {name:'杠铃弯举',muscle:'arm',met:4.5,rest:90},{name:'窄握卧推',muscle:'arm',met:5,rest:120},
   {name:'深蹲',muscle:'leg',met:6.5,rest:240},{name:'腿举',muscle:'leg',met:5.5,rest:240},
   {name:'腿弯举',muscle:'leg',met:4.5,rest:180},{name:'腿伸',muscle:'leg',met:4,rest:180},
   {name:'站姿提踵',muscle:'leg',met:3.5,rest:120},{name:'罗马尼亚硬拉',muscle:'leg',met:6,rest:200},
-  {name:'弓箭步',muscle:'leg',met:5,rest:120},
-  {name:'卷腹',muscle:'core',met:3.5,rest:60},{name:'平板支撑',muscle:'core',met:4,rest:60},
-  {name:'悬挂举腿',muscle:'core',met:4,rest:90},{name:'俄罗斯转体',muscle:'core',met:3.5,rest:60}
+  {name:'弓箭步',muscle:'leg',met:5,rest:120,mode:'bw'},
+  {name:'卷腹',muscle:'core',met:3.5,rest:60,mode:'bw'},{name:'平板支撑',muscle:'core',met:4,rest:60,mode:'iso'},
+  {name:'悬挂举腿',muscle:'core',met:4,rest:90,mode:'bw'},{name:'俄罗斯转体',muscle:'core',met:3.5,rest:60,mode:'bw'}
 ];
 function parseExLine(line){var p=line.trim().split(/\s+/);if(p.length>=2&&MUSCLE_REV[p[p.length-1]])return{name:p.slice(0,-1).join(' '),muscle:MUSCLE_REV[p[p.length-1]]};return{name:line.trim(),muscle:null}}
 var SPORTS=[
@@ -787,8 +822,8 @@ var W={
   delPlan:function(id){setJ('ironlog_plans',getJ('ironlog_plans',[]).filter(function(p){return p.id!==id}));this.renderPlans()},
   startWk:function(id){
     var plan=this.getPlans().find(function(p){return p.id===id});if(!plan)return;
-    var _awk={plan:plan,sets:{},vol:0,startTs:Date.now()};
-    plan.exercises.forEach(function(ex){_awk.sets[ex.name]=[{w:0,r:8}];});
+    var _awk={plan:plan,sets:{},vol:0,startTs:Date.now()},self=this;
+    plan.exercises.forEach(function(ex){var _m=self.exMode(ex.name);_awk.sets[ex.name]=[_m==='iso'?{t:30}:_m==='bw'?{r:8}:{w:0,r:8}];});
     this.activeWk=_awk;this.saveActive();this._enterActive();
   },
   _enterActive:function(){
@@ -799,7 +834,7 @@ var W={
     if(this.wkInt)clearInterval(this.wkInt);
     this.wkSec=Math.floor((Date.now()-this.activeWk.startTs)/1000);
     this.wkInt=setInterval(function(){self.wkSec=Math.floor((Date.now()-self.activeWk.startTs)/1000);var m=Math.floor(self.wkSec/60),s=self.wkSec%60;document.getElementById('wo-timer').textContent=pad(m)+':'+pad(s)},1000);
-    var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=s.w*s.r})});
+    var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=(s.w||0)*(s.r||0)})});
     this.activeWk.vol=vol;document.getElementById('wo-vol').textContent='容量 '+Math.round(vol)+' kg';
     this.renderExercises();
   },
@@ -825,13 +860,24 @@ var W={
     var plan=this.activeWk.plan,self=this;
     document.getElementById('wo-exlist').innerHTML=plan.exercises.map(function(ex){
       var sets=self.activeWk.sets[ex.name]||[];
-      var tag='<span class="tag m-'+ex.muscle+'">'+MUSCLE_TAG[ex.muscle]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';var _last=getJ('ironlog_last_sets',{})[ex.name];var lastHtml=_last&&_last.length?'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--bl);margin-top:4px">上次 '+_last.map(function(s){return s.w+'×'+s.r}).join(', ')+'</div>':'';
+      var mode=self.exMode(ex.name);
+      var tag='<span class="tag m-'+ex.muscle+'">'+MUSCLE_TAG[ex.muscle]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';var _last=getJ('ironlog_last_sets',{})[ex.name];var lastHtml=_last&&_last.length?'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--bl);margin-top:4px">上次 '+_last.map(function(s){return self.fmtSet(s,mode)}).join(', ')+'</div>':'';
       var rows=sets.map(function(s,si){
+        var mid,calc;
+        if(mode==='iso'){
+          mid='<input type="number" value="'+(s.t||0)+'" style="width:64px;text-align:center;padding:4px 6px;font-size:13px" placeholder="秒" onchange="W.updSet(\''+ex.name+'\','+si+',\'t\',this.value)">';
+          calc='<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+(s.t||0)+'s</span>';
+        }else if(mode==='bw'){
+          mid='<input type="number" value="'+(s.r||0)+'" style="width:64px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">';
+          calc='<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd);flex:1">自重</span>';
+        }else{
+          mid='<input type="number" value="'+(s.w||0)+'" style="width:60px;text-align:center;padding:4px 6px;font-size:13px" placeholder="kg" onchange="W.updSet(\''+ex.name+'\','+si+',\'w\',this.value)">'+
+            '<input type="number" value="'+(s.r||0)+'" style="width:48px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">';
+          calc='<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+Math.round((s.w||0)*(s.r||0))+'kg</span>';
+        }
         return '<div class="dn" style="padding:5px 0">'+
           '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);width:22px">'+pad(si+1)+'</span>'+
-          '<input type="number" value="'+s.w+'" style="width:60px;text-align:center;padding:4px 6px;font-size:13px" placeholder="kg" onchange="W.updSet(\''+ex.name+'\','+si+',\'w\',this.value)">'+
-          '<input type="number" value="'+s.r+'" style="width:48px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">'+
-          '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+Math.round(s.w*s.r)+'kg</span>'+
+          mid+calc+
           '<button class="btn sm pr" style="font-size:11px" onclick="W.startRest('+(ex.rest||120)+')">&#10003; 完成</button>'+
           '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
       }).join('');
@@ -845,13 +891,14 @@ var W={
     if(!this.activeWk)return;
     if(!this.activeWk.sets[name])this.activeWk.sets[name]=[];
     var prev=this.activeWk.sets[name];
-    this.activeWk.sets[name].push({w:prev.length?prev[prev.length-1].w:0,r:prev.length?prev[prev.length-1].r:8});
+    var _m=this.exMode(name),_lp=prev[prev.length-1]||{};
+    this.activeWk.sets[name].push(_m==='iso'?{t:_lp.t||30}:_m==='bw'?{r:_lp.r||8}:{w:_lp.w||0,r:_lp.r||8});
     this.renderExercises();this.saveActive();
   },
   updSet:function(name,idx,field,val){
     if(!this.activeWk||!this.activeWk.sets[name])return;
     this.activeWk.sets[name][idx][field]=parseFloat(val)||0;
-    var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=s.w*s.r})});
+    var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=(s.w||0)*(s.r||0)})});
     this.activeWk.vol=vol;document.getElementById('wo-vol').textContent='容量 '+Math.round(vol)+' kg';
     this.renderExercises();this.saveActive();
   },
@@ -896,8 +943,8 @@ var W={
     setJ('ironlog_prs',prs);
     var last=getJ('ironlog_last_sets',{}),hist=getJ('ironlog_strength_history',{}),td=today();
     Object.keys(sets).forEach(function(name){
-      var done=sets[name].filter(function(s){return s.w>0||s.r>0});
-      if(done.length)last[name]=done.map(function(s){return {w:s.w,r:s.r}});
+      var done=sets[name].filter(function(s){return s.w>0||s.r>0||s.t>0});
+      if(done.length)last[name]=done.map(function(s){return {w:s.w,r:s.r,t:s.t}});
       var best=0;sets[name].forEach(function(s){if(s.w>0&&s.r>0){var e=Math.round(s.w*(1+s.r/30));if(e>best)best=e}});
       if(best>0){if(!hist[name])hist[name]=[];var h=hist[name][hist[name].length-1];if(h&&h.d===td)h.e=Math.max(h.e,best);else hist[name].push({d:td,e:best})}
     });
@@ -1084,9 +1131,12 @@ var W={
     if(!this.activeWk)return;
     if(this.activeWk.plan.exercises.some(function(e){return e.name===name})){toast('已有该动作');return}
     this.activeWk.plan.exercises.push({name:name,muscle:muscle||'core',rest:rest||120});
-    this.activeWk.sets[name]=[{w:0,r:8}];
+    var _m=this.exMode(name);
+    this.activeWk.sets[name]=[_m==='iso'?{t:30}:_m==='bw'?{r:8}:{w:0,r:8}];
     this.saveActive();closeModNow();this.renderExercises();toast(name+' 已添加');
   },
+  exMode:function(name){var e=this.getExLib().find(function(x){return x.name===name});return e&&e.mode?e.mode:'standard';},
+  fmtSet:function(s,mode){if(mode==='iso')return (s.t||0)+'s';if(mode==='bw')return (s.r||0)+'次';return (s.w||0)+'×'+(s.r||0);},
   getExLib:function(){
     var custom=getJ('ironlog_ex_lib',[]);
     var names=custom.map(function(e){return e.name});
@@ -1113,7 +1163,7 @@ var W={
             '<span style="font-size:10px;color:var(--txd)">内置</span>';
           return '<div class="dn2" style="margin-bottom:4px">'+
             '<div style="flex:1"><div style="font-size:12px;color:var(--tx)">'+e.name+'</div>'+
-            '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">MET '+e.met+' · 休息 '+e.rest+'s</div></div>'+
+            '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">'+(e.mode==='bw'?'自重 · ':e.mode==='iso'?'等长 · ':'')+'MET '+e.met+' · 休息 '+e.rest+'s</div></div>'+
             btns+'</div>';
         }).join('')+'</div>';
     });
@@ -1126,6 +1176,8 @@ var W={
       '<select id="nex-m"><option value="chest">胸</option><option value="back">背</option>'+
       '<option value="leg">腿</option><option value="shoulder">肩</option>'+
       '<option value="arm">手臂</option><option value="core">核心</option></select>'+
+      '<label class="lb" style="margin-top:6px">训练模式</label>'+
+      '<select id="nex-mode"><option value="standard">标准（重量×次数）</option><option value="bw">自重（仅次数）</option><option value="iso">等长（计时秒）</option></select>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
       '<div><label class="lb">MET 值</label><input type="number" id="nex-met" value="5" min="2" max="12" step="0.5"></div>'+
       '<div><label class="lb">组间休息(秒)</label><input type="number" id="nex-r" value="120" min="30" step="15"></div>'+
@@ -1141,6 +1193,8 @@ var W={
       '<label class="lb">名称</label><input type="text" id="nex-n" value="'+e.name+'">'+
       '<label class="lb" style="margin-top:6px">肌群</label>'+
       '<select id="nex-m">'+Object.keys(MTAG).map(function(k){return'<option value="'+k+'"'+(k===e.muscle?' selected':'')+'>'+MTAG[k]+'</option>'}).join('')+'</select>'+
+      '<label class="lb" style="margin-top:6px">训练模式</label>'+
+      '<select id="nex-mode">'+[['standard','标准（重量×次数）'],['bw','自重（仅次数）'],['iso','等长（计时秒）']].map(function(o){return'<option value="'+o[0]+'"'+((e.mode||'standard')===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
       '<div><label class="lb">MET 值</label><input type="number" id="nex-met" value="'+e.met+'" min="2" max="12" step="0.5"></div>'+
       '<div><label class="lb">组间休息(秒)</label><input type="number" id="nex-r" value="'+e.rest+'" min="30" step="15"></div>'+
@@ -1154,9 +1208,10 @@ var W={
     var m=document.getElementById('nex-m').value;
     var met=parseFloat(document.getElementById('nex-met').value)||5;
     var rest=parseInt(document.getElementById('nex-r').value)||120;
+    var mode=document.getElementById('nex-mode').value;
     var custom=getJ('ironlog_ex_lib',[]);
-    if(origName){var idx=custom.findIndex(function(e){return e.name===origName});if(idx>=0)custom[idx]={name:n,muscle:m,met:met,rest:rest};else custom.push({name:n,muscle:m,met:met,rest:rest});}
-    else custom.push({name:n,muscle:m,met:met,rest:rest});
+    if(origName){var idx=custom.findIndex(function(e){return e.name===origName});if(idx>=0)custom[idx]={name:n,muscle:m,met:met,rest:rest,mode:mode};else custom.push({name:n,muscle:m,met:met,rest:rest,mode:mode});}
+    else custom.push({name:n,muscle:m,met:met,rest:rest,mode:mode});
     setJ('ironlog_ex_lib',custom);closeModNow();this.renderExLib();toast('已保存 ✓');
   },
   delEx:function(name){
