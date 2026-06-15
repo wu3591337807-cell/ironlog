@@ -322,7 +322,7 @@ svg.chart{width:100%;display:block}
       </div>
     </div>
     <div class="card">
-      <div class="ct">活动水平</div>
+      <div class="ct">活动水平 <span style="font-size:10px;color:var(--txd);font-weight:400">（仅作记录；目标摄入按久坐基准算，训练消耗自动叠加）</span></div>
       <div class="col">
         <div class="sg">
           <button class="sgb on" id="pr-a0" onclick="PR.setAct(0)">久坐</button>
@@ -353,7 +353,8 @@ svg.chart{width:100%;display:block}
       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);margin-top:10px;line-height:1.7" id="pr-mb"></div>
     </div>
     <div class="card">
-      <div class="ct">数据备份</div>
+      <div class="ct">数据备份 <span style="font-size:10px;color:var(--txd);font-weight:400">v<span id="app-ver"></span></span></div>
+      <div id="bak-status" style="font-size:11px;line-height:1.6;margin-bottom:10px"></div>
       <button class="btn" style="width:100%;margin-bottom:8px" onclick="BAK.copy()">&#128203; 复制 JSON 到剪贴板</button>
       <button class="btn" style="width:100%;margin-bottom:12px" onclick="BAK.download()">&#11015; 下载备份文件</button>
       <div class="ct" style="margin-top:4px;margin-bottom:8px">恢复数据</div>
@@ -361,6 +362,7 @@ svg.chart{width:100%;display:block}
       <button class="btn pr" style="width:100%;margin-bottom:6px" onclick="document.getElementById('bak-file').click()">&#128194; 选择备份文件恢复</button>
       <textarea id="bak-in" placeholder="或粘贴备份 JSON..." style="width:100%;height:60px;background:var(--sf3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:8px;resize:none;box-sizing:border-box"></textarea>
       <button class="btn" style="width:100%;margin-top:6px" onclick="BAK.restore()">粘贴恢复</button>
+      <button class="btn" style="width:100%;margin-top:10px;color:var(--txm)" onclick="BAK.forceUpdate()">&#128260; 强制更新到最新版</button>
     </div>
   </div>
 </div>
@@ -411,6 +413,7 @@ svg.chart{width:100%;display:block}
 <div id="toast"></div>
 
 <script>
+var APP_VERSION='2026.06.15';
 // ── FOOD DATABASE ──
 var FOODS=[
 {id:'f1',n:'鸡胸肉',a:['鸡胸','breast','chicken'],k:165,p:31,c:0,f:3.6,ca:11,mg:29,zn:.9},
@@ -1739,7 +1742,7 @@ var PR={
     var age=parseFloat(document.getElementById('pr-age').value)||0;
     if(!wt||!ht||!age){document.getElementById('pr-grid').innerHTML='<div class="si" style="grid-column:1/-1"><div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--txm);text-align:center;padding:8px 0">请填写身高、体重、年龄</div></div>';return}
     var bmr=this.sex===0?(10*wt+6.25*ht-5*age+5):(10*wt+6.25*ht-5*age-161);
-    var tdee=Math.round(bmr*ACT_MULT[this.act]);
+    var tdee=Math.round(bmr*1.2);
     var goalDelta=[-500,0,300][this.goal];
     var targetKcal=tdee+goalDelta;
     var protein=Math.round(wt*[2.0,1.6,1.8][this.goal]);
@@ -1753,7 +1756,7 @@ var PR={
       '<div class="si"><div class="sl2">TDEE</div><div class="sv ac">'+tdee+'</div><div class="su">kcal/天</div></div>'+
       '<div class="si"><div class="sl2">目标摄入</div><div class="sv gn">'+targetKcal+'</div><div class="su">kcal/天</div></div>'+
       '<div class="si"><div class="sl2">预测周期</div><div class="sv sm">'+predict+'</div></div>';
-    document.getElementById('pr-mb').innerHTML='蛋白质 <b>'+protein+'g</b> · 碳水 <b>'+carbs+'g</b> · 脂肪 <b>'+fat+'g</b><br>Mifflin-St Jeor BMR × '+ACT_MULT[this.act];
+    document.getElementById('pr-mb').innerHTML='蛋白质 <b>'+protein+'g</b> · 碳水 <b>'+carbs+'g</b> · 脂肪 <b>'+fat+'g</b><br>Mifflin-St Jeor BMR × 1.2（久坐基准，训练消耗由训练记录自动叠加）';
     this._cache={bmr:Math.round(bmr),tdee:tdee,targetKcal:targetKcal,proteinTarget:protein,carbTarget:carbs,fatTarget:fat};
   },
   load:function(){
@@ -1788,6 +1791,25 @@ var PR={
 
 // ── BACKUP ──
 var BAK={
+  renderStatus:function(){
+    var av=document.getElementById('app-ver');if(av)av.textContent=APP_VERSION;
+    var el=document.getElementById('bak-status');if(!el)return;
+    var lb=localStorage.getItem('ironlog_last_backup'),html='';
+    if(!lb){html+='<span style="color:var(--rd)">\u26a0\ufe0f 从未备份</span>';}
+    else{var d=Math.round((new Date(today())-new Date(lb))/86400000);
+      if(d<=0)html+='<span style="color:var(--ac)">今天已备份 \u2713</span>';
+      else html+='<span style="color:'+(d>=14?'var(--rd)':'var(--txm)')+'">'+d+' 天前备份</span>';}
+    var bytes=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ironlog_')===0)bytes+=(localStorage.getItem(k)||'').length;}
+    var pct=Math.min(bytes/5242880*100,100);
+    html+=' \u00b7 存储 '+(bytes/1024).toFixed(0)+'KB <span style="color:'+(pct>=80?'var(--rd)':'var(--txm)')+'">('+pct.toFixed(0)+'%)</span>';
+    el.innerHTML=html;
+  },
+  forceUpdate:function(){
+    if(!confirm('将清除页面缓存并重新加载最新版本（不会删除你的训练/饮食数据）。\n继续？'))return;
+    if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})});}
+    if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});}
+    setTimeout(function(){location.reload(true)},300);
+  },
   collect:function(){
     var data={};
     for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ironlog_')===0)data[k]=getJ(k,null);}
@@ -1813,14 +1835,18 @@ var BAK={
     a.href=URL.createObjectURL(blob);a.download='ironlog-'+today()+'.json';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
+    localStorage.setItem('ironlog_last_backup',today());this.renderStatus();
     toast('下载中 ⬇');
   },
   restore:function(){
     var s=document.getElementById('bak-in').value.trim();
     if(!s){toast('请粘贴备份JSON');return;}
     try{
-      var data=JSON.parse(s);var n=0;
-      Object.keys(data).forEach(function(k){if(k.indexOf('ironlog_')===0){setJ(k,data[k]);n++;}});
+      var data=JSON.parse(s);
+      var keys=Object.keys(data).filter(function(k){return k.indexOf('ironlog_')===0});
+      if(!keys.length){toast('备份内容为空');return;}
+      if(!confirm('将导入 '+keys.length+' 项数据，覆盖本机对应记录。\n建议先下载当前数据做备份。\n确定恢复？'))return;
+      var n=0;keys.forEach(function(k){setJ(k,data[k]);n++;});
       toast('已恢复 '+n+' 项，请刷新页面');
       document.getElementById('bak-in').value='';
     }catch(e){toast('JSON格式错误');}
@@ -1830,8 +1856,11 @@ var BAK={
     var reader=new FileReader();
     reader.onload=function(e){
       try{
-        var data=JSON.parse(e.target.result);var n=0;
-        Object.keys(data).forEach(function(k){if(k.indexOf('ironlog_')===0){setJ(k,data[k]);n++;}});
+        var data=JSON.parse(e.target.result);
+        var keys=Object.keys(data).filter(function(k){return k.indexOf('ironlog_')===0});
+        if(!keys.length){toast('备份内容为空');input.value='';return;}
+        if(!confirm('将导入 '+keys.length+' 项数据，覆盖本机对应记录。\n建议先下载当前数据做备份。\n确定恢复？')){input.value='';return;}
+        var n=0;keys.forEach(function(k){setJ(k,data[k]);n++;});
         toast('已恢复 '+n+' 项，请刷新页面');
         input.value='';
       }catch(err){toast('文件格式错误');}
@@ -1969,7 +1998,7 @@ initTheme();
 W.renderPlans();
 W.renderSports();
 W.renderCardioWeek();
-W.resumeActive();W.swResume();
+W.resumeActive();W.swResume();BAK.renderStatus();
 DT.render();
 PR.load();
 (function(){var el=document.getElementById('dt-log'),x0=0,y0=0;
