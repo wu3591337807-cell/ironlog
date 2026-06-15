@@ -178,7 +178,7 @@ svg.chart{width:100%;display:block}
 
 <!-- ② 训练 -->
 <div id="p-wo" class="panel">
-  <div style="background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 13px;display:flex;gap:6px">
+  <div style="background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 13px;display:flex;gap:6px;position:sticky;top:var(--hdr-h,46px);z-index:150">
     <button class="btn sm on" id="wo-t1" onclick="W.sub(1)">&#128170; 力量</button>
     <button class="btn sm" id="wo-t2" onclick="W.sub(2)">&#127939; 有氧</button>
     <button class="btn sm" id="wo-t3" onclick="W.sub(3)">&#128218; 动作库</button>
@@ -250,7 +250,7 @@ svg.chart{width:100%;display:block}
 
 <!-- ③ 饮食 -->
 <div id="p-dt" class="panel">
-  <div style="background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 13px;display:flex;gap:6px">
+  <div style="background:var(--sf);border-bottom:1px solid var(--bd);padding:7px 13px;display:flex;gap:6px;position:sticky;top:var(--hdr-h,46px);z-index:150">
     <button class="btn sm on" id="dt-t1" onclick="DT.sub(1)">🥗 饮食日志</button>
     <button class="btn sm" id="dt-t2" onclick="DT.sub(2)">📚 菜谱</button>
     <button class="btn sm" id="dt-t3" onclick="DT.sub(3)">📖 饮食库</button>
@@ -1982,6 +1982,7 @@ var HI={
 };
 
 // ── INIT ──
+(function(){var h=document.getElementById('hdr');function setH(){document.documentElement.style.setProperty('--hdr-h',h.offsetHeight+'px')}setH();window.addEventListener('resize',setH)})();
 	FL.render();
 	D.render();
 W.renderPlans();
