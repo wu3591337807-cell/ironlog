@@ -420,7 +420,7 @@ svg.chart{width:100%;display:block}
 <div id="toast"></div>
 
 <script>
-var APP_VERSION='2026.06.15';
+var APP_VERSION='2026.06.18';
 // ── FOOD DATABASE ──
 var FOODS=[
 {id:'f1',n:'鸡胸肉',a:['鸡胸','breast','chicken'],k:165,p:31,c:0,f:3.6,ca:11,mg:29,zn:.9},
@@ -1826,7 +1826,7 @@ var BAK={
     if(!confirm('将清除页面缓存并重新加载最新版本（不会删除你的训练/饮食数据）。\n继续？'))return;
     if('caches' in window){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})});}
     if(navigator.serviceWorker){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})});}
-    setTimeout(function(){location.reload(true)},300);
+    setTimeout(function(){location.replace(location.pathname+'?u='+Date.now())},300);
   },
   collect:function(){
     var data={};
@@ -2031,15 +2031,19 @@ window.addEventListener('storage',function(e){
   if(active)showTab(active.id.replace('nb-',''));
 });
 if('serviceWorker' in navigator && location.protocol==='https:'){
-  navigator.serviceWorker.register('sw.js').then(function(reg){
+  var _swReloaded=false;
+  function _swReload(){if(_swReloaded)return;_swReloaded=true;location.reload();}
+  navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(reg){
     reg.update();
     reg.addEventListener('updatefound',function(){
       var nw=reg.installing;if(!nw)return;
       nw.addEventListener('statechange',function(){
-        if(nw.state==='installed'&&navigator.serviceWorker.controller)location.reload();
+        if(nw.state==='installed'&&navigator.serviceWorker.controller)_swReload();
       });
     });
   }).catch(function(){});
+  navigator.serviceWorker.addEventListener('controllerchange',_swReload);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update()})});
 }
 </script>
 </body>
