@@ -302,7 +302,7 @@ svg.chart{width:100%;display:block}
     <div class="con" id="rc-list"></div>
   </div>
   <div id="dt-fl" style="display:none">
-      <div class="ph" style="padding-top:9px"><span class="ptitle">饮食库</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="bulkImportFood()">批量导入</button><button class="btn sm" onclick="FL.restoreHidden()">恢复隐藏</button><button class="btn sm pr" onclick="FL.add()">+ 添加</button></div></div>
+      <div class="ph" style="padding-top:9px"><span class="ptitle">饮食库</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="bulkImportFood()">批量导入</button><button class="btn sm" onclick="FL.restoreHidden()">恢复隐藏</button><button class="btn sm" onclick="FL.add(true)">💊 补剂</button><button class="btn sm pr" onclick="FL.add()">+ 添加</button></div></div>
       <div class="con">
         <div class="card">
           <div class="ct">搜索食物库</div>
@@ -764,6 +764,24 @@ var EX_LIB_DEFAULTS=[
   {name:'悬挂举腿',muscle:'core',met:4,rest:90,mode:'bw'},{name:'俄罗斯转体',muscle:'core',met:3.5,rest:60,mode:'bw'}
 ];
 function parseExLine(line){var p=line.trim().split(/\s+/);if(p.length>=2&&MUSCLE_REV[p[p.length-1]])return{name:p.slice(0,-1).join(' '),muscle:MUSCLE_REV[p[p.length-1]]};return{name:line.trim(),muscle:null}}
+var MUSCLE_SEED={
+'自重引体':'back','龙门架高位反手下拉':'back','马格南划船':'back','俯身划船':'back','135度下拉':'back',
+'鹦鹉螺':'chest','下斜平板推':'chest','上斜分动卧推':'chest','夹胸':'chest','分动上斜夹胸':'chest',
+'绳索三头下压':'arm',
+'卷腹':'core','反向山羊挺':'core','侧向等长斜平板':'core','悬垂举腿':'core',
+'腿弯举 腘绳肌':'leg','腿屈伸 股四头肌':'leg','俯卧腿弯举 腘绳肌':'leg','安全杆深蹲 股四头肌':'leg','腿举 股四头肌':'leg','小腿推 小腿':'leg','深蹲推举 股四头肌':'leg','赤字罗马尼亚硬拉 腘绳肌':'leg'
+};
+function migExMuscle(){
+  if(localStorage.getItem('ironlog_mig_exmus'))return;
+  var plans=getJ('ironlog_plans',[]);
+  var restOf={};plans.forEach(function(p){(p.exercises||[]).forEach(function(e){if(restOf[e.name]==null)restOf[e.name]=e.rest})});
+  var lib=getJ('ironlog_ex_lib',[]);var have=lib.map(function(e){return e.name});
+  Object.keys(MUSCLE_SEED).forEach(function(nm){if(have.indexOf(nm)<0)lib.push({name:nm,muscle:MUSCLE_SEED[nm],met:5,rest:restOf[nm]||120,mode:'standard'})});
+  setJ('ironlog_ex_lib',lib);
+  plans.forEach(function(p){(p.exercises||[]).forEach(function(e){if(MUSCLE_SEED[e.name])e.muscle=MUSCLE_SEED[e.name]})});
+  setJ('ironlog_plans',plans);
+  localStorage.setItem('ironlog_mig_exmus','1');
+}
 var SPORTS=[
   {n:'跑步',icon:'🏃',met:8},{n:'快走',icon:'🚶',met:4.5},{n:'骑行',icon:'🚴',met:7.5},
   {n:'游泳',icon:'🏊',met:8},{n:'跳绳',icon:'🪢',met:10},{n:'椭圆机',icon:'⚙️',met:5},
@@ -855,7 +873,7 @@ var W={
     document.getElementById('wo-exlist').innerHTML=plan.exercises.map(function(ex){
       var sets=self.activeWk.sets[ex.name]||[];
       var mode=self.exMode(ex.name);
-      var tag='<span class="tag m-'+ex.muscle+'">'+MUSCLE_TAG[ex.muscle]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';var _last=getJ('ironlog_last_sets',{})[ex.name];var lastHtml=_last&&_last.length?'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--bl);margin-top:4px">上次 '+_last.map(function(s){return self.fmtSet(s,mode)}).join(', ')+'</div>':'';
+      var _mus=self.exMuscle(ex.name,ex.muscle);var tag='<span class="tag m-'+_mus+'">'+MUSCLE_TAG[_mus]+'</span>';var _pr=getJ('ironlog_prs',{})[ex.name];var prHtml=_pr?' <span style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd)">PR '+_pr.w+'kg×'+_pr.r+' · e1RM'+_pr.e1rm+'</span>':'';var _last=getJ('ironlog_last_sets',{})[ex.name];var lastHtml=_last&&_last.length?'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--bl);margin-top:4px">上次 '+_last.map(function(s){return self.fmtSet(s,mode)}).join(', ')+'</div>':'';
       var rows=sets.map(function(s,si){
         var mid,calc;
         if(mode==='iso'){
@@ -1093,10 +1111,10 @@ var W={
     var MTAG=MUSCLE_TAG;
     var html='<div class="mtitle">添加动作</div>'+
       '<div style="margin-bottom:8px"><label class="lb">自定义动作名</label>'+
-      '<div style="display:flex;gap:6px"><input type="text" id="aex-n" placeholder="动作名称" style="flex:1">'+
-      '<select id="aex-m"><option value="core">核心</option><option value="chest">胸</option>'+
+      '<input type="text" id="aex-n" placeholder="动作名称" style="width:100%;box-sizing:border-box">'+
+      '<select id="aex-m" style="width:100%;margin-top:6px"><option value="core">核心</option><option value="chest">胸</option>'+
       '<option value="back">背</option><option value="leg">腿</option>'+
-      '<option value="shoulder">肩</option><option value="arm">手臂</option></select></div></div>'+
+      '<option value="shoulder">肩</option><option value="arm">手臂</option></select></div>'+
       '<div class="ct" style="margin-bottom:6px">从动作库选择</div>'+
       '<div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">';
     var ORDER=['chest','back','shoulder','arm','leg','core'];
@@ -1126,11 +1144,12 @@ var W={
     this.saveActive();closeModNow();this.renderExercises();toast(name+' 已添加');
   },
   exMode:function(name){var e=this.getExLib().find(function(x){return x.name===name});return e&&e.mode?e.mode:'standard';},
+  exMuscle:function(name,fb){var e=this.getExLib().find(function(x){return x.name===name});return e?e.muscle:(fb||'core');},
   fmtSet:function(s,mode){if(mode==='iso')return (s.t||0)+'s';if(mode==='bw')return (s.r||0)+'次';return (s.w||0)+'×'+(s.r||0);},
   getExLib:function(){
     var custom=getJ('ironlog_ex_lib',[]);
     var names=custom.map(function(e){return e.name});
-    return EX_LIB_DEFAULTS.filter(function(e){return names.indexOf(e.name)<0}).concat(custom);
+    return EX_LIB_DEFAULTS.filter(function(e){return names.indexOf(e.name)<0&&getJ('ironlog_hidden_ex',[]).indexOf(e.name)<0}).concat(custom);
   },
   renderExLib:function(){
     var el=document.getElementById('wo-ellist');if(!el)return;
@@ -1140,7 +1159,7 @@ var W={
     var grouped={leg:[],chest:[],back:[],shoulder:[],arm:[],core:[]};
     lib.forEach(function(e){if(grouped[e.muscle])grouped[e.muscle].push(e)});
     var MTAG=MUSCLE_TAG,ORDER=['chest','back','shoulder','arm','leg','core'];
-    var html='<div class="ph" style="padding-top:9px"><span class="ptitle">动作库</span><button class="btn sm pr" onclick="W.newEx()">➕ 添加</button></div>';
+    var html='<div class="ph" style="padding-top:9px"><span class="ptitle">动作库</span><button class="btn sm" onclick="W.restoreHiddenEx()">恢复隐藏</button><button class="btn sm pr" onclick="W.newEx()">➕ 添加</button></div>';
     ORDER.forEach(function(m){
       if(!grouped[m].length)return;
       html+='<div class="card" style="margin-bottom:6px"><div class="ct">'+MTAG[m]+'</div>'+
@@ -1150,7 +1169,7 @@ var W={
             '<div style="display:flex;gap:4px">'+
             '<button class="btn sm" onclick="W.editEx('+JSON.stringify(e.name)+')"><b>编辑</b></button>'+
             '<button class="btn sm dn" onclick="W.delEx('+JSON.stringify(e.name)+')">&#10005;</button></div>':
-            '<span style="font-size:10px;color:var(--txd)">内置</span>';
+            '<button class="btn sm dn" onclick="W.hideEx('+JSON.stringify(e.name)+')">&#10005;</button>';
           return '<div class="dn2" style="margin-bottom:4px">'+
             '<div style="flex:1"><div style="font-size:12px;color:var(--tx)">'+e.name+'</div>'+
             '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txd)">'+(e.mode==='bw'?'自重 · ':e.mode==='iso'?'等长 · ':'')+'MET '+e.met+' · 休息 '+e.rest+'s</div></div>'+
@@ -1208,6 +1227,15 @@ var W={
     if(!confirm('删除自定义动作"'+name+'"？'))return;
     setJ('ironlog_ex_lib',getJ('ironlog_ex_lib',[]).filter(function(e){return e.name!==name}));
     this.renderExLib();toast('已删除');
+  },
+  hideEx:function(name){
+    if(!confirm('从动作库移除内置动作"'+name+'"？'))return;
+    var h=getJ('ironlog_hidden_ex',[]);if(h.indexOf(name)<0)h.push(name);setJ('ironlog_hidden_ex',h);
+    this.renderExLib();toast('已移除');
+  },
+  restoreHiddenEx:function(){
+    var h=getJ('ironlog_hidden_ex',[]);if(!h.length){toast('无隐藏动作');return}
+    setJ('ironlog_hidden_ex',[]);this.renderExLib();toast('已恢复 '+h.length+' 个');
   },
   renderSports:function(){
     var self=this;
@@ -1281,8 +1309,8 @@ var W={
 };
 
 // ── DIET ──
-var MEAL_NAMES=['早餐','午餐','晚餐','加餐'];
-var MEAL_KEYS=['breakfast','lunch','dinner','snack'];
+var MEAL_NAMES=['早餐','午餐','晚餐','加餐','补剂'];
+var MEAL_KEYS=['breakfast','lunch','dinner','snack','supp'];
 var TILE_MAP={strength:['#0F6E56','🏋️'],cardio:['#042C53','🏃'],protein:['#173404','🍗'],carb:['#412402','🍞'],fat:['#4A1B0C','🥑']};
 function tile(cat){var t=TILE_MAP[cat]||TILE_MAP.protein;return '<div class="tile" style="background:'+t[0]+'">'+t[1]+'</div>';}
 function foodCat(it){var p=(it.protein||0)*4,c=(it.carbs||0)*4,f=(it.fat||0)*9;return p>=c&&p>=f?'protein':(c>=f?'carb':'fat');}
@@ -1357,7 +1385,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
       zn:+(f.zn*r).toFixed(2),isSupp:!!f.isSupp};
     var all=getJ('ironlog_diet_logs',{});
     if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
-    all[this.date].meals[MEAL_KEYS[meal]].push(item);
+    if(!all[this.date].meals[MEAL_KEYS[meal]])all[this.date].meals[MEAL_KEYS[meal]]=[];all[this.date].meals[MEAL_KEYS[meal]].push(item);
     vib(15);setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(f.n+' 已加入'+MEAL_NAMES[meal]+' ✓');
   },
   addRecipe:function(id){
@@ -1380,7 +1408,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
       protein:+(r.protein*amt).toFixed(1),carbs:+(r.carbs*amt).toFixed(1),fat:+(r.fat*amt).toFixed(1),ca:0,mg:0,zn:0};
     var all=getJ('ironlog_diet_logs',{});
     if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
-    all[this.date].meals[MEAL_KEYS[meal]].push(item);
+    if(!all[this.date].meals[MEAL_KEYS[meal]])all[this.date].meals[MEAL_KEYS[meal]]=[];all[this.date].meals[MEAL_KEYS[meal]].push(item);
     vib(15);setJ('ironlog_diet_logs',all);closeModNow();this.render();toast(r.name+' 已加入'+MEAL_NAMES[meal]+' ✓');
   },
   showFoodInfo:function(meal,idx){
@@ -1438,7 +1466,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
     if(!confirm('将昨日饮食追加到今日？'))return;
     if(!all[this.date])all[this.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
     MEAL_KEYS.forEach(function(k){(src.meals[k]||[]).forEach(function(it){
-      all[DT.date].meals[k].push(Object.assign({},it,{id:Date.now()+Math.floor(Math.random()*1e6)}));
+      if(!all[DT.date].meals[k])all[DT.date].meals[k]=[];all[DT.date].meals[k].push(Object.assign({},it,{id:Date.now()+Math.floor(Math.random()*1e6)}));
     })});
     setJ('ironlog_diet_logs',all);this.render();toast('已复制昨日饮食 ✓');
   },
@@ -1475,7 +1503,7 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
       }).join('');
       return '<div style="margin-bottom:10px">'+
         '<div style="font-family:IBM Plex Mono,monospace;font-size:9px;letter-spacing:1.5px;color:var(--txd);text-transform:uppercase;padding:5px 0 4px;border-bottom:1px solid var(--bd);margin-bottom:6px;display:flex;justify-content:space-between">'+
-        '<span>'+MEAL_NAMES[mi]+'</span><span style="color:var(--ac)">'+mkcal+' kcal</span></div>'+
+        '<span>'+(key==='supp'?'💊 ':'')+MEAL_NAMES[mi]+'</span><span style="color:var(--ac)">'+mkcal+' kcal</span></div>'+
         (rows||'<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);padding:8px 0">暂无记录</div>')+'</div>';
     }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="DT.copyYesterday()">📋 复制昨日饮食</button>';
     this.renderFreq();
@@ -1574,7 +1602,7 @@ var RC={
       protein:+(r.protein*amt).toFixed(1),carbs:+(r.carbs*amt).toFixed(1),fat:+(r.fat*amt).toFixed(1),ca:0,mg:0,zn:0};
     var all=getJ('ironlog_diet_logs',{});
     if(!all[d])all[d]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
-    all[d].meals[MEAL_KEYS[meal]].push(item);setJ('ironlog_diet_logs',all);
+    if(!all[d].meals[MEAL_KEYS[meal]])all[d].meals[MEAL_KEYS[meal]]=[];all[d].meals[MEAL_KEYS[meal]].push(item);setJ('ironlog_diet_logs',all);
     closeModNow();DT.render();toast(r.name+' 已记录到 '+d+' '+MEAL_NAMES[meal]+' ✓');
   }
 };
@@ -1611,8 +1639,8 @@ var RC={
 	    }).join('');
 	  },
 	  search:function(q){this.render(q)},
-	  add:function(){
-	    showMod('<div class="mtitle">添加自定义食物</div><div class="col">'+
+	  add:function(supp){
+	    showMod('<div class="mtitle">'+(supp?'添加补剂':'添加自定义食物')+'</div><div class="col">'+
 	      '<label class="lb">食物名称</label><input type="text" id="cf-n" placeholder="如：鸡胸肉">'+
 	      '<label class="lb" style="margin-top:6px">别名（逗号分隔，可选）</label><input type="text" id="cf-a" placeholder="如：breast,chicken">'+
 	      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">'+
@@ -1624,8 +1652,8 @@ var RC={
 	      '<div><label class="lb">钙 mg</label><input type="number" id="cf-ca" placeholder="11"></div>'+
 	      '<div><label class="lb">镁 mg</label><input type="number" id="cf-mg" placeholder="29"></div>'+
 	      '<div><label class="lb">锌 mg</label><input type="number" id="cf-zn" placeholder="0.9" step=".1"></div></div>'+
-	      '<div style="margin-top:6px"><label class="lb"><input type="checkbox" id="cf-supp" onchange="FL.toggleSupp()"> 这是补剂</label></div>'+
-	      '<div id="cf-supp-extra" style="display:none;margin-top:4px"><label class="lb">单位</label><input type="text" id="cf-unit" placeholder="片" value="片"></div>'+
+	      '<div style="margin-top:6px"><label class="lb"><input type="checkbox" id="cf-supp" '+(supp?'checked ':'')+'onchange="FL.toggleSupp()"> 这是补剂</label></div>'+
+	      '<div id="cf-supp-extra" style="'+(supp?'':'display:none;')+'margin-top:4px"><label class="lb">单位</label><input type="text" id="cf-unit" placeholder="片" value="片"></div>'+
 	      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
 	      '<button class="btn" onclick="closeModNow()">取消</button>'+
 	      '<button class="btn pr" onclick="FL.save()">保存</button></div>');
@@ -1982,6 +2010,7 @@ var HI={
 };
 
 // ── INIT ──
+migExMuscle();
 (function(){var h=document.getElementById('hdr');function setH(){document.documentElement.style.setProperty('--hdr-h',h.offsetHeight+'px')}setH();window.addEventListener('resize',setH)})();
 	FL.render();
 	D.render();
