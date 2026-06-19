@@ -731,20 +731,6 @@ var D={
 };
 
 // ── WORKOUT ──
-var PLAN_DEFAULTS=[
-  {id:'p1',name:'推A - 胸肩三头',builtin:true,exercises:[
-    {name:'杠铃卧推',muscle:'chest',rest:180},{name:'上斜哑铃卧推',muscle:'chest',rest:180},
-    {name:'哑铃肩推',muscle:'shoulder',rest:120},{name:'侧平举',muscle:'shoulder',rest:90},
-    {name:'绳索下压',muscle:'arm',rest:90}]},
-  {id:'p2',name:'拉B - 背二头',builtin:true,exercises:[
-    {name:'引体向上',muscle:'back',rest:180},{name:'杠铃划船',muscle:'back',rest:180},
-    {name:'高位下拉',muscle:'back',rest:180},{name:'哑铃弯举',muscle:'arm',rest:90},
-    {name:'锤式弯举',muscle:'arm',rest:90}]},
-  {id:'p3',name:'腿C',builtin:true,exercises:[
-    {name:'深蹲',muscle:'leg',rest:240},{name:'腿举',muscle:'leg',rest:240},
-    {name:'腿弯举',muscle:'leg',rest:180},{name:'腿伸',muscle:'leg',rest:180},
-    {name:'站姿提踵',muscle:'leg',rest:120}]}
-];
 var MUSCLE_TAG={leg:'腿',chest:'胸',back:'背',shoulder:'肩',arm:'手臂',core:'核心'};
 var MUSCLE_REV={'腿':'leg','胸':'chest','背':'back','肩':'shoulder','手臂':'arm','臂':'arm','核心':'core','腹':'core'};
 var EX_LIB_DEFAULTS=[
@@ -807,12 +793,7 @@ var W={
     if(n===3)this.renderExLib();
   },
   getPlans:function(){
-    var saved=getJ('ironlog_plans',[]);
-    var map={};saved.forEach(function(p){map[p.id]=p;});
-    var r=PLAN_DEFAULTS.map(function(p){return map[p.id]||p;});
-    var dids=PLAN_DEFAULTS.map(function(p){return p.id;});
-    saved.forEach(function(p){if(dids.indexOf(p.id)<0)r.push(p);});
-    return r;
+    return getJ('ironlog_plans',[]);
   },
   renderPlans:function(){
     var plans=this.getPlans();var self=this;
@@ -1006,7 +987,7 @@ var W={
     var exStr=document.getElementById('ep-e').value.trim();
     if(!name||!exStr){toast('请填写名称和动作');return;}
     var orig=this.getPlans().find(function(p){return p.id===id;});
-    var isBuiltin=PLAN_DEFAULTS.some(function(p){return p.id===id;});
+    var isBuiltin=false;
     var exercises=exStr.split('\n').filter(Boolean).map(function(line){
       var pe=parseExLine(line);
       var ox=orig?orig.exercises.find(function(e){return e.name===pe.name;}):null;
@@ -1213,7 +1194,7 @@ var W={
       '</div></div>'+
       '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
       '<button class="btn" onclick="closeModNow()">取消</button>'+
-      '<button class="btn pr" onclick="W.saveEx('+JSON.stringify(name)+')"><b>保存</b></button></div>');
+      '<button class="btn pr" onclick=\'W.saveEx('+JSON.stringify(name)+')\'"><b>保存</b></button></div>');
   },
   saveEx:function(origName){
     var n=document.getElementById('nex-n').value.trim();if(!n){toast('请输入名称');return}
