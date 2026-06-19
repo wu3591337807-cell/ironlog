@@ -708,7 +708,8 @@ var D={
   editWk:function(id){
     var l=getJ('ironlog_workout_logs',[]).find(function(x){return x.id===id});if(!l)return;
     showMod('<div class="mtitle">编辑训练记录</div><div class="col">'+
-      '<label class="lb">'+(l.planName||'力量训练')+' · 时长（分钟）</label>'+
+      '<label class="lb">日期</label><input type="date" id="ew-dt" value="'+l.date+'">'+
+      '<label class="lb" style="margin-top:6px">'+(l.planName||'力量训练')+' · 时长（分钟）</label>'+
       '<input type="number" id="ew-d" value="'+(l.duration||0)+'" min="1" inputmode="numeric"></div>'+
       '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
       '<button class="btn dn" onclick="D.delWk('+id+')">删除</button>'+
@@ -719,6 +720,7 @@ var D={
     var logs=getJ('ironlog_workout_logs',[]);var l=logs.find(function(x){return x.id===id});if(!l)return;
     var d=parseFloat(document.getElementById('ew-d').value)||0;if(!d){toast('请输入时长');return}
     l.duration=Math.round(d);l.kcal=Math.round((l.volume||0)*.04+l.duration*3.5);
+    var nd=document.getElementById('ew-dt').value;if(nd)l.date=nd;
     setJ('ironlog_workout_logs',logs);closeModNow();this.render();toast('已更新 ✓');
   },
   delWk:function(id){
@@ -1045,8 +1047,8 @@ var W={
   editLog:function(id){
     var l=getJ('ironlog_workout_logs',[]).find(function(x){return x.id===id});if(!l)return;
     showMod('<div class="mtitle">编辑训练记录</div><div class="col">'+
-      '<div style="font-size:12px;color:var(--txd);margin-bottom:8px">'+l.planName+' · '+l.date+'</div>'+
-      '<label class="lb">时长（分钟）</label>'+
+      '<label class="lb">日期</label><input type="date" id="elw-dt" value="'+l.date+'">'+
+      '<label class="lb" style="margin-top:6px">'+l.planName+' · 时长（分钟）</label>'+
       '<input type="number" id="elw-d" value="'+(l.duration||0)+'" min="1" inputmode="numeric">'+
       '</div>'+
       '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
@@ -1058,6 +1060,7 @@ var W={
     var logs=getJ('ironlog_workout_logs',[]);var l=logs.find(function(x){return x.id===id});if(!l)return;
     var d=parseFloat(document.getElementById('elw-d').value)||0;if(!d){toast('请输入时长');return}
     l.duration=Math.round(d);
+    var nd=document.getElementById('elw-dt').value;if(nd)l.date=nd;
     var bw=(function(){var wr=getJ('ironlog_weight_records',[]);return wr.length?wr[wr.length-1].weight:70})();
     l.kcal=Math.max(Math.round(bw*(l.duration/60)*5),Math.round((l.volume||0)*.04+l.duration*2));
     setJ('ironlog_workout_logs',logs);closeModNow();this.renderLogs();toast('已更新 ✓');
