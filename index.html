@@ -760,6 +760,7 @@ var MUSCLE_SEED={
 '腿弯举 腘绳肌':'leg','腿屈伸 股四头肌':'leg','俯卧腿弯举 腘绳肌':'leg','安全杆深蹲 股四头肌':'leg','腿举 股四头肌':'leg','小腿推 小腿':'leg','深蹲推举 股四头肌':'leg','赤字罗马尼亚硬拉 腘绳肌':'leg'
 };
 function migExMuscle(){
+  if(!localStorage.getItem('ironlog_mig_rmplan')){setJ('ironlog_plans',getJ('ironlog_plans',[]).filter(function(p){return!p.builtin}));localStorage.setItem('ironlog_mig_rmplan','1');}
   if(localStorage.getItem('ironlog_mig_exmus'))return;
   var plans=getJ('ironlog_plans',[]);
   var restOf={};plans.forEach(function(p){(p.exercises||[]).forEach(function(e){if(restOf[e.name]==null)restOf[e.name]=e.rest})});
