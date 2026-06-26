@@ -189,7 +189,7 @@ svg.chart{width:100%;display:block}
     <div class="con"><div id="wo-plist"></div><div id="wo-logs"></div></div>
   </div>
   <div id="wo-active" style="display:none">
-    <div class="ph" style="padding-top:9px"><span class="ptitle" id="wo-aname">训练中</span><div style="display:flex;gap:6px"><button class="btn sm" onclick="W.abort()">放弃</button><button class="btn sm pr" onclick="W.finish()">&#10003; 完成</button></div></div>
+    <div class="ph" style="padding-top:9px"><span class="ptitle" id="wo-aname">训练中</span><button class="btn sm" onclick="W.abort()">放弃</button></div>
     <div class="con">
       <div class="card" style="background:var(--sf2)">
         <div class="row sb">
@@ -878,9 +878,16 @@ var W={
           '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
       }).join('');
       return '<div class="card" style="margin-bottom:6px">'+
-        '<div class="row sb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div><div style="margin-top:3px">'+tag+prHtml+'</div></div></div>'+lastHtml+
+        '<div class="row sb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div><div style="margin-top:3px">'+tag+prHtml+'</div></div><button class="btn sm" onclick="W.rmExFromWk(\''+ex.name+'\')">移除</button></div>'+lastHtml+
         rows+'<button class="btn sm" style="margin-top:6px" onclick="W.addSet(\''+ex.name+'\','+ex.rest+')">+ 加组</button></div>';
-    }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="W.addExToWk()">✔ 添加动作</button>';
+    }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="W.addExToWk()">＋ 添加动作</button>'+'<button class="btn pr" style="width:100%;margin-top:8px" onclick="W.finish()">&#10003; 完成训练</button>';
+  },
+  rmExFromWk:function(name){
+    if(!this.activeWk)return;
+    if(!confirm('从本次训练移除「'+name+'」？仅影响本次，不改原计划'))return;
+    this.activeWk.plan.exercises=this.activeWk.plan.exercises.filter(function(e){return e.name!==name});
+    delete this.activeWk.sets[name];
+    this.renderExercises();this.saveActive();
   },
   addSet:function(name,rest){
     vib(15);
@@ -1918,7 +1925,7 @@ var HI={
   },
   svg:function(W,H,PL,PR2,PT,PB){return {W:W,H:H,PL:PL,PR:PR2,PT:PT,PB:PB,CW:W-PL-PR2,CH:H-PT-PB}},
   grid:function(c,yMin,yMax,steps){var s='';for(var i=0;i<=steps;i++){var v=yMin+(yMax-yMin)*(i/steps),y=c.PT+c.CH-c.CH*(i/steps);s+='<line x1="'+c.PL+'" y1="'+y+'" x2="'+(c.PL+c.CW)+'" y2="'+y+'" stroke="var(--bd)" stroke-width="0.5"/><text x="'+(c.PL-3)+'" y="'+(y+3)+'" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="8" fill="var(--txm)">'+v.toFixed(v<10?1:0)+'</text>'}return s},
-  xlabels:function(c,dates){var s='',n=dates.length,skip=n<=10?1:n<=31?5:10;for(var i=0;i<n;i++){if(i%skip!==0&&i!==n-1)continue;var x=c.PL+c.CW*(i/(n-1||1));s+='<text x="'+x+'" y="'+(c.H-5)+'" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="7" fill="var(--txm)">'+fmtShort(dates[i])+'</text>'}return s},
+  xlabels:function(c,dates,bar){var s='',n=dates.length,skip=n<=10?1:n<=31?5:10;for(var i=0;i<n;i++){if(i%skip!==0&&i!==n-1)continue;var x=bar?c.PL+c.CW*((i+0.5)/n):c.PL+c.CW*(i/(n-1||1));var anc=x<c.PL+8?'start':x>c.W-8?'end':'middle';s+='<text x="'+x+'" y="'+(c.H-5)+'" text-anchor="'+anc+'" font-family="IBM Plex Mono,monospace" font-size="7" fill="var(--txm)">'+fmtShort(dates[i])+'</text>'}return s},
   weightChart:function(dates){
     var wr=getJ('ironlog_weight_records',[]),map={};wr.forEach(function(r){map[r.date]=r.weight});
     var series=dates.map(function(d){return{d:d,v:map[d]||null}});
@@ -1946,9 +1953,9 @@ var HI={
     var mx=Math.max.apply(null,series.map(function(s){return s.v||0}).concat(target||0))*1.1||500;
     var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
     var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
-    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates,true);
     if(target>0){var ty=c.PT+c.CH-c.CH*(target/mx);svg+='<line x1="'+c.PL+'" y1="'+ty+'" x2="'+(c.PL+c.CW)+'" y2="'+ty+'" stroke="var(--txd)" stroke-width="1" stroke-dasharray="4,3"/>'}
-    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="'+(target&&s.v>target*1.05?'var(--rd)':'var(--ac)')+'" rx="1" opacity=".85"><title>'+s.d+': '+s.v+' kcal</title></rect>'});
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*((i+0.5)/n)-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="'+(target&&s.v>target*1.05?'var(--rd)':'var(--ac)')+'" rx="1" opacity=".85"><title>'+s.d+': '+s.v+' kcal</title></rect>'});
     el.innerHTML=svg+'</svg>';
   },
   burnChart:function(dates){
@@ -1963,8 +1970,8 @@ var HI={
     var mx=Math.max.apply(null,series.map(function(s){return s.v}))*1.15||300;
     var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
     var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
-    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
-    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,wH=c.CH*(s.w/mx),cvH=c.CH*(s.c/mx);if(wH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH)+'" width="'+bw+'" height="'+wH+'" fill="var(--gn)" rx="1" opacity=".85"/>';if(cvH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH-cvH)+'" width="'+bw+'" height="'+cvH+'" fill="var(--bl)" rx="1" opacity=".85"/>'});
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates,true);
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*((i+0.5)/n)-bw/2,wH=c.CH*(s.w/mx),cvH=c.CH*(s.c/mx);if(wH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH)+'" width="'+bw+'" height="'+wH+'" fill="var(--gn)" rx="1" opacity=".85"/>';if(cvH>0)svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-wH-cvH)+'" width="'+bw+'" height="'+cvH+'" fill="var(--bl)" rx="1" opacity=".85"/>'});
     el.innerHTML=svg+'</svg>';
   },
   proteinChart:function(dates){
@@ -1975,9 +1982,9 @@ var HI={
     var mx=Math.max.apply(null,series.map(function(s){return s.v||0}).concat(target||0))*1.1||100;
     var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
     var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
-    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates,true);
     if(target>0){var ty=c.PT+c.CH-c.CH*(target/mx);svg+='<line x1="'+c.PL+'" y1="'+ty+'" x2="'+(c.PL+c.CW)+'" y2="'+ty+'" stroke="var(--txd)" stroke-width="1" stroke-dasharray="4,3"/>'}
-    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="'+(target&&s.v>=target*.9?'var(--gn)':'#e06060')+'" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'g</title></rect>'});
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*((i+0.5)/n)-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="'+(target&&s.v>=target*.9?'var(--gn)':'#e06060')+'" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'g</title></rect>'});
     el.innerHTML=svg+'</svg>';
   },
   volumeChart:function(dates){
@@ -1988,8 +1995,8 @@ var HI={
     var mx=Math.max.apply(null,series.map(function(s){return s.v}))*1.15||1000;
     var c=this.svg(340,130,36,8,10,24),n=dates.length,bw=Math.max(3,c.CW/n-2);
     var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
-    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates);
-    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*(i/(n-1||1))-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="var(--ac)" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'kg</title></rect>'});
+    svg+=this.grid(c,0,mx,4)+this.xlabels(c,dates,true);
+    series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*((i+0.5)/n)-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="var(--ac)" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'kg</title></rect>'});
     el.innerHTML=svg+'</svg>';
   },
   fillStrengthSel:function(){
