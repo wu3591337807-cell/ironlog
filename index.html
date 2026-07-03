@@ -111,6 +111,7 @@ svg.chart{width:100%;display:block}
     <span class="tchip dtag" id="db-tc" style="display:none">TODAY</span><button class="dtoday" id="db-today" style="display:none" onclick="D.goToday()">回今天</button>
   </div>
   <div class="con">
+    <div id="db-banner" style="display:none"></div>
     <div class="card">
       <div class="ct">体重记录</div>
       <div class="row" style="align-items:stretch">
@@ -640,6 +641,7 @@ var D={
     this.renderCountdown(prof);
     this.renderCals(prof,diet,wLogs,cLogs);
     this.renderCal();
+    this.renderBanner();
   },
   renderCals:function(prof,diet,wLogs,cLogs){
     var tgt=prof?(prof.targetKcal||prof.tdee||0):0;
@@ -688,6 +690,39 @@ var D={
     si.textContent=def<0?'⚠️':def>400?'💪':'📊';
     st.innerHTML=msg||'摄入 <b>'+net+' KCAL</b>，消耗 <b>'+burn+' KCAL</b>';
     pr2.innerHTML=pills.map(function(x){return'<span style="font-family:IBM Plex Mono,monospace;font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:3px;border:1px solid var(--'+x[1]+');color:var(--'+x[1]+')">'+x[0]+'</span>'}).join('');
+  },
+  dietLogged:function(d){var x=getJ('ironlog_diet_logs',{})[d];return !!(x&&x.meals&&Object.values(x.meals).some(function(m){return m&&m.length}))},
+  dietStreak:function(){var n=0,d=today();if(!this.dietLogged(d))d=addD(d,-1);while(this.dietLogged(d)){n++;d=addD(d,-1)}return n},
+  copyDay:function(from,to,msg){
+    var all=getJ('ironlog_diet_logs',{});var src=all[from];
+    if(!src||!Object.values(src.meals).some(function(m){return m&&m.length})){toast('来源日无饮食记录');return}
+    if(!confirm(msg))return;
+    if(!all[to])all[to]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
+    MEAL_KEYS.forEach(function(k){(src.meals[k]||[]).forEach(function(it){
+      if(!all[to].meals[k])all[to].meals[k]=[];all[to].meals[k].push(Object.assign({},it,{id:Date.now()+Math.floor(Math.random()*1e6)}));
+    })});
+    setJ('ironlog_diet_logs',all);this.render();toast('已复制 \u2713');
+  },
+  goDiet:function(d){DT.date=d;showTab('dt');DT.render();},
+  renderBanner:function(){
+    var el=document.getElementById('db-banner');if(!el)return;
+    var td=today(),yd=addD(td,-1),dbf=addD(td,-2);
+    var hasHistory=Object.keys(getJ('ironlog_diet_logs',{})).length>0;
+    var streak=this.dietStreak();var self=this;
+    var rows=[];
+    if(streak>0)rows.push('<div style="font-family:IBM Plex Mono,monospace;font-size:11px;color:var(--ac);letter-spacing:.5px">\ud83d\udd25 \u996e\u98df\u8fde\u7eed\u8bb0\u5f55 <b style="font-size:14px">'+streak+'</b> \u5929</div>');
+    if(hasHistory&&!this.dietLogged(yd)){
+      var acts='';
+      if(this.dietLogged(dbf))acts+='<span style="color:var(--ac);cursor:pointer" onclick="D.copyDay(\''+dbf+'\',\''+yd+'\',\'\u628a\u524d\u5929\u7684\u996e\u98df\u590d\u5236\u5230\u6628\u5929\uff1f\')">\u590d\u5236\u524d\u65e5 \u203a</span>&nbsp;&nbsp;';
+      acts+='<span style="color:var(--ac);cursor:pointer" onclick="D.goDiet(\''+yd+'\')">\u53bb\u8865\u5f55 \u203a</span>';
+      rows.push('<div style="font-size:12px;color:var(--tx)">\ud83d\udccb \u6628\u5929\u6ca1\u8bb0\u996e\u98df \u00b7 '+acts+'</div>');
+    }
+    if(!this.dietLogged(td)&&this.dietLogged(yd)){
+      rows.push('<div style="font-size:12px;color:var(--tx)">\ud83c\udf5a \u4eca\u5929\u7167\u5e38\u5403\uff1f<span style="color:var(--ac);cursor:pointer" onclick="D.copyDay(\''+yd+'\',\''+td+'\',\'\u590d\u5236\u6628\u65e5\u5168\u5929\u996e\u98df\u5230\u4eca\u5929\uff0c\u4e4b\u540e\u53ef\u5fae\u8c03\uff1f\')">\u4e00\u952e\u590d\u5236\u6628\u65e5 \u203a</span></div>');
+    }
+    if(!rows.length){el.style.display='none';el.innerHTML='';return}
+    el.style.display='block';
+    el.innerHTML='<div style="background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:7px">'+rows.join('')+'</div>';
   },
   renderCountdown:function(prof){
     var card=document.getElementById('db-cdc');
