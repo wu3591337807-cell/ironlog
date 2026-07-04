@@ -146,7 +146,7 @@ svg.chart{width:100%;display:block}
         </div>
         <div style="flex:1;min-width:0">
           <div class="sl2" id="db-dn" style="margin-bottom:6px">未设目标</div>
-          <div class="su" style="font-size:11px">目标 <span id="db-tgt" style="color:var(--tx)">—</span> KCAL · 净摄入 <span id="db-act" style="color:var(--tx)">0</span></div>
+          <div class="su" style="font-size:11px">目标 <span id="db-tgt" style="color:var(--tx)">—</span> KCAL · 净摄入 <span id="db-act" style="color:var(--tx)">0</span><br><span id="db-tdee" style="color:var(--txm)"></span></div>
           <div class="su" style="font-size:11px;margin-top:3px">训练消耗 <span id="db-brn" style="color:var(--gn)">0</span> · <span id="db-bd">力量0+有氧0</span></div>
         </div>
       </div>
@@ -327,6 +327,12 @@ svg.chart{width:100%;display:block}
         <div style="font-size:10px;color:var(--txm);font-family:'IBM Plex Mono',monospace;line-height:1.6">bigmodel.cn 注册 &rarr; 控制台 &rarr; API Keys &rarr; 复制粘贴到此，即可在饮食页拍照识别</div>
       </div>
     </div>
+    <div class="card" id="pr-sum" style="display:none">
+      <div class="ct">身体信息</div>
+      <div id="pr-sumtx" style="font-size:13px;color:var(--tx);line-height:1.7;margin-bottom:10px"></div>
+      <button class="btn" style="width:100%" onclick="PR.edit()">&#9998; 更改身体信息</button>
+    </div>
+    <div id="pr-form">
     <div class="card">
       <div class="ct">基础信息</div>
       <div class="col">
@@ -363,12 +369,32 @@ svg.chart{width:100%;display:block}
         <div><label class="lb">目标日期（可选）</label><input type="date" id="pr-td" oninput="PR.calc()"></div>
       </div>
     </div>
+    </div>
     <div class="card">
       <div class="ct">TDEE 计算</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="pr-grid">
         <div class="si" style="grid-column:1/-1"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txm);text-align:center;padding:8px 0">请填写身高、体重、年龄</div></div>
       </div>
       <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);margin-top:10px;line-height:1.7" id="pr-mb"></div>
+    </div>
+    <div class="card">
+      <div class="ct">身体指标</div>
+      <div id="pr-met"></div>
+    </div>
+    <div class="card">
+      <div class="ct">围度记录 <span style="font-size:10px;color:var(--txd);font-weight:400">每周量一次 · 平台期比体重诚实</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+        <div><label class="lb">腰 cm</label><input type="number" id="pr-gw" step=".5" inputmode="decimal"></div>
+        <div><label class="lb">胸 cm</label><input type="number" id="pr-gc" step=".5" inputmode="decimal"></div>
+        <div><label class="lb">臂 cm</label><input type="number" id="pr-ga" step=".5" inputmode="decimal"></div>
+        <div><label class="lb">腿 cm</label><input type="number" id="pr-gt" step=".5" inputmode="decimal"></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:8px" onclick="PR.saveGirth()">记录围度</button>
+      <div id="pr-glist" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
+      <div class="ct">成就</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="pr-achv"></div>
     </div>
     <div class="card">
       <div class="ct">数据备份 <span style="font-size:10px;color:var(--txd);font-weight:400">v<span id="app-ver"></span></span></div>
@@ -394,6 +420,7 @@ svg.chart{width:100%;display:block}
   </div>
   <div class="con">
     <div class="card"><div class="ct">本周报告</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="hi-wk"></div></div>
+    <div class="card"><div class="ct">代谢追踪 <span style="font-size:10px;color:var(--txd);font-weight:400">实测 TDEE · 每周一结算</span></div><div id="hi-tc2"></div></div>
     <div class="card"><div class="ct">体重趋势</div><div id="hi-wstats" style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--txd);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px"></div><div id="hi-wc"></div></div>
     <div class="card">
       <div class="ct">热量摄入</div>
@@ -583,7 +610,7 @@ function showTab(id){
   if(id==='db')D.render();
   if(id==='wo'){W.renderPlans();W.renderSports();W.renderCardioWeek()}
   if(id==='dt'){DT.autoMeal();DT.render()}
-  if(id==='pr')PR.load();
+  if(id==='pr'){PR.load();PR.renderAll();}
   if(id==='hi')HI.render();
 }
 
@@ -664,7 +691,7 @@ var D={
     var ck=cLogs.reduce(function(s,l){return s+(l.kcal||0)},0);
     var burn=Math.round(wk+ck);
     var def=tgt>0?Math.round(tgt-net+burn):null;
-    document.getElementById('db-tgt').textContent=tgt>0?Math.round(tgt):'—';
+    document.getElementById('db-tgt').textContent=tgt>0?Math.round(tgt):'—';var _ti=TD.info();var _te=document.getElementById('db-tdee');if(_te)_te.textContent=_ti?('实测 TDEE '+_ti.t+' '+_ti.arrow):'';
     document.getElementById('db-act').textContent=net;
     var ring=document.getElementById('db-ring'),rat=tgt>0?net/tgt:0,pct=tgt>0?Math.min(rat*100,100):0;
     ring.style.strokeDashoffset=(264*(1-pct/100)).toFixed(1);
@@ -730,6 +757,8 @@ var D={
     if(!this.dietLogged(td)&&this.dietLogged(yd)){
       rows.push('<div style="font-size:12px;color:var(--tx)">\ud83c\udf5a \u4eca\u5929\u7167\u5e38\u5403\uff1f<span style="color:var(--ac);cursor:pointer" onclick="D.copyDay(\''+yd+'\',\''+td+'\',\'\u590d\u5236\u6628\u65e5\u5168\u5929\u996e\u98df\u5230\u4eca\u5929\uff0c\u4e4b\u540e\u53ef\u5fae\u8c03\uff1f\')">\u4e00\u952e\u590d\u5236\u6628\u65e5 \u203a</span></div>');
     }
+    var sug=TD.sug();
+    if(sug)rows.push('<div style="font-size:12px;color:var(--tx)">\ud83d\udcca 实测TDEE <b>'+sug.tdee+'</b> · 上周'+(sug.rate===null?'—':(sug.rate>0?'+':'')+sug.rate+'kg')+' · 目标 '+sug.cur+'\u2192<b style="color:var(--ac)">'+sug.nt+'</b>&nbsp;&nbsp;<span style="color:var(--ac);cursor:pointer" onclick="TD.apply()">应用 \u203a</span>&nbsp;&nbsp;<span style="color:var(--txm);cursor:pointer" onclick="TD.dismiss()">\u2715 本周不提醒</span></div>');
     if(!rows.length){el.style.display='none';el.innerHTML='';return}
     el.style.display='block';
     el.innerHTML='<div style="background:var(--sf);border:1px solid var(--bd);border-left:3px solid var(--ac);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:7px">'+rows.join('')+'</div>';
@@ -1890,8 +1919,87 @@ var RC={
 
 var ACT_INFO=['每周0次，办公室工作','每周1-3次轻度运动','每周3-5次中等运动','每天高强度训练'];
 var ACT_MULT=[1.2,1.375,1.55,1.725];
+// ── TDEE ENGINE ──
+var TD={
+  emaMap:function(){
+    var wr=getJ('ironlog_weight_records',[]).slice().sort(function(a,b){return a.date.localeCompare(b.date)});
+    var m={},e=null;
+    wr.forEach(function(r){e=e===null?r.weight:(0.25*r.weight+0.75*e);m[r.date]=+e.toFixed(2)});
+    return {map:m,dates:wr.map(function(r){return r.date})};
+  },
+  emaAt:function(em,d){var best=null;em.dates.forEach(function(x){if(x<=d)best=x});return best?{d:best,v:em.map[best]}:null},
+  intake:function(d){
+    var day=getJ('ironlog_diet_logs',{})[d];if(!day)return 0;
+    var k=0;Object.values(day.meals||{}).forEach(function(items){(items||[]).forEach(function(it){k+=it.kcal||0})});
+    return Math.round(k*0.9);
+  },
+  measure:function(){
+    var td=today(),start=addD(td,-20),valid=[];
+    for(var i=0;i<21;i++){var k=this.intake(addD(start,i));if(k>800)valid.push(k)}
+    if(valid.length<12)return{st:'collecting',n:valid.length};
+    var em=this.emaMap();
+    var w2=this.emaAt(em,td),w1=null;
+    for(var j=0;j<em.dates.length;j++){if(em.dates[j]>=start){w1={d:em.dates[j],v:em.map[em.dates[j]]};break}}
+    if(!w1||!w2||w1.d>=w2.d)return{st:'noweight'};
+    var span=Math.round((new Date(w2.d)-new Date(w1.d))/86400000);
+    if(span<10)return{st:'noweight'};
+    var dW=+(w2.v-w1.v).toFixed(2);
+    if(Math.abs(dW)>3)return{st:'anomaly'};
+    var avgIn=Math.round(valid.reduce(function(s,v){return s+v},0)/valid.length);
+    var raw=Math.round(avgIn-dW*7700/span);
+    var prof=getJ('ironlog_profile',null),base=(prof&&prof.tdee)||raw;
+    raw=Math.max(Math.round(base*0.6),Math.min(Math.round(base*1.4),raw));
+    return{st:'ok',raw:raw,dW:dW,avgIn:avgIn,span:span};
+  },
+  weekKey:function(){var d=new Date(today());var wd=(d.getDay()+6)%7;d.setDate(d.getDate()-wd);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())},
+  settle:function(){
+    var st=getJ('ironlog_tdee_state',{hist:[]});
+    var wk=this.weekKey();
+    if(st.week===wk)return;
+    var m=this.measure();
+    if(m.st!=='ok')return;
+    var nt0=st.tdee?Math.round(st.tdee*0.7+m.raw*0.3):m.raw;
+    st.tdee=nt0;st.week=wk;
+    st.hist=(st.hist||[]).filter(function(h){return h.w!==wk});st.hist.push({w:wk,t:nt0});
+    if(st.hist.length>26)st.hist=st.hist.slice(-26);
+    var prof=getJ('ironlog_profile',null);
+    st.sug=null;
+    if(prof&&prof.targetKcal){
+      var em=this.emaMap(),now=this.emaAt(em,today()),ago=this.emaAt(em,addD(today(),-7));
+      var rate=(now&&ago&&now.d>ago.d)?+(now.v-ago.v).toFixed(2):null;
+      var wt=now?now.v:(prof.weight||0);
+      var goalRate=prof.goal==='cut'?-wt*0.005:prof.goal==='bulk'?wt*0.0025:0;
+      var ideal=Math.round((nt0+goalRate*7700/7)/10)*10;
+      var delta=ideal-prof.targetKcal;
+      if(Math.abs(delta)>=100){
+        delta=Math.max(-150,Math.min(150,delta));
+        st.sug={w:wk,nt:prof.targetKcal+delta,cur:prof.targetKcal,tdee:nt0,rate:rate};
+      }
+    }
+    setJ('ironlog_tdee_state',st);
+  },
+  sug:function(){var st=getJ('ironlog_tdee_state',{});return(st.sug&&st.sug.w===this.weekKey()&&st.dis!==this.weekKey())?st.sug:null},
+  info:function(){
+    var st=getJ('ironlog_tdee_state',{});if(!st.tdee)return null;
+    var h=st.hist||[],arrow='\u2192';
+    if(h.length>=2){var d=h[h.length-1].t-h[h.length-2].t;arrow=d>30?'\u2197':d<-30?'\u2198':'\u2192'}
+    return{t:st.tdee,arrow:arrow,hist:h};
+  },
+  apply:function(){
+    var st=getJ('ironlog_tdee_state',{});var s=st.sug;if(!s)return;
+    var prof=getJ('ironlog_profile',null);if(!prof)return;
+    prof.targetKcal=s.nt;
+    var pro=prof.proteinTarget||0,fat=Math.round(s.nt*0.25/9);
+    prof.fatTarget=fat;prof.carbTarget=Math.round((s.nt-pro*4-fat*9)/4);
+    setJ('ironlog_profile',prof);
+    st.sug=null;setJ('ironlog_tdee_state',st);
+    toast('目标已更新为 '+s.nt+' kcal \u2713');D.render();
+  },
+  dismiss:function(){var st=getJ('ironlog_tdee_state',{});st.dis=this.weekKey();setJ('ironlog_tdee_state',st);D.render();}
+};
+
 var PR={
-  sex:0,act:0,goal:0,_cache:null,
+  sex:0,act:0,goal:0,_cache:null,editing:false,
   setSex:function(n){this.sex=n;document.getElementById('pr-m').className='sgb'+(n===0?' on':'');document.getElementById('pr-f').className='sgb'+(n===1?' on':'');this.calc()},
   setAct:function(n){this.act=n;for(var i=0;i<4;i++)document.getElementById('pr-a'+i).className='sgb'+(i===n?' on':'');document.getElementById('pr-ad').textContent=ACT_INFO[n];this.calc()},
   setGoal:function(n){this.goal=n;for(var i=0;i<3;i++)document.getElementById('pr-g'+i).className='sgb'+(i===n?' on':'');this.calc()},
@@ -1944,7 +2052,100 @@ var PR={
     }else p.cd=null;
     setJ('ironlog_profile',p);
     if(wt){var wr=getJ('ironlog_weight_records',[]).filter(function(x){return x.date!==today()});wr.push({date:today(),weight:wt,ts:Date.now()});wr.sort(function(a,b){return a.date.localeCompare(b.date)});setJ('ironlog_weight_records',wr)}
-    toast('档案已保存 ✓');
+    toast('档案已保存 \u2713');
+    this.editing=false;this.renderAll();
+  },
+  edit:function(){this.editing=true;this.renderMode();},
+  renderMode:function(){
+    var prof=getJ('ironlog_profile',null);
+    var form=document.getElementById('pr-form'),sum=document.getElementById('pr-sum');
+    if(!form||!sum)return;
+    var collapsed=!!prof&&!this.editing;
+    form.style.display=collapsed?'none':'block';
+    sum.style.display=collapsed?'block':'none';
+    if(collapsed){
+      var g={cut:'减脂',maintain:'维持',bulk:'增肌'}[prof.goal]||'';
+      var wr=getJ('ironlog_weight_records',[]);
+      var wt=wr.length?wr[wr.length-1].weight:prof.weight;
+      document.getElementById('pr-sumtx').innerHTML=(prof.sex===1?'女':'男')+' · '+prof.age+'岁 · '+prof.height+'cm · <b>'+wt+'kg</b> · '+g+(prof.targetWeight?' \u2192 '+prof.targetWeight+'kg':'')+
+        '<br><span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm)">目标摄入 '+(prof.targetKcal||0)+' kcal · 蛋白 '+(prof.proteinTarget||0)+'g</span>';
+    }
+  },
+  renderAll:function(){this.renderMode();this.renderMetrics();this.renderGirth();this.renderAchv();},
+  _bar:function(label,val,unit,min,max,zones){
+    var pct=Math.max(0,Math.min(100,(val-min)/(max-min)*100));
+    var segs='',zlab='',prev=min;
+    zones.forEach(function(z){segs+='<div style="flex:'+(z[0]-prev)+';background:'+z[1]+';height:6px"></div>';if(val>=prev&&val<z[0]||!zlab&&z[0]>=max)zlab=z[2];prev=z[0]});
+    if(val>=zones[zones.length-1][0])zlab=zones[zones.length-1][2];
+    return '<div style="margin-bottom:13px"><div class="row sb"><span style="font-size:11px;color:var(--txm)">'+label+'</span><span style="font-family:IBM Plex Mono,monospace;font-size:13px;color:var(--tx)"><b>'+val+'</b>'+unit+' <span style="font-size:10px;color:var(--ac)">'+zlab+'</span></span></div>'+
+      '<div style="position:relative;margin-top:6px"><div style="display:flex;border-radius:3px;overflow:hidden;opacity:.75">'+segs+'</div><div style="position:absolute;top:-3px;left:'+pct+'%;width:2px;height:12px;background:var(--tx)"></div></div></div>';
+  },
+  renderMetrics:function(){
+    var el=document.getElementById('pr-met');if(!el)return;
+    var prof=getJ('ironlog_profile',null);
+    if(!prof||!prof.height||!prof.age){el.innerHTML='<div class="nodata" style="padding:8px 0">先填写身体信息</div>';return}
+    var wr=getJ('ironlog_weight_records',[]);
+    var wt=wr.length?wr[wr.length-1].weight:prof.weight;
+    var h=prof.height/100;
+    var bmi=+(wt/(h*h)).toFixed(1);
+    var male=prof.sex!==1;
+    var bf=+(1.2*bmi+0.23*prof.age-10.8*(male?1:0)-5.4).toFixed(1);
+    var ffmi=+(((wt*(1-bf/100))/(h*h))+6.1*(1.8-h)).toFixed(1);
+    var html=this._bar('BMI',bmi,'',15,40,[[18.5,'#4a90d9','偏瘦'],[24,'var(--gn)','正常'],[28,'var(--or)','偏胖'],[40,'var(--rd)','肥胖']]);
+    html+=this._bar('体脂估算',bf,'%',male?5:12,male?40:45,male?[[10,'#4a90d9','偏低'],[20,'var(--gn)','理想'],[25,'var(--or)','偏高'],[40,'var(--rd)','高']]:[[17,'#4a90d9','偏低'],[27,'var(--gn)','理想'],[32,'var(--or)','偏高'],[45,'var(--rd)','高']]);
+    html+=this._bar('FFMI 肌肉量',ffmi,'',15,28,[[18,'#4a90d9','新手'],[20,'var(--gn)','中等'],[22,'#2f9e6e','良好'],[25,'var(--ac)','优秀'],[28,'var(--or)','极高']]);
+    var ti=TD.info(),ms;
+    if(ti){ms='<b style="color:var(--ac)">'+ti.t+'</b> kcal/天 '+ti.arrow}
+    else{var m=TD.measure();ms=m.st==='collecting'?'数据积累中 '+m.n+'/12 天':m.st==='noweight'?'需要更多体重记录':'计算中'}
+    html+='<div class="row sb" style="border-top:1px solid var(--bd);padding-top:9px"><span style="font-size:11px;color:var(--txm)">实测代谢 TDEE</span><span style="font-family:IBM Plex Mono,monospace;font-size:12px;color:var(--tx)">'+ms+'</span></div>';
+    html+='<div style="font-family:IBM Plex Mono,monospace;font-size:9px;color:var(--txd);margin-top:6px">体脂为 BMI 估算式，仅供趋势参考 · 实测TDEE由体重与饮食数据反推</div>';
+    el.innerHTML=html;
+  },
+  saveGirth:function(){
+    var g={date:today()},ok=false;
+    [['w','waist'],['c','chest'],['a','arm'],['t','thigh']].forEach(function(x){var v=parseFloat(document.getElementById('pr-g'+x[0]).value)||0;if(v>0){g[x[1]]=v;ok=true}});
+    if(!ok){toast('至少填一项围度');return}
+    var arr=getJ('ironlog_girth',[]).filter(function(r){return r.date!==today()});
+    arr.push(g);arr.sort(function(a,b){return a.date.localeCompare(b.date)});
+    setJ('ironlog_girth',arr);vib(15);toast('围度已记录 \u2713');this.renderGirth();
+  },
+  renderGirth:function(){
+    var el=document.getElementById('pr-glist');if(!el)return;
+    var arr=getJ('ironlog_girth',[]);
+    var last=arr[arr.length-1];
+    if(last)[['w','waist'],['c','chest'],['a','arm'],['t','thigh']].forEach(function(x){var inp=document.getElementById('pr-g'+x[0]);if(inp&&!inp.value&&last[x[1]])inp.value=last[x[1]]});
+    if(!arr.length){el.innerHTML='<div class="nodata" style="padding:6px 0">暂无记录</div>';return}
+    var NM={waist:'腰',chest:'胸',arm:'臂',thigh:'腿'};
+    var rows=arr.slice(-3).reverse().map(function(r){
+      var idx=arr.indexOf(r),prev=idx>0?arr[idx-1]:null;
+      var cells=Object.keys(NM).filter(function(k){return r[k]}).map(function(k){
+        var d=prev&&prev[k]?+(r[k]-prev[k]).toFixed(1):null;
+        var ds=d===null||d===0?'':' <span style="color:'+(k==='waist'?(d<0?'var(--gn)':'var(--rd)'):'var(--txm)')+'">('+(d>0?'+':'')+d+')</span>';
+        return NM[k]+r[k]+ds;
+      }).join(' · ');
+      return '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);padding:3px 0">'+r.date.slice(5)+'  '+cells+'</div>';
+    }).join('');
+    el.innerHTML=rows;
+  },
+  renderAchv:function(){
+    var el=document.getElementById('pr-achv');if(!el)return;
+    var wl=getJ('ironlog_workout_logs',[]),cl=getJ('ironlog_cardio_logs',[]);
+    var vol=wl.reduce(function(s,l){return s+(l.volume||0)},0);
+    var cmin=cl.reduce(function(s,l){return s+(l.duration||0)},0);
+    var wr=getJ('ironlog_weight_records',[]);
+    var lost=wr.length>1?+(wr[0].weight-wr[wr.length-1].weight).toFixed(1):0;
+    var days=Object.keys(getJ('ironlog_diet_logs',{})).sort(),best=0,cur=0,prev=null;
+    days.forEach(function(d){
+      if(!D.dietLogged(d))return;
+      cur=(prev&&addD(prev,1)===d)?cur+1:1;
+      if(cur>best)best=cur;prev=d;
+    });
+    el.innerHTML=
+      '<div class="si"><div class="sl2">训练次数</div><div class="sv">'+wl.length+'</div><div class="su">次</div></div>'+
+      '<div class="si"><div class="sl2">举起总量</div><div class="sv ac">'+(vol/1000).toFixed(1)+'</div><div class="su">吨</div></div>'+
+      '<div class="si"><div class="sl2">有氧时长</div><div class="sv">'+cmin+'</div><div class="su">分钟</div></div>'+
+      '<div class="si"><div class="sl2">最长连续记录</div><div class="sv">'+best+'</div><div class="su">天</div></div>'+
+      '<div class="si" style="grid-column:1/-1"><div class="sl2">已减体重</div><div class="sv '+(lost>0?'gn':'')+'">'+(lost>0?'-':'')+Math.abs(lost)+'</div><div class="su">kg · 自 '+(wr.length?wr[0].date:'—')+'</div></div>';
   }
 };
 
@@ -2033,7 +2234,22 @@ var HI={
   days:7,
   period:function(n,btn){this.days=n;document.querySelectorAll('.pbb').forEach(function(b){b.classList.remove('on')});btn.classList.add('on');this.render()},
   dateRange:function(){var arr=[],t=today();for(var i=this.days-1;i>=0;i--)arr.push(addD(t,-i));return arr},
-  render:function(){var dates=this.dateRange();this.weekReport();this.weightChart(dates);this.calChart(dates);this.burnChart(dates);this.proteinChart(dates);this.volumeChart(dates);this.fillStrengthSel();this.strengthChart()},
+  render:function(){var dates=this.dateRange();this.weekReport();this.tdeeChart();this.weightChart(dates);this.calChart(dates);this.burnChart(dates);this.proteinChart(dates);this.volumeChart(dates);this.fillStrengthSel();this.strengthChart()},
+  tdeeChart:function(){
+    var el=document.getElementById('hi-tc2');if(!el)return;
+    var h=(getJ('ironlog_tdee_state',{}).hist)||[];
+    if(h.length<2){el.innerHTML='<div class="nodata">每周一自动结算一次实测TDEE，两周后显示曲线</div>';return}
+    var vals=h.map(function(x){return x.t});
+    var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+    var p2=(mx-mn)<100?100:(mx-mn)*.2,yMin=mn-p2,yMax=mx+p2;
+    var c=this.svg(340,130,36,8,10,24),n=h.length;
+    var svg='<svg class="chart" viewBox="0 0 340 130" xmlns="http://www.w3.org/2000/svg">';
+    svg+=this.grid(c,yMin,yMax,4)+this.xlabels(c,h.map(function(x){return x.w}));
+    var pts=[],cirs='';
+    h.forEach(function(x,i){var px=c.PL+c.CW*(i/(n-1||1)),py=c.PT+c.CH-c.CH*((x.t-yMin)/(yMax-yMin));pts.push(px+','+py);cirs+='<circle cx="'+px+'" cy="'+py+'" r="2.5" fill="var(--ac)" stroke="var(--bg)" stroke-width="1.5"><title>'+x.w+': '+x.t+' kcal</title></circle>'});
+    svg+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--ac)" stroke-width="2" stroke-linejoin="round"/>';
+    el.innerHTML=svg+cirs+'</svg>';
+  },
   weekReport:function(){
     var t=today(),tw=[],lw=[];
     for(var i=6;i>=0;i--)tw.push(addD(t,-i));for(var i=13;i>=7;i--)lw.push(addD(t,-i));
@@ -2152,6 +2368,7 @@ var HI={
 
 // ── INIT ──
 migExMuscle();
+TD.settle();
 (function(){var _vk=document.getElementById('pr-vlm');if(_vk)_vk.value=localStorage.getItem('ironlog_vlm_key')||''})();
 D.goToday=function(){this.date=today();this.render();};
 (function(){var h=document.getElementById('hdr');function setH(){document.documentElement.style.setProperty('--hdr-h',h.offsetHeight+'px')}setH();window.addEventListener('resize',setH)})();
@@ -2162,7 +2379,7 @@ W.renderSports();
 W.renderCardioWeek();
 W.resumeActive();W.swResume();BAK.renderStatus();
 DT.render();
-PR.load();
+PR.load();PR.renderAll();
 (function(){var el=document.getElementById('dt-log'),x0=0,y0=0;
  el.addEventListener('touchstart',function(e){x0=e.changedTouches[0].clientX;y0=e.changedTouches[0].clientY},{passive:true});
  el.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;
