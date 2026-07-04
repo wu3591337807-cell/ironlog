@@ -1588,8 +1588,18 @@ var matches=ALL_FOODS.map(function(f){var ov=getJ('ironlog_food_overrides',{});r
 };
 
 // ── AI PHOTO ──
+var OIL_LVS=[['boil','💧 水煮'],['light','🥗 低油'],['normal','🍳 正常'],['heavy','🔥 重油'],['fry','🍟 油炸']];
+function oilLabel(lv){var x=OIL_LVS.find(function(o){return o[0]===lv});return x?x[1].split(' ')[1]:''}
+function oilAdj(lv,k,f){
+  k=+k||0;f=+f||0;var f2;
+  if(lv==='boil'){f2=+(f*0.4).toFixed(1);return[Math.round(k-(f-f2)*9),f2]}
+  if(lv==='light'){f2=+(f*0.7).toFixed(1);return[Math.round(k-(f-f2)*9),f2]}
+  if(lv==='heavy')return[Math.round(k+72),+(f+8).toFixed(1)];
+  if(lv==='fry')return[Math.round(k+135),+(f+15).toFixed(1)];
+  return[Math.round(k),+f.toFixed(1)];
+}
 var AI={
-  items:[],
+  items:[],lvs:[],
   snap:function(){
     if(!localStorage.getItem('ironlog_vlm_key')){toast('先在档案页填入智谱 API Key');showTab('pr');return}
     document.getElementById('ai-file').click();
@@ -1606,40 +1616,57 @@ var AI={
     rd.readAsDataURL(f);
   },
   query:function(dataUrl){
-    showMod('<div class="mtitle">\ud83d\udcf7 \u8bc6\u522b\u4e2d\u2026</div><div class="nodata" style="padding:20px 0">AI \u6b63\u5728\u4f30\u7b97\u70ed\u91cf\uff0c\u7ea6 5-10 \u79d2</div>');
+    showMod('<div class="mtitle">📷 识别中…</div><div class="nodata" style="padding:20px 0">AI 正在估算热量，约 5-10 秒</div>');
     fetch('https://open.bigmodel.cn/api/paas/v4/chat/completions',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+localStorage.getItem('ironlog_vlm_key')},
       body:JSON.stringify({model:'glm-4v-flash',temperature:0.1,messages:[{role:'user',content:[
         {type:'image_url',image_url:{url:dataUrl.split(',')[1]}},
-        {type:'text',text:'\u8bc6\u522b\u56fe\u4e2d\u98df\u7269\u5e76\u6309\u56fe\u4e2d\u5b9e\u9645\u4efd\u91cf\u4f30\u7b97\u8425\u517b\u3002\u53ea\u8f93\u51faJSON\u6570\u7ec4\u65e0\u5176\u4ed6\u6587\u5b57\uff0c\u683c\u5f0f\uff1a[{"name":"\u98df\u7269\u540d","grams":\u514b\u6570,"kcal":\u6574\u6570,"protein":\u514b,"carbs":\u514b,"fat":\u514b}]\uff0c\u6bcf\u79cd\u98df\u7269\u4e00\u6761\u3002'}
+        {type:'text',text:'识别图中食物并按图中实际份量、正常家常用油估算营养。只输出JSON数组无其他文字，格式：[{"name":"食物名","grams":克数,"kcal":整数,"protein":克,"carbs":克,"fat":克,"cook":"烹饪方式"}]，cook取值：boil(水煮/蒸/凉拌)、normal(一般炒制)、heavy(明显重油/红烧/油亮)、fry(油炸)、none(米饭面食水果饮料等无需用油)。每种食物一条。'}
       ]}]})
     }).then(function(r){return r.json()}).then(function(d){
       var txt=(d.choices&&d.choices[0]&&d.choices[0].message.content)||'';
       var m=txt.match(/\[[\s\S]*\]/);
-      if(!m)throw new Error((d.error&&d.error.message)||'\u672a\u8bc6\u522b\u5230\u98df\u7269');
-      var items=JSON.parse(m[0]);if(!items.length)throw new Error('\u672a\u8bc6\u522b\u5230\u98df\u7269');
-      AI.items=items;AI.showResult();
-    }).catch(function(e){showMod('<div class="mtitle">\u8bc6\u522b\u5931\u8d25</div><div class="nodata" style="padding:12px 0">'+((e&&e.message)||e)+'</div><div class="row" style="justify-content:center"><button class="btn" onclick="closeModNow()">\u5173\u95ed</button></div>')});
+      if(!m)throw new Error((d.error&&d.error.message)||'未识别到食物');
+      var items=JSON.parse(m[0]);if(!items.length)throw new Error('未识别到食物');
+      var mem=getJ('ironlog_oil_mem',{});
+      AI.items=items;
+      AI.lvs=items.map(function(it){
+        if(it.cook==='none')return 'none';
+        if(mem[it.name])return mem[it.name];
+        return ['boil','light','normal','heavy','fry'].indexOf(it.cook)>=0?it.cook:'normal';
+      });
+      AI.showResult();
+    }).catch(function(e){showMod('<div class="mtitle">识别失败</div><div class="nodata" style="padding:12px 0">'+((e&&e.message)||e)+'</div><div class="row" style="justify-content:center"><button class="btn" onclick="closeModNow()">关闭</button></div>')});
   },
+  setLv:function(i,lv){AI.lvs[i]=lv;AI.showResult();},
   showResult:function(){
     var rows=AI.items.map(function(it,i){
-      return '<div class="row sb" style="padding:6px 0;border-bottom:1px solid var(--bd)"><div><div style="font-size:13px;color:var(--tx)">'+it.name+' <span style="font-size:10px;color:var(--txm)">'+(it.grams||'?')+'g</span></div><div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm)">P'+(it.protein||0)+' C'+(it.carbs||0)+' F'+(it.fat||0)+'</div></div><div style="display:flex;align-items:center;gap:6px"><input type="number" id="ai-k'+i+'" value="'+Math.round(it.kcal||0)+'" style="width:64px;text-align:center;padding:4px 6px;font-size:13px"><span class="su">kcal</span></div></div>';
+      var lv=AI.lvs[i];
+      var a=lv==='none'?[Math.round(it.kcal||0),+(it.fat||0)]:oilAdj(lv,it.kcal||0,it.fat||0);
+      var chips=lv==='none'?'':'<div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap">'+OIL_LVS.map(function(o){return '<button class="btn sm'+(o[0]===lv?' on':'')+'" style="font-size:10px;padding:3px 7px" onclick="AI.setLv('+i+',\''+o[0]+'\')">'+o[1]+'</button>'}).join('')+'</div>';
+      return '<div style="padding:7px 0;border-bottom:1px solid var(--bd)"><div class="row sb"><div><div style="font-size:13px;color:var(--tx)">'+it.name+' <span style="font-size:10px;color:var(--txm)">'+(it.grams||'?')+'g</span></div><div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm)">P'+(it.protein||0)+' C'+(it.carbs||0)+' F'+a[1]+'</div></div><div style="display:flex;align-items:center;gap:6px"><input type="number" id="ai-k'+i+'" value="'+a[0]+'" style="width:64px;text-align:center;padding:4px 6px;font-size:13px"><span class="su">kcal</span></div></div>'+chips+'</div>';
     }).join('');
-    showMod('<div class="mtitle">\ud83d\udcf7 \u8bc6\u522b\u7ed3\u679c\uff08\u70ed\u91cf\u53ef\u6539\uff09</div>'+rows+
-      '<label class="lb" style="margin-top:10px">\u52a0\u5165\u54ea\u4e00\u9910</label>'+
+    showMod('<div class="mtitle">📷 识别结果（热量可改）</div>'+rows+
+      '<label class="lb" style="margin-top:10px">加入哪一餐</label>'+
       '<div class="sg" style="margin-top:2px">'+MEAL_NAMES.slice(0,4).map(function(nm,i){return '<button class="sgb'+(i===DT.curMeal?' on':'')+'" onclick="AI.confirm('+i+')">'+nm+'</button>'}).join('')+'</div>'+
-      '<div class="row" style="margin-top:12px;justify-content:center"><button class="btn" onclick="closeModNow()">\u53d6\u6d88</button></div>');
+      '<div class="row" style="margin-top:12px;justify-content:center"><button class="btn" onclick="closeModNow()">取消</button></div>');
   },
   confirm:function(meal){
     var all=getJ('ironlog_diet_logs',{});
     if(!all[DT.date])all[DT.date]={meals:{breakfast:[],lunch:[],dinner:[],snack:[]}};
     if(!all[DT.date].meals[MEAL_KEYS[meal]])all[DT.date].meals[MEAL_KEYS[meal]]=[];
+    var mem=getJ('ironlog_oil_mem',{});
     AI.items.forEach(function(it,i){
-      var kEl=document.getElementById('ai-k'+i);var k=kEl?(parseFloat(kEl.value)||0):(it.kcal||0);
-      all[DT.date].meals[MEAL_KEYS[meal]].push({id:Date.now()+i,name:'\ud83d\udcf7 '+it.name,amount:it.grams||0,unit:'g',kcal:Math.round(k),protein:+(it.protein||0)||0,carbs:+(it.carbs||0)||0,fat:+(it.fat||0)||0,ca:0,mg:0,zn:0});
+      var lv=AI.lvs[i];
+      var a=lv==='none'?[Math.round(it.kcal||0),+(it.fat||0)]:oilAdj(lv,it.kcal||0,it.fat||0);
+      var kEl=document.getElementById('ai-k'+i);var k=kEl?(parseFloat(kEl.value)||0):a[0];
+      var nm='📷 '+it.name+(lv!=='none'&&lv!=='normal'?'·'+oilLabel(lv):'');
+      all[DT.date].meals[MEAL_KEYS[meal]].push({id:Date.now()+i,name:nm,amount:it.grams||0,unit:'g',kcal:Math.round(k),protein:+(it.protein||0)||0,carbs:+(it.carbs||0)||0,fat:a[1]||0,ca:0,mg:0,zn:0});
+      if(lv!=='none')mem[it.name]=lv;
     });
-    vib(15);setJ('ironlog_diet_logs',all);closeModNow();DT.render();toast('\u5df2\u52a0\u5165'+MEAL_NAMES[meal]+' \u2713');
+    setJ('ironlog_oil_mem',mem);
+    vib(15);setJ('ironlog_diet_logs',all);closeModNow();DT.render();toast('已加入'+MEAL_NAMES[meal]+' ✓');
   }
 };
 
