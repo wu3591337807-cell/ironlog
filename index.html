@@ -272,8 +272,12 @@ svg.chart{width:100%;display:block}
         <button class="btn sm" id="dt-mb3" onclick="DT.setMeal(3)">加餐</button>
       </div>
       <div id="dt-freq" style="margin-top:7px;display:flex;gap:5px;flex-wrap:wrap"></div>
-      <button class="btn" style="width:100%;margin-top:8px" onclick="AI.snap()">&#128247; 拍照识别热量</button>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <button class="btn" style="flex:1" onclick="AI.snap()">&#128247; 拍照识别</button>
+        <button class="btn" style="flex:1" onclick="AI.pick()">&#128444;&#65039; 相册识别</button>
+      </div>
       <input type="file" id="ai-file" accept="image/*" capture="environment" style="display:none" onchange="AI.onFile(this)">
+      <input type="file" id="ai-file2" accept="image/*" style="display:none" onchange="AI.onFile(this)">
     </div>
     <div class="dnav">
       <button onclick="DT.prev()">&#8592;</button>
@@ -1632,6 +1636,10 @@ var AI={
   snap:function(){
     if(!localStorage.getItem('ironlog_vlm_key')){toast('先在档案页填入智谱 API Key');showTab('pr');return}
     document.getElementById('ai-file').click();
+  },
+  pick:function(){
+    if(!localStorage.getItem('ironlog_vlm_key')){toast('先在档案页填入智谱 API Key');showTab('pr');return}
+    document.getElementById('ai-file2').click();
   },
   onFile:function(inp){
     var f=inp.files&&inp.files[0];inp.value='';if(!f)return;
