@@ -2091,8 +2091,7 @@ var PR={
     var male=prof.sex!==1;
     var bf=+(1.2*bmi+0.23*prof.age-10.8*(male?1:0)-5.4).toFixed(1);
     var ffmi=+(((wt*(1-bf/100))/(h*h))+6.1*(1.8-h)).toFixed(1);
-    var html=this._bar('BMI',bmi,'',15,40,[[18.5,'#4a90d9','偏瘦'],[24,'var(--gn)','正常'],[28,'var(--or)','偏胖'],[40,'var(--rd)','肥胖']]);
-    html+=this._bar('体脂估算',bf,'%',male?5:12,male?40:45,male?[[10,'#4a90d9','偏低'],[20,'var(--gn)','理想'],[25,'var(--or)','偏高'],[40,'var(--rd)','高']]:[[17,'#4a90d9','偏低'],[27,'var(--gn)','理想'],[32,'var(--or)','偏高'],[45,'var(--rd)','高']]);
+    var html=this._bar('体脂估算',bf,'%',male?5:12,male?40:45,male?[[10,'#4a90d9','偏低'],[20,'var(--gn)','理想'],[25,'var(--or)','偏高'],[40,'var(--rd)','高']]:[[17,'#4a90d9','偏低'],[27,'var(--gn)','理想'],[32,'var(--or)','偏高'],[45,'var(--rd)','高']]);
     html+=this._bar('FFMI 肌肉量',ffmi,'',15,28,[[18,'#4a90d9','新手'],[20,'var(--gn)','中等'],[22,'#2f9e6e','良好'],[25,'var(--ac)','优秀'],[28,'var(--or)','极高']]);
     var ti=TD.info(),ms;
     if(ti){ms='<b style="color:var(--ac)">'+ti.t+'</b> kcal/天 '+ti.arrow}
