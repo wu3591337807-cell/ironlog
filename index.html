@@ -247,10 +247,10 @@ svg.chart{width:100%;display:block}
       </div>
       <div class="card"><div class="ct">本周汇总</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="wo-cwk"></div></div>
     </div>
-    <div id="wo-records" style="display:none">
-      <div class="ph" style="padding-top:9px"><span class="ptitle">训练记录</span></div>
-      <div class="con"><div id="wo-logs"></div></div>
-    </div>
+  </div>
+  <div id="wo-records" style="display:none">
+    <div class="ph" style="padding-top:9px"><span class="ptitle">训练记录</span></div>
+    <div class="con"><div id="wo-logs"></div></div>
   </div>
 </div>
 
@@ -1104,7 +1104,7 @@ var W={
     setJ('ironlog_plans',saved);
     closeModNow();this.renderPlans();toast('已保存 ✓');
   },
-  logDays:30,
+  logDays:0,
   renderLogs:function(){
     var el=document.getElementById('wo-logs');if(!el)return;
     var self=this;
@@ -2467,4 +2467,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1784080411 -->
+<!-- b1785983212 -->
