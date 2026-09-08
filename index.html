@@ -600,6 +600,14 @@ function fmtLong(s){var p=s.split('-'),days=['日','一','二','三','四','五'
 function fmtShort(s){var p=s.split('-');return p[1]+'/'+p[2]}
 function getJ(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d}catch(e){return d}}
 function setJ(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function metKcal(met,wt,min){return Math.round(Math.max(0,(met||1)-1)*(wt||70)*((min||0)/60));}
+function curWeight(){
+  var wr=getJ('ironlog_weight_records',[]).filter(function(x){return x&&x.date&&x.weight>0;})
+          .sort(function(a,b){return b.date.localeCompare(a.date);});
+  if(wr.length)return wr[0].weight;
+  var p=getJ('ironlog_profile',null);
+  return (p&&p.weight>0)?p.weight:70;
+}
 function logErr(msg,src,line){try{var a=getJ('ironlog_errlog',[]);if(!Array.isArray(a))a=[];a.push({ts:Date.now(),msg:String(msg||'').slice(0,300),src:String(src||'').slice(0,120),line:line||0});setJ('ironlog_errlog',a.slice(-20));}catch(e){}}
 window.onerror=function(msg,src,line){logErr(msg,src,line);try{toast('\u6e32\u67d3\u51fa\u9519\uff0c\u6863\u6848\u9875\u53ef\u67e5\u770b\u8be6\u60c5')}catch(e){}};
 window.addEventListener('unhandledrejection',function(e){logErr((e&&e.reason&&e.reason.message)||e.reason,'promise',0);try{toast('\u6e32\u67d3\u51fa\u9519\uff0c\u6863\u6848\u9875\u53ef\u67e5\u770b\u8be6\u60c5')}catch(e2){}});
@@ -847,6 +855,91 @@ var MUSCLE_SEED={
 '卷腹':'core','反向山羊挺':'core','侧向等长斜平板':'core','悬垂举腿':'core',
 '腿弯举 腘绳肌':'leg','腿屈伸 股四头肌':'leg','俯卧腿弯举 腘绳肌':'leg','安全杆深蹲 股四头肌':'leg','腿举 股四头肌':'leg','小腿推 小腿':'leg','深蹲推举 股四头肌':'leg','赤字罗马尼亚硬拉 腘绳肌':'leg'
 };
+var EX_SUFFIX=['股四头肌','腘绳肌','臀大肌','肱二头肌','肱三头肌','三角肌','背阔肌','胸大肌',
+               '斜方肌','腹直肌','小腿','股四头','腘绳','臀','腿','胸','背','肩','手臂','核心'];
+function stripExSuffix(name){
+  if(!name)return name;
+  var p=String(name).trim().split(/\s+/);
+  if(p.length<2)return String(name).trim();
+  if(EX_SUFFIX.indexOf(p[p.length-1])>=0)return p.slice(0,-1).join(' ');
+  return String(name).trim();
+}
+function migStripSuffix(){
+  if(localStorage.getItem('ironlog_mig_stripsuffix'))return;
+  var map={},n=0;
+  var plans=getJ('ironlog_plans',[]);
+  plans.forEach(function(p){(p.exercises||[]).forEach(function(e){
+    if(!e.name)return;var nn=stripExSuffix(e.name);if(nn!==e.name)map[e.name]=nn;
+  })});
+  var lib=getJ('ironlog_ex_lib',[]);
+  lib.forEach(function(e){if(!e.name)return;var nn=stripExSuffix(e.name);if(nn!==e.name)map[e.name]=nn;});
+  ['ironlog_prs','ironlog_last_sets','ironlog_strength_history'].forEach(function(k){
+    var o=getJ(k,{});if(!o||typeof o!=='object')return;
+    Object.keys(o).forEach(function(nm){var nn=stripExSuffix(nm);if(nn!==nm)map[nm]=nn;});
+  });
+  if(!Object.keys(map).length){localStorage.setItem('ironlog_mig_stripsuffix','1');return;}
+  plans.forEach(function(p){(p.exercises||[]).forEach(function(e){
+    if(map[e.name]){e.name=map[e.name];n++;}
+  })});
+  setJ('ironlog_plans',plans);
+  var seen={};var out=[];
+  lib.forEach(function(e){
+    var nm=map[e.name]||e.name;
+    if(seen[nm])return;
+    seen[nm]=1;e.name=nm;out.push(e);
+  });
+  setJ('ironlog_ex_lib',out);
+  migKeyed('ironlog_prs',map,function(a,b){return (a.e1rm||0)>=(b.e1rm||0)?a:b;});
+  migKeyed('ironlog_last_sets',map,function(a,b){return b;});
+  migKeyed('ironlog_strength_history',map,function(a,b){
+    var m={};[].concat(a||[],b||[]).forEach(function(x){
+      if(!x||!x.d)return;if(!m[x.d]||x.e>m[x.d].e)m[x.d]=x;
+    });
+    return Object.keys(m).sort().map(function(d){return m[d];});
+  });
+  localStorage.setItem('ironlog_mig_stripsuffix','1');
+  if(n>0)setTimeout(function(){toast('已清理 '+n+' 个动作名的部位后缀');},900);
+}
+function migKeyed(key,map,merge){
+  var o=getJ(key,{});if(!o||typeof o!=='object')return;
+  var out={};
+  Object.keys(o).forEach(function(k){
+    var nk=map[k]||k;
+    out[nk]=(out[nk]===undefined)?o[k]:merge(out[nk],o[k]);
+  });
+  setJ(key,out);
+}
+var MUSCLE_KW={
+  leg:['深蹲','腿举','腿弯举','腿屈伸','硬拉','箭步','弓步','臀推','提踵','小腿','股四头','腘绳','臀'],
+  chest:['卧推','夹胸','飞鸟','推胸','俯卧撑','胸推','双杠臂屈伸'],
+  back:['引体','划船','下拉','背','斜方','耸肩','面拉'],
+  shoulder:['肩推','侧平举','前平举','推举','三角肌','肩'],
+  arm:['弯举','三头','二头','臂屈伸','下压','腕'],
+  core:['卷腹','平板','举腿','腹','转体','山羊挺']
+};
+function guessMuscle(name){
+  if(!name)return 'core';
+  var lib=W.getExLib().find(function(x){return x.name===name;});
+  if(lib&&lib.muscle)return lib.muscle;
+  var ORDER=['leg','chest','back','shoulder','arm','core'];
+  for(var i=0;i<ORDER.length;i++){
+    var kws=MUSCLE_KW[ORDER[i]];
+    for(var j=0;j<kws.length;j++){if(name.indexOf(kws[j])>=0)return ORDER[i];}
+  }
+  return 'core';
+}
+function migPlanMuscle(){
+  if(localStorage.getItem('ironlog_mig_planmus2'))return;
+  var plans=getJ('ironlog_plans',[]),n=0;
+  plans.forEach(function(p){(p.exercises||[]).forEach(function(e){
+    if(!e.name)return;
+    var g=guessMuscle(e.name);
+    if(e.muscle!==g){e.muscle=g;n++;}
+  })});
+  setJ('ironlog_plans',plans);
+  localStorage.setItem('ironlog_mig_planmus2','1');
+  if(n>0)setTimeout(function(){toast('已重新归类 '+n+' 个动作的部位');},600);
+}
 function migExMuscle(){
   if(!localStorage.getItem('ironlog_mig_rmplan')){setJ('ironlog_plans',getJ('ironlog_plans',[]).filter(function(p){return!p.builtin}));localStorage.setItem('ironlog_mig_rmplan','1');}
   if(localStorage.getItem('ironlog_mig_exmus'))return;
@@ -864,9 +957,27 @@ var SPORTS=[
   {n:'爬坡',icon:'🥾',met:6},{n:'Padel',icon:'🎾',met:6},
   {n:'羽毛球',icon:'🏸',met:5.5},{n:'篮球',icon:'🏀',met:6.5}
 ];
+function renderExPicker(selectedNames,onclickFnName){
+  var lib=W.getExLib(),existing=selectedNames||[],grouped={leg:[],chest:[],back:[],shoulder:[],arm:[],core:[]};
+  lib.forEach(function(e){if(grouped[e.muscle])grouped[e.muscle].push(e)});
+  var MTAG=MUSCLE_TAG,ORDER=['chest','back','shoulder','arm','leg','core'];
+  var html='<div class="ct" style="margin-bottom:6px">从动作库选择</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">';
+  ORDER.forEach(function(m){
+    if(!grouped[m].length)return;
+    html+='<div><div style="font-size:10px;color:var(--txd);margin-bottom:4px">'+MTAG[m]+'</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
+      grouped[m].map(function(e){
+        var dis=existing.indexOf(e.name)>=0;
+        if(dis)return '<button class="btn sm" disabled style="opacity:.4">'+e.name+'</button>';
+        return '<button class="btn sm" onclick=\''+onclickFnName+'('+JSON.stringify(e.name)+','+JSON.stringify(e.muscle)+','+e.rest+')\'>'+e.name+'</button>';
+      }).join('')+'</div></div>';
+  });
+  return html+'</div>';
+}
 var W={
   curSub:1,curSport:0,swInt:null,swSec:0,swOn:false,swStart:0,swBase:0,
-  restInt:null,restSec:0,activeWk:null,wkInt:null,wkSec:0,
+  restInt:null,restSec:0,activeWk:null,_npEx:[],wkInt:null,wkSec:0,
   sub:function(n){
     this.curSub=n;
     document.getElementById('wo-t1').className='btn sm'+(n===1?' on':'');
@@ -1044,11 +1155,11 @@ var W={
     if(!this.activeWk)return;
     if(this.wkInt)clearInterval(this.wkInt);if(this.restInt)clearInterval(this.restInt);
     var plan=this.activeWk.plan,vol=this.activeWk.vol,dur=Math.round(this.wkSec/60);
-    var _bw=(function(){var wr=getJ('ironlog_weight_records',[]);return wr.length?wr[wr.length-1].weight:70})();
+    var _bw=curWeight();
     var _lib=W.getExLib(),_wsets=this.activeWk.sets,_exNames=Object.keys(_wsets);
     var _tot=_exNames.reduce(function(s,n){return s+(_wsets[n]||[]).length},0)||1;
     var kcal=0;
-    _exNames.forEach(function(n){var ex=_lib.find(function(e){return e.name===n;})||{met:5};kcal+=ex.met*_bw*(dur/60)*(_wsets[n].length/_tot);});
+    _exNames.forEach(function(n){var ex=_lib.find(function(e){return e.name===n;})||{met:5};kcal+=Math.max(0,(ex.met||1)-1)*_bw*(dur/60)*(_wsets[n].length/_tot);});
     kcal=Math.max(Math.round(kcal),Math.round(vol*.04+dur*2));
     var sets=this.activeWk.sets;
     var prs=getJ('ironlog_prs',{}),newPR=0;
@@ -1073,22 +1184,65 @@ var W={
     this.renderPlans();toast('训练完成！消耗 '+kcal+' kcal'+(newPR?' · '+newPR+'项新PR 🏆':' ✓'));
   },
   newPlan:function(){
+    this._npEx=[];
+    this.renderNewPlan('','120');
+  },
+  renderNewPlan:function(planName,rest){
+    var selected=this._npEx||[],names=selected.map(function(e){return e.name});
+    var selectedHtml=selected.length?selected.map(function(e){
+      var m=e.muscle||guessMuscle(e.name);
+      return '<div class="row" style="justify-content:space-between;align-items:center;margin:4px 0"><span>'+e.name+' <span class="tag m-'+m+'">'+(MUSCLE_TAG[m]||MUSCLE_TAG.core)+'</span></span><button class="btn sm dn" onclick=\'W.removeNewPlanEx('+JSON.stringify(e.name)+')\'>移除</button></div>';
+    }).join(''):'<div class="nodata" style="padding:8px 0">暂无已选动作</div>';
+    var rv=(rest==null?'120':rest);
     showMod('<div class="mtitle">新建训练计划</div><div class="col">'+
-      '<label class="lb">计划名称</label><input type="text" id="np-n" placeholder="如：推A">'+
-      '<label class="lb" style="margin-top:8px">动作（每行一个，可加肌群：如「深蹲 腿」）</label>'+
-      '<textarea id="np-e" rows="5" style="resize:vertical;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:8px;font-size:13px;width:100%;outline:none" placeholder="杠铃卧推 胸&#10;哑铃肩推 肩&#10;绳索下压 手臂"></textarea>'+
-      '<label class="lb" style="margin-top:8px">默认组间休息（秒）</label><input type="number" id="np-r" value="120" min="0" step="15" inputmode="numeric"></div>'+
-      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<label class="lb">计划名称</label><input type="text" id="np-n" placeholder="如：推A" value="'+(planName||'')+'">'+
+      '<label class="lb" style="margin-top:8px">默认组间休息（秒）</label><input type="number" id="np-r" value="'+rv+'" min="0" step="15" inputmode="numeric">'+
+      '<label class="lb" style="margin-top:8px">自定义动作名</label>'+
+      '<div style="display:flex;gap:6px"><input type="text" id="np-ex-n" placeholder="动作名称" style="flex:1;min-width:0">'+
+      '<select id="np-ex-m"><option value="core">核心</option><option value="chest">胸</option>'+
+      '<option value="back">背</option><option value="leg">腿</option>'+
+      '<option value="shoulder">肩</option><option value="arm">手臂</option></select>'+
+      '<button class="btn sm" onclick="W.addNewPlanEx(document.getElementById(\'np-ex-n\').value,document.getElementById(\'np-ex-m\').value)">添加</button></div>'+
+      '<div class="ct" style="margin-top:10px;margin-bottom:6px">已选动作</div>'+
+      '<div style="max-height:150px;overflow-y:auto">'+selectedHtml+'</div>'+
+      renderExPicker(names,'W.addNewPlanEx')+
+      '</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
       '<button class="btn" onclick="closeModNow()">取消</button>'+
       '<button class="btn pr" onclick="W.savePlan()">保存</button></div>');
   },
+  addNewPlanEx:function(name,muscle){
+    var ne=document.getElementById('np-n'),re=document.getElementById('np-r');
+    var planName=ne?ne.value.trim():'',rest=parseInt(re&&re.value,10);
+    if(isNaN(rest)||rest<0)rest=120;
+    name=stripExSuffix(String(name||'').trim());
+    if(!name){toast('请输入动作名');return}
+    if((this._npEx||[]).some(function(e){return e.name===name})){toast('已有该动作');return}
+    muscle=muscle||guessMuscle(name);
+    var lib=getJ('ironlog_ex_lib',[]);
+    if(!this.getExLib().some(function(e){return e.name===name})){
+      lib.push({name:name,muscle:muscle,met:5,rest:rest,mode:'standard'});setJ('ironlog_ex_lib',lib);
+    }
+    this._npEx.push({name:name,muscle:muscle});
+    this.renderNewPlan(planName,rest);
+  },
+  removeNewPlanEx:function(name){
+    var ne=document.getElementById('np-n'),re=document.getElementById('np-r');
+    var planName=ne?ne.value.trim():'',rest=parseInt(re&&re.value,10);
+    if(isNaN(rest)||rest<0)rest=120;
+    this._npEx=(this._npEx||[]).filter(function(e){return e.name!==name});
+    this.renderNewPlan(planName,rest);
+  },
   savePlan:function(){
-    var name=document.getElementById('np-n').value.trim(),exStr=document.getElementById('np-e').value.trim();
-    if(!name||!exStr){toast('请填写名称和动作');return}
-    var rest=parseInt(document.getElementById('np-r').value)||120;
-    var plan={id:'u'+Date.now(),name:name,exercises:exStr.split('\n').filter(Boolean).map(function(e){var pe=parseExLine(e);return{name:pe.name,muscle:pe.muscle||'core',rest:rest}})};
+    var name=document.getElementById('np-n').value.trim(),exs=this._npEx||[];
+    if(!name||!exs.length){toast('请填写名称和动作');return}
+    var rest=parseInt(document.getElementById('np-r').value,10);
+    if(isNaN(rest)||rest<0)rest=120;
+    var plan={id:'u'+Date.now(),name:name,exercises:exs.map(function(e){
+      var en=stripExSuffix(e.name),em=e.muscle||guessMuscle(en);
+      return{name:en,muscle:em,rest:rest};
+    })};
     var plans=getJ('ironlog_plans',[]);plans.push(plan);setJ('ironlog_plans',plans);
-    closeModNow();this.renderPlans();toast('计划已保存 ✓');
+    this._npEx=[];closeModNow();this.renderPlans();toast('计划已保存 ✓');
   },
   editPlan:function(id){
     var plan=this.getPlans().find(function(p){return p.id===id;});if(!plan)return;
@@ -1111,7 +1265,7 @@ var W={
     var exercises=exStr.split('\n').filter(Boolean).map(function(line){
       var pe=parseExLine(line);
       var ox=orig?orig.exercises.find(function(e){return e.name===pe.name;}):null;
-      return {name:pe.name,muscle:pe.muscle||(ox?ox.muscle:'core'),rest:ox?ox.rest:120};
+      return {name:pe.name,muscle:pe.muscle||(ox?ox.muscle:guessMuscle(pe.name)),rest:ox?ox.rest:120};
     });
     var saved=getJ('ironlog_plans',[]);
     var idx=saved.findIndex(function(p){return p.id===id;});
@@ -1172,7 +1326,7 @@ var W={
     var d=parseFloat(document.getElementById('elw-d').value)||0;if(!d){toast('请输入时长');return}
     l.duration=Math.round(d);
     var nd=document.getElementById('elw-dt').value;if(nd)l.date=nd;
-    var bw=(function(){var wr=getJ('ironlog_weight_records',[]);return wr.length?wr[wr.length-1].weight:70})();
+    var bw=curWeight();
     l.kcal=Math.max(Math.round(bw*(l.duration/60)*5),Math.round((l.volume||0)*.04+l.duration*2));
     setJ('ironlog_workout_logs',logs);closeModNow();this.renderLogs();toast('已更新 ✓');
   },
@@ -1199,9 +1353,10 @@ var W={
   saveCardio2:function(id){
     var logs=getJ('ironlog_cardio_logs',[]);var l=logs.find(function(x){return x.id===id});if(!l)return;
     var d=parseFloat(document.getElementById('ec-d').value)||0;if(!d){toast('请输入时长');return}
-    l.duration=Math.round(d);
+    l.duration=d;
     var nd=document.getElementById('ec-dt').value;if(nd)l.date=nd;
-    l.kcal=Math.round((l.met||6)*(l.weight||70)*(l.duration/60));
+    var sp=SPORTS.find(function(x){return x.n===l.sport;}),met=parseFloat(l.met)||((sp&&sp.met)||6);
+    l.kcal=metKcal(met,l.weight,l.duration);
     setJ('ironlog_cardio_logs',logs);closeModNow();this.renderLogs();if(typeof D!=='undefined')D.render();toast('已更新 \u2713');
   },
   delCardio:function(id){
@@ -1242,31 +1397,15 @@ var W={
   },
   addExToWk:function(){
     if(!this.activeWk)return;
-    var lib=this.getExLib();
     var existing=this.activeWk.plan.exercises.map(function(e){return e.name});
-    var grouped={leg:[],chest:[],back:[],shoulder:[],arm:[],core:[]};
-    lib.forEach(function(e){if(grouped[e.muscle])grouped[e.muscle].push(e)});
-    var MTAG=MUSCLE_TAG;
     var html='<div class="mtitle">添加动作</div>'+
       '<div style="margin-bottom:8px"><label class="lb">自定义动作名</label>'+
       '<input type="text" id="aex-n" placeholder="动作名称" style="width:100%;box-sizing:border-box">'+
       '<select id="aex-m" style="width:100%;margin-top:6px"><option value="core">核心</option><option value="chest">胸</option>'+
       '<option value="back">背</option><option value="leg">腿</option>'+
       '<option value="shoulder">肩</option><option value="arm">手臂</option></select></div>'+
-      '<div class="ct" style="margin-bottom:6px">从动作库选择</div>'+
-      '<div style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">';
-    var ORDER=['chest','back','shoulder','arm','leg','core'];
-    ORDER.forEach(function(m){
-      if(!grouped[m].length)return;
-      html+='<div><div style="font-size:10px;color:var(--txd);margin-bottom:4px">'+MTAG[m]+'</div>'+
-        '<div style="display:flex;flex-wrap:wrap;gap:4px">'+
-        grouped[m].map(function(e){
-          var dis=existing.indexOf(e.name)>=0;
-          if(dis)return '<button class="btn sm" disabled style="opacity:.4">'+e.name+'</button>';
-          return '<button class="btn sm" onclick=\'W.confirmAddExN('+JSON.stringify(e.name)+','+JSON.stringify(e.muscle)+','+e.rest+')\'>'+e.name+'</button>';
-        }).join('')+'</div></div>';
-    });
-    html+='</div><div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      renderExPicker(existing,'W.confirmAddExN')+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
       '<button class="btn" onclick="closeModNow()">取消</button>'+
       '<button class="btn pr" onclick="W.confirmAddExN(document.getElementById(\'aex-n\').value,document.getElementById(\'aex-m\').value,120)">添加自定义</button></div>';
     showMod(html);
@@ -1385,8 +1524,7 @@ var W={
   pickSport:function(i){
     this.curSport=i;this.renderSports();
     document.getElementById('c-met').value=SPORTS[i].met;
-    var wr=getJ('ironlog_weight_records',[]).sort(function(a,b){return b.date.localeCompare(a.date)});
-    if(wr.length)document.getElementById('c-wt').value=wr[0].weight;
+    document.getElementById('c-wt').value=curWeight();
     this.cPreview();
   },
   cmode:function(n){
@@ -1398,9 +1536,9 @@ var W={
   },
   cPreview:function(){
     var dur=parseFloat(document.getElementById('c-dur').value)||(this.swNow()/60)||0;
-    var wt=parseFloat(document.getElementById('c-wt').value)||70;
-    var met=parseFloat(document.getElementById('c-met').value)||8;
-    document.getElementById('c-prev').textContent=(dur>0?Math.round(met*wt*(dur/60)):'—')+' kcal';
+    var wt=parseFloat(document.getElementById('c-wt').value)||curWeight();
+    var met=parseFloat(document.getElementById('c-met').value)||SPORTS[this.curSport].met;
+    document.getElementById('c-prev').textContent=(dur>0?metKcal(met,wt,dur):'—')+' kcal';
   },
   swNow:function(){return Math.floor(this.swBase+(this.swOn?(Date.now()-this.swStart)/1000:0))},
   swSave:function(){setJ('ironlog_cardio_sw',{base:this.swBase,start:this.swStart,on:this.swOn})},
@@ -1426,10 +1564,10 @@ var W={
   },
   saveCardio:function(){
     var dur=parseFloat(document.getElementById('c-dur').value);if(!dur){toast('请输入时长');return}
-    var wt=parseFloat(document.getElementById('c-wt').value)||70;
+    var wt=parseFloat(document.getElementById('c-wt').value)||curWeight();
     var met=parseFloat(document.getElementById('c-met').value)||SPORTS[this.curSport].met;
     var sp=SPORTS[this.curSport];
-    var log={id:Date.now(),date:today(),sport:sp.n,icon:sp.icon,met:met,duration:dur,weight:wt,kcal:Math.round(met*wt*(dur/60))};
+    var log={id:Date.now(),date:today(),sport:sp.n,icon:sp.icon,met:met,duration:dur,weight:wt,kcal:metKcal(met,wt,dur)};
     var logs=getJ('ironlog_cardio_logs',[]);logs.push(log);setJ('ironlog_cardio_logs',logs);
     toast('有氧记录保存 ✓ '+log.kcal+' kcal');this.swReset();document.getElementById('c-dur').value='';this.renderCardioWeek();
   },
@@ -2459,6 +2597,8 @@ var HI={
 
 // ── INIT ──
 migExMuscle();
+migStripSuffix();
+migPlanMuscle();
 TD.settle();
 (function(){var _vk=document.getElementById('pr-vlm');if(_vk)_vk.value=localStorage.getItem('ironlog_vlm_key')||''})();
 D.goToday=function(){this.date=today();this.render();};
@@ -2499,4 +2639,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1788861460 -->
+<!-- b1788862712 -->
