@@ -2463,7 +2463,7 @@ var HI={
   days:7,
   period:function(n,btn){this.days=n;document.querySelectorAll('.pbb').forEach(function(b){b.classList.remove('on')});btn.classList.add('on');this.render()},
   dateRange:function(){var arr=[],t=today();for(var i=this.days-1;i>=0;i--)arr.push(addD(t,-i));return arr},
-  render:function(){var dates=this.dateRange();this.weekReport();this.tdeeChart();this.weightChart(dates);this.calChart(dates);this.burnChart(dates);this.proteinChart(dates);this.volumeChart(dates);this.fillStrengthSel();this.strengthChart()},
+  render:function(){var dates=this.dateRange();this.weekReport();this.tdeeChart();this.weightChart(dates);this.calChart(dates);this.burnChart(dates);this.proteinChart(dates);this.volumeChart(dates);this.fillStrengthSel();this.strengthChart(dates)},
   tdeeChart:function(){
     var el=document.getElementById('hi-tc2');if(!el)return;
     var h=(getJ('ironlog_tdee_state',{}).hist)||[];
@@ -2579,10 +2579,14 @@ var HI={
     var cur=sel.value;
     sel.innerHTML=names.map(function(nm){return '<option'+(nm===cur?' selected':'')+'>'+nm+'</option>'}).join('');
   },
-  strengthChart:function(){
+  strengthChart:function(dates){
     var sel=document.getElementById('hi-sx'),el=document.getElementById('hi-sc');if(!el)return;
-    var hist=(getJ('ironlog_strength_history',{})[sel?sel.value:''])||[];
-    if(!hist.length){el.innerHTML='<div class="nodata">完成训练后这里显示力量曲线</div>';return}
+    var all=(getJ('ironlog_strength_history',{})[sel?sel.value:''])||[];
+    if(!all.length){el.innerHTML='<div class="nodata">完成训练后这里显示力量曲线</div>';return}
+    var MINPTS=6,_from=(dates&&dates.length)?dates[0]:'';
+    var win=_from?all.filter(function(h){return h&&h.d&&h.d>=_from;}):all.slice();
+    var hist=win.length>=MINPTS?win:all.slice(-MINPTS);
+    var _expanded=hist.length>win.length;
     var vals=hist.map(function(h){return h.e}),mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
     var pad2=(mx-mn)<5?5:(mx-mn)*.2,yMin=Math.max(0,mn-pad2),yMax=mx+pad2;
     var c=this.svg(340,130,36,8,10,24),n=hist.length,dts=hist.map(function(h){return h.d});
@@ -2591,7 +2595,7 @@ var HI={
     var pts=[],cirs='';
     hist.forEach(function(h,i){var x=c.PL+c.CW*(i/(n-1||1)),y=c.PT+c.CH-c.CH*((h.e-yMin)/(yMax-yMin||1));pts.push(x+','+y);cirs+='<circle cx="'+x+'" cy="'+y+'" r="2.5" fill="var(--gn)" stroke="var(--bg)" stroke-width="1.5"><title>'+h.d+': '+h.e+'kg</title></circle>'});
     if(pts.length>1)svg+='<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--gn)" stroke-width="2" stroke-linejoin="round"/>';
-    el.innerHTML=svg+cirs+'</svg>';
+    el.innerHTML=svg+cirs+'</svg>'+(_expanded?'<div class="su" style="text-align:center;margin-top:3px">\u7a97\u53e3\u5185\u4ec5 '+win.length+' \u6b21 \u00b7 \u5df2\u6269\u5c55\u5230\u6700\u8fd1 '+hist.length+' \u6b21</div>':'');
   }
 };
 
@@ -2639,4 +2643,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1788862712 -->
+<!-- b1788872830 -->
