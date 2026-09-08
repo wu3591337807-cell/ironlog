@@ -448,7 +448,7 @@ svg.chart{width:100%;display:block}
     </div>
     <div class="card"><div class="ct">蛋白质摄入</div><div id="hi-pc"></div></div>
     <div class="card"><div class="ct">训练容量 (kg)</div><div id="hi-vc"></div></div>
-    <div class="card"><div class="row sb" style="margin-bottom:8px"><div class="ct" style="margin:0">力量进步 (e1RM)</div><select id="hi-sx" onchange="HI.strengthChart()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:4px 8px;font-size:12px;width:auto"></select></div><div id="hi-sc"></div></div>
+    <div class="card"><div class="ct" style="margin-bottom:7px">力量进步 (e1RM)</div><div style="display:flex;gap:6px;margin-bottom:8px"><select id="hi-sm" onchange="HI.onMuscleChange()" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:4px 8px;font-size:12px;flex:1;min-width:0"></select><select id="hi-sx" onchange="HI.strengthChart(HI.dateRange())" style="background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx);padding:4px 8px;font-size:12px;flex:1;min-width:0"></select></div><div id="hi-sc"></div></div>
   </div>
 </div>
 
@@ -2572,12 +2572,36 @@ var HI={
     series.forEach(function(s,i){if(!s.v)return;var x=c.PL+c.CW*((i+0.5)/n)-bw/2,bH=c.CH*(s.v/mx);svg+='<rect x="'+x+'" y="'+(c.PT+c.CH-bH)+'" width="'+bw+'" height="'+bH+'" fill="var(--ac)" rx="1" opacity=".85"><title>'+s.d+': '+s.v+'kg</title></rect>'});
     el.innerHTML=svg+'</svg>';
   },
+  MORDER:['chest','back','shoulder','arm','leg','core'],
+  strengthIndex:function(){
+    var hist=getJ('ironlog_strength_history',{}),idx={};
+    Object.keys(hist).forEach(function(nm){
+      var arr=hist[nm]||[];if(!arr.length)return;
+      var m=guessMuscle(nm);if(!MUSCLE_TAG[m])m='core';
+      if(!idx[m])idx[m]=[];
+      idx[m].push({name:nm,last:(arr[arr.length-1]||{}).d||''});
+    });
+    Object.keys(idx).forEach(function(m){
+      idx[m].sort(function(a,b){return b.last.localeCompare(a.last)});   // 最近练过的排最前
+    });
+    return idx;
+  },
   fillStrengthSel:function(){
-    var sel=document.getElementById('hi-sx');if(!sel)return;
-    var names=Object.keys(getJ('ironlog_strength_history',{}));
-    if(!names.length){sel.innerHTML='<option>暂无数据</option>';return}
-    var cur=sel.value;
-    sel.innerHTML=names.map(function(nm){return '<option'+(nm===cur?' selected':'')+'>'+nm+'</option>'}).join('');
+    var ms=document.getElementById('hi-sm'),sel=document.getElementById('hi-sx');if(!ms||!sel)return;
+    var idx=this.strengthIndex(),keys=Object.keys(idx),ORD=this.MORDER;
+    if(!keys.length){ms.innerHTML='<option>\u6682\u65e0\u6570\u636e</option>';sel.innerHTML='<option>\u6682\u65e0\u6570\u636e</option>';return}
+    keys.sort(function(a,b){return ORD.indexOf(a)-ORD.indexOf(b)});
+    var m=(keys.indexOf(ms.value)>=0)?ms.value:keys[0];
+    ms.innerHTML=keys.map(function(k){return '<option value="'+k+'"'+(k===m?' selected':'')+'>'+MUSCLE_TAG[k]+'</option>'}).join('');
+    var list=idx[m]||[],curX=sel.value;
+    var pick=list.some(function(x){return x.name===curX})?curX:(list[0]?list[0].name:'');
+    sel.innerHTML=list.map(function(x){return '<option'+(x.name===pick?' selected':'')+'>'+x.name+'</option>'}).join('');
+  },
+  onMuscleChange:function(){
+    var ms=document.getElementById('hi-sm'),sel=document.getElementById('hi-sx');if(!ms||!sel)return;
+    var list=this.strengthIndex()[ms.value]||[];
+    sel.innerHTML=list.map(function(x,i){return '<option'+(i===0?' selected':'')+'>'+x.name+'</option>'}).join('');
+    this.strengthChart(this.dateRange());
   },
   strengthChart:function(dates){
     var sel=document.getElementById('hi-sx'),el=document.getElementById('hi-sc');if(!el)return;
@@ -2643,4 +2667,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1788872830 -->
+<!-- b1788876983 -->
