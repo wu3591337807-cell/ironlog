@@ -249,7 +249,6 @@ svg.chart{width:100%;display:block}
     </div>
   </div>
   <div id="wo-records" style="display:none">
-    <div class="ph" style="padding-top:9px"><span class="ptitle">训练记录</span></div>
     <div class="con"><div id="wo-logs"></div></div>
   </div>
 </div>
@@ -601,6 +600,9 @@ function fmtLong(s){var p=s.split('-'),days=['日','一','二','三','四','五'
 function fmtShort(s){var p=s.split('-');return p[1]+'/'+p[2]}
 function getJ(k,d){try{return JSON.parse(localStorage.getItem(k)||'null')||d}catch(e){return d}}
 function setJ(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function logErr(msg,src,line){try{var a=getJ('ironlog_errlog',[]);if(!Array.isArray(a))a=[];a.push({ts:Date.now(),msg:String(msg||'').slice(0,300),src:String(src||'').slice(0,120),line:line||0});setJ('ironlog_errlog',a.slice(-20));}catch(e){}}
+window.onerror=function(msg,src,line){logErr(msg,src,line);try{toast('\u6e32\u67d3\u51fa\u9519\uff0c\u6863\u6848\u9875\u53ef\u67e5\u770b\u8be6\u60c5')}catch(e){}};
+window.addEventListener('unhandledrejection',function(e){logErr((e&&e.reason&&e.reason.message)||e.reason,'promise',0);try{toast('\u6e32\u67d3\u51fa\u9519\uff0c\u6863\u6848\u9875\u53ef\u67e5\u770b\u8be6\u60c5')}catch(e2){}});
 function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2200)}
 function vib(ms){try{if(navigator.vibrate)navigator.vibrate(ms||15)}catch(e){}}
 function showMod(html){document.getElementById('mc').innerHTML=html;document.getElementById('mover').classList.add('on')}
@@ -619,7 +621,7 @@ function showTab(id){
   if(id==='db')D.render();
   if(id==='wo'){W.renderPlans();W.renderSports();W.renderCardioWeek()}
   if(id==='dt'){DT.autoMeal();DT.render()}
-  if(id==='pr'){PR.load();PR.renderAll();}
+  if(id==='pr'){PR.load();PR.renderAll();BAK.renderStatus();}
   if(id==='hi')HI.render();
 }
 
@@ -766,6 +768,9 @@ var D={
     if(!this.dietLogged(td)&&this.dietLogged(yd)){
       rows.push('<div style="font-size:12px;color:var(--tx)">\ud83c\udf5a \u4eca\u5929\u7167\u5e38\u5403\uff1f<span style="color:var(--ac);cursor:pointer" onclick="D.copyDay(\''+yd+'\',\''+td+'\',\'\u590d\u5236\u6628\u65e5\u5168\u5929\u996e\u98df\u5230\u4eca\u5929\uff0c\u4e4b\u540e\u53ef\u5fae\u8c03\uff1f\')">\u4e00\u952e\u590d\u5236\u6628\u65e5 \u203a</span></div>');
     }
+    var _lb=localStorage.getItem('ironlog_last_backup');
+    var _bd=_lb?Math.round((new Date(td)-new Date(_lb))/86400000):999;
+    if(_bd>=7)rows.push('<div style="font-size:12px;color:var(--rd)">\u26a0\ufe0f '+(_lb?'\u5df2 '+_bd+' \u5929\u672a\u5907\u4efd':'\u4ece\u672a\u5907\u4efd')+' \u00b7 \u6570\u636e\u53ea\u5b58\u5728\u8fd9\u53f0\u624b\u673a\u4e0a&nbsp;&nbsp;<span style="color:var(--ac);cursor:pointer" onclick="BAK.download();D.renderBanner()">\u7acb\u5373\u5907\u4efd \u203a</span></div>');
     var sug=TD.sug();
     if(sug)rows.push('<div style="font-size:12px;color:var(--tx)">\ud83d\udcca 实测TDEE <b>'+sug.tdee+'</b> · 上周'+(sug.rate===null?'—':(sug.rate>0?'+':'')+sug.rate+'kg')+' · 目标 '+sug.cur+'\u2192<b style="color:var(--ac)">'+sug.nt+'</b>&nbsp;&nbsp;<span style="color:var(--ac);cursor:pointer" onclick="TD.apply()">应用 \u203a</span>&nbsp;&nbsp;<span style="color:var(--txm);cursor:pointer" onclick="TD.dismiss()">\u2715 本周不提醒</span></div>');
     if(!rows.length){el.style.display='none';el.innerHTML='';return}
@@ -920,12 +925,22 @@ var W={
     this.renderExercises();
   },
   saveActive:function(){
-    if(this.activeWk)setJ('ironlog_active_workout',{plan:this.activeWk.plan,sets:this.activeWk.sets,startTs:this.activeWk.startTs});
+    if(this.activeWk)setJ('ironlog_active_workout',{plan:this.activeWk.plan,sets:this.activeWk.sets,startTs:this.activeWk.startTs,restEnd:this.restEnd||0,restDur:this.restDur||0});
   },
   resumeActive:function(){
     var s=getJ('ironlog_active_workout',null);if(!s||!s.plan)return;
     this.activeWk={plan:s.plan,sets:s.sets||{},vol:0,startTs:s.startTs||Date.now()};
     this._enterActive();toast('已恢复未完成的训练');
+    var _re=s.restEnd||0,self2=this;
+    if(_re>Date.now()){
+      this.restDur=s.restDur||120;this.restEnd=_re;
+      document.getElementById('wo-restCard').style.display='block';this.showRest();
+      if(this.restInt)clearInterval(this.restInt);
+      this.restInt=setInterval(function(){self2.showRest()},250);
+    }else if(_re>0){
+      this.restEnd=0;this.saveActive();
+      setTimeout(function(){toast('\u4f11\u606f\u5df2\u7ed3\u675f')},1200);
+    }
   },
   abort:function(){
     if(!confirm('确定放弃本次训练？记录不会保存'))return;
@@ -1000,13 +1015,14 @@ var W={
     document.getElementById('wo-restCard').style.display='block';this.showRest();
     var self=this;
     this.restInt=setInterval(function(){self.showRest()},250);
+    this.saveActive();
   },
   showRest:function(){
     var left=Math.max(0,Math.round((this.restEnd-Date.now())/1000));this.restSec=left;
     document.getElementById('wo-rt').textContent=pad(Math.floor(left/60))+':'+pad(left%60);
     if(left<=0){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none';this.restAlert()}
   },
-  addRest:function(n){this.restEnd+=n*1000;this.showRest()},
+  addRest:function(n){this.restEnd+=n*1000;this.showRest();this.saveActive()},
   restAlert:function(){
     toast('休息结束 ✓');
     try{if(navigator.vibrate)navigator.vibrate([200,100,200])}catch(e){}
@@ -1021,7 +1037,7 @@ var W={
       }
     }catch(e){}
   },
-  skipRest:function(){if(this.restInt)clearInterval(this.restInt);document.getElementById('wo-restCard').style.display='none'},
+  skipRest:function(){if(this.restInt)clearInterval(this.restInt);this.restEnd=0;this.saveActive();document.getElementById('wo-restCard').style.display='none'},
   resetRest:function(){this.startRest(this.restDur||120)},
   finish:function(){
     vib([15,40,15]);
@@ -1110,7 +1126,7 @@ var W={
     var self=this;
     var wLogs=getJ('ironlog_workout_logs',[]).slice().map(function(l){return Object.assign({},l,{_t:'w'});});
     var cLogs=getJ('ironlog_cardio_logs',[]).slice().map(function(l){return Object.assign({},l,{_t:'c'});});
-    var all=wLogs.concat(cLogs).sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;});
+    var all=wLogs.concat(cLogs).filter(function(l){return l&&l.date;}).sort(function(a,b){return b.date.localeCompare(a.date)||b.id-a.id;});
     var cutoff=self.logDays>0?addD(today(),-self.logDays+1):'';
     var logs=cutoff?all.filter(function(l){return l.date>=cutoff;}):all;
     var fh='<div class="row sb" style="margin-top:4px;margin-bottom:6px">'+
@@ -2221,6 +2237,8 @@ var BAK={
     var bytes=0;for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.indexOf('ironlog_')===0)bytes+=(localStorage.getItem(k)||'').length;}
     var pct=Math.min(bytes/5242880*100,100);
     html+=' \u00b7 存储 '+(bytes/1024).toFixed(0)+'KB <span style="color:'+(pct>=80?'var(--rd)':'var(--txm)')+'">('+pct.toFixed(0)+'%)</span>';
+    var _errs=getJ('ironlog_errlog',[]);
+    if(_errs.length)html+='<br><span style="color:var(--rd);cursor:pointer" onclick="BAK.showErr()">\u26a0\ufe0f '+_errs.length+' \u6761\u9519\u8bef\u8bb0\u5f55 \u203a</span>';
     el.innerHTML=html;
   },
   forceUpdate:function(){
@@ -2235,6 +2253,20 @@ var BAK={
     data.__version=1;data.__date=today();
     return JSON.stringify(data,null,2);
   },
+  showErr:function(){
+    var a=getJ('ironlog_errlog',[]);if(!a.length){toast('\u6682\u65e0\u9519\u8bef\u8bb0\u5f55');return}
+    var rows=a.slice().reverse().map(function(e){
+      var d=new Date(e.ts||0);
+      return '<div style="padding:6px 0;border-bottom:1px solid var(--bd)">'+
+        '<div style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm)">'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+' \u00b7 '+String(e.src||'').split('/').pop()+':'+(e.line||0)+'</div>'+
+        '<div style="font-size:12px;color:var(--tx);word-break:break-all">'+String(e.msg||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div></div>';
+    }).join('');
+    showMod('<div class="mtitle">\u9519\u8bef\u65e5\u5fd7\uff08'+a.length+'\uff09</div><div style="max-height:300px;overflow-y:auto">'+rows+'</div>'+
+      '<div class="row" style="margin-top:12px;justify-content:flex-end;gap:8px">'+
+      '<button class="btn" onclick="closeModNow()">\u5173\u95ed</button>'+
+      '<button class="btn dn" onclick="BAK.clearErr()">\u6e05\u7a7a</button></div>');
+  },
+  clearErr:function(){localStorage.removeItem('ironlog_errlog');closeModNow();this.renderStatus();toast('\u5df2\u6e05\u7a7a');},
   copy:function(){
     var s=this.collect();
     if(navigator.clipboard&&navigator.clipboard.writeText){
@@ -2467,4 +2499,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1785983212 -->
+<!-- b1788861460 -->
