@@ -855,7 +855,7 @@ var MUSCLE_SEED={
 '卷腹':'core','反向山羊挺':'core','侧向等长斜平板':'core','悬垂举腿':'core',
 '腿弯举 腘绳肌':'leg','腿屈伸 股四头肌':'leg','俯卧腿弯举 腘绳肌':'leg','安全杆深蹲 股四头肌':'leg','腿举 股四头肌':'leg','小腿推 小腿':'leg','深蹲推举 股四头肌':'leg','赤字罗马尼亚硬拉 腘绳肌':'leg'
 };
-var EX_SUFFIX=['股四头肌','腘绳肌','臀大肌','肱二头肌','肱三头肌','三角肌','背阔肌','胸大肌',
+var EX_SUFFIX=['股四头肌','腘绳肌','臀大肌','肱二头肌','肱三头肌','二头肌','三头肌','三角肌','背阔肌','胸大肌',
                '斜方肌','腹直肌','小腿','股四头','腘绳','臀','腿','胸','背','肩','手臂','核心'];
 function stripExSuffix(name){
   if(!name)return name;
@@ -909,16 +909,22 @@ function migKeyed(key,map,merge){
   });
   setJ(key,out);
 }
+var MUSCLE_EXACT={'直臂下压':'back','三头下压/双杠臂屈伸':'arm'};
+var MUSCLE_HINT={shoulder:['后束','中束','前束']};
 var MUSCLE_KW={
-  leg:['深蹲','腿举','腿弯举','腿屈伸','硬拉','箭步','弓步','臀推','提踵','小腿','股四头','腘绳','臀'],
-  chest:['卧推','夹胸','飞鸟','推胸','俯卧撑','胸推','双杠臂屈伸'],
+  leg:['深蹲','腿举','腿弯举','腿屈伸','硬拉','箭步','弓步','臀推','提踵','小腿','股四头','腘绳','臀','髋','倒蹬','北欧'],
+  chest:['卧推','夹胸','飞鸟','推胸','俯卧撑','胸推','双杠臂屈伸','斜推'],
   back:['引体','划船','下拉','背','斜方','耸肩','面拉'],
-  shoulder:['肩推','侧平举','前平举','推举','三角肌','肩'],
-  arm:['弯举','三头','二头','臂屈伸','下压','腕'],
+  shoulder:['肩推','侧平举','前平举','推举','三角肌','肩','y举','Y举','侧举'],
+  arm:['弯举','三头','二头','臂屈伸','下压','腕','过头伸展','牧师'],
   core:['卷腹','平板','举腿','腹','转体','山羊挺']
 };
 function guessMuscle(name){
   if(!name)return 'core';
+  if(MUSCLE_EXACT[name])return MUSCLE_EXACT[name];
+  for(var h in MUSCLE_HINT){
+    for(var k=0;k<MUSCLE_HINT[h].length;k++){if(name.indexOf(MUSCLE_HINT[h][k])>=0)return h;}
+  }
   var lib=W.getExLib().find(function(x){return x.name===name;});
   if(lib&&lib.muscle)return lib.muscle;
   var ORDER=['leg','chest','back','shoulder','arm','core'];
@@ -927,6 +933,22 @@ function guessMuscle(name){
     for(var j=0;j<kws.length;j++){if(name.indexOf(kws[j])>=0)return ORDER[i];}
   }
   return 'core';
+}
+function migRegroup(){
+  if(localStorage.getItem('ironlog_mig_regroup1'))return;
+  localStorage.removeItem('ironlog_mig_stripsuffix');migStripSuffix();
+  localStorage.removeItem('ironlog_mig_planmus2');migPlanMuscle();
+  var cl=getJ('ironlog_cardio_logs',[]),n=0;
+  var wr=getJ('ironlog_weight_records',[]).filter(function(x){return x&&x.date&&x.weight>0;})
+         .sort(function(a,b){return a.date.localeCompare(b.date);});
+  cl.forEach(function(l){
+    if(!l||l.weight!==70||!l.date)return;
+    var cand=null;wr.forEach(function(r){if(r.date<=l.date)cand=r;});
+    if(!cand||cand.weight===70)return;
+    l.weight=cand.weight;l.kcal=metKcal(l.met,cand.weight,l.duration);n++;
+  });
+  if(n){setJ('ironlog_cardio_logs',cl);setTimeout(function(){toast('已修正 '+n+' 条体重缺失的有氧记录')},1400);}
+  localStorage.setItem('ironlog_mig_regroup1','1');
 }
 function migPlanMuscle(){
   if(localStorage.getItem('ironlog_mig_planmus2'))return;
@@ -2657,6 +2679,7 @@ var HI={
 migExMuscle();
 migStripSuffix();
 migPlanMuscle();
+migRegroup();
 TD.settle();
 (function(){var _vk=document.getElementById('pr-vlm');if(_vk)_vk.value=localStorage.getItem('ironlog_vlm_key')||''})();
 D.goToday=function(){this.date=today();this.render();};
@@ -2697,4 +2720,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1789107995 -->
+<!-- b1789115116 -->
