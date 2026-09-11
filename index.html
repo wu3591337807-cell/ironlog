@@ -41,7 +41,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--ac)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--bd);background:var(--sf2);color:var(--txd);cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:1px;white-space:nowrap}
 .btn:hover,.btn:active{border-color:var(--ac);color:var(--ac)}
 .btn.pr{background:var(--ac);border-color:var(--ac);color:#0f0f0f;font-weight:600}.btn.pr:hover{opacity:.85}
-.btn.dn{border-color:var(--rd);color:var(--rd)}.btn.sm{padding:5px 10px;font-size:10px}
+.btn.dn{border-color:var(--rd);color:var(--rd)}.btn.sm{padding:5px 10px;font-size:10px}.wo-jump{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac)}
 .sv{font-family:"Bebas Neue",sans-serif;font-size:27px;line-height:1}
 .sv.ac{color:var(--ac)}.sv.gn{color:var(--gn)}.sv.rd{color:var(--rd)}.sv.sm{font-size:19px}
 .su{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--txm);margin-top:2px}
@@ -1082,16 +1082,17 @@ var W={
             '<input type="number" value="'+(s.r||0)+'" style="width:48px;text-align:center;padding:4px 6px;font-size:13px" placeholder="次" onchange="W.updSet(\''+ex.name+'\','+si+',\'r\',this.value)">';
           calc='<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--ac);flex:1">'+Math.round((s.w||0)*(s.r||0))+'kg</span>';
         }
+        var tagBtn=mode==='standard'?'<button class="btn sm" style="width:26px;padding:5px 0;font-size:10px;color:'+(s.tag?'var(--ac)':'var(--txm)')+'" onclick=\'W.pickTag('+JSON.stringify(ex.name).replace(/'/g,'&#39;')+','+si+')\'>'+(s.tag==='drop'?'D':s.tag==='rp'?'RP':s.tag==='fail'?'F':'·')+'</button>':'';
         return '<div class="dn" style="padding:5px 0">'+
           '<span style="font-family:IBM Plex Mono,monospace;font-size:10px;color:var(--txm);width:22px">'+pad(si+1)+'</span>'+
-          mid+calc+
+          mid+calc+tagBtn+
           '<button class="btn sm pr" style="font-size:11px" onclick="W.startRest('+(ex.rest||120)+')">&#10003; 完成</button>'+
           '<button class="btn sm dn" onclick="W.rmSet(\''+ex.name+'\','+si+')">&#10005;</button></div>';
       }).join('');
-      return '<div class="card" style="margin-bottom:6px">'+
+      return '<div class="card" data-ex='+JSON.stringify(ex.name)+' style="margin-bottom:6px">'+
         '<div class="row sb" style="margin-bottom:8px"><div><div style="font-size:13px;font-weight:600;color:var(--tx)">'+ex.name+'</div><div style="margin-top:3px">'+tag+prHtml+'</div></div><button class="btn sm" onclick="W.rmExFromWk(\''+ex.name+'\')">移除</button></div>'+lastHtml+
         rows+'<button class="btn sm" style="margin-top:6px" onclick="W.addSet(\''+ex.name+'\','+ex.rest+')">+ 加组</button></div>';
-    }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="W.addExToWk()">＋ 添加动作</button>'+'<button class="btn pr" style="width:100%;margin-top:8px" onclick="W.finish()">&#10003; 完成训练</button>';
+    }).join('')+'<button class="btn" style="width:100%;margin-top:4px" onclick="W.addExToWk()">＋ 添加动作</button>'+'<button id="wo-finish" class="btn pr" style="width:100%;margin-top:8px" onclick="W.finish()">&#10003; 完成训练</button>';
   },
   rmExFromWk:function(name){
     if(!this.activeWk)return;
@@ -1114,6 +1115,20 @@ var W={
     this.activeWk.sets[name][idx][field]=parseFloat(val)||0;
     var vol=0;Object.values(this.activeWk.sets).forEach(function(sets){sets.forEach(function(s){vol+=(s.w||0)*(s.r||0)})});
     this.activeWk.vol=vol;document.getElementById('wo-vol').textContent='容量 '+Math.round(vol)+' kg';
+    this.renderExercises();this.saveActive();
+  },
+  pickTag:function(name,idx){
+    var q=JSON.stringify(name).replace(/'/g,'&#39;');
+    showMod("<div class=\"mtitle\">\u5f3a\u5ea6\u6280\u5de7</div><div class=\"row\" style=\"flex-wrap:wrap;gap:6px\">"+
+      "<button class=\"btn sm\" onclick='W.setTag("+q+","+idx+",&#39;&#39;);closeModNow()'>\u6b63\u5e38</button>"+
+      "<button class=\"btn sm\" onclick='W.setTag("+q+","+idx+",&#39;drop&#39;);closeModNow()'>\u9012\u51cf</button>"+
+      "<button class=\"btn sm\" onclick='W.setTag("+q+","+idx+",&#39;rp&#39;);closeModNow()'>rest-pause</button>"+
+      "<button class=\"btn sm\" onclick='W.setTag("+q+","+idx+",&#39;fail&#39;);closeModNow()'>\u529b\u7aed</button>");
+  },
+  setTag:function(name,idx,tag){
+    if(!this.activeWk||!this.activeWk.sets[name]||!this.activeWk.sets[name][idx])return;
+    var s=this.activeWk.sets[name][idx];
+    if(tag)s.tag=tag;else delete s.tag;
     this.renderExercises();this.saveActive();
   },
   rmSet:function(name,idx){if(this.activeWk){this.activeWk.sets[name].splice(idx,1);this.renderExercises();this.saveActive()}},
@@ -1147,6 +1162,11 @@ var W={
         else new Notification('IRONLOG',{body:'休息结束，开始下一组 \u{1f4aa}'});
       }
     }catch(e){}
+    if(document.hidden)return;
+    var _wk=this.activeWk,_sets=_wk&&_wk.sets||{},_exs=_wk&&_wk.plan&&_wk.plan.exercises||[],_target=null,_cards=document.querySelectorAll('#wo-exlist [data-ex]');
+    for(var i=0;i<_exs.length&&!_target;i++){var _name=_exs[i].name,_unfilled=(_sets[_name]||[]).some(function(s){return !(s.w>0||s.r>0||s.t>0)});if(!_unfilled)continue;for(var j=0;j<_cards.length;j++){if(_cards[j].getAttribute('data-ex')===_name){_target=_cards[j];break}}}
+    if(!_target)_target=document.getElementById('wo-finish');
+    if(_target){_target.classList.add('wo-jump');_target.scrollIntoView({behavior:'smooth', block:'center'});setTimeout(function(){_target.classList.remove('wo-jump')},1500);}
   },
   skipRest:function(){if(this.restInt)clearInterval(this.restInt);this.restEnd=0;this.saveActive();document.getElementById('wo-restCard').style.display='none'},
   resetRest:function(){this.startRest(this.restDur||120)},
@@ -1164,14 +1184,14 @@ var W={
     var sets=this.activeWk.sets;
     var prs=getJ('ironlog_prs',{}),newPR=0;
     Object.keys(sets).forEach(function(name){sets[name].forEach(function(s){
-      if(s.w>0&&s.r>0){var e=Math.round(s.w*(1+s.r/30));if(!prs[name]||e>prs[name].e1rm){prs[name]={w:s.w,r:s.r,e1rm:e,date:today()};newPR++}}
+      if(s.w>0&&s.r>0&&!s.tag){var e=Math.round(s.w*(1+s.r/30));if(!prs[name]||e>prs[name].e1rm){prs[name]={w:s.w,r:s.r,e1rm:e,date:today()};newPR++}}
     })});
     setJ('ironlog_prs',prs);
     var last=getJ('ironlog_last_sets',{}),hist=getJ('ironlog_strength_history',{}),td=today();
     Object.keys(sets).forEach(function(name){
       var done=sets[name].filter(function(s){return s.w>0||s.r>0||s.t>0});
-      if(done.length)last[name]=done.map(function(s){return {w:s.w,r:s.r,t:s.t}});
-      var best=0;sets[name].forEach(function(s){if(s.w>0&&s.r>0){var e=Math.round(s.w*(1+s.r/30));if(e>best)best=e}});
+      if(done.length)last[name]=done.map(function(s){return {w:s.w,r:s.r,t:s.t,tag:s.tag}});
+      var best=0;sets[name].forEach(function(s){if(s.w>0&&s.r>0&&!s.tag){var e=Math.round(s.w*(1+s.r/30));if(e>best)best=e}});
       if(best>0){if(!hist[name])hist[name]=[];var h=hist[name][hist[name].length-1];if(h&&h.d===td)h.e=Math.max(h.e,best);else hist[name].push({d:td,e:best})}
     });
     setJ('ironlog_last_sets',last);setJ('ironlog_strength_history',hist);
@@ -1422,7 +1442,7 @@ var W={
   },
   exMode:function(name){var e=this.getExLib().find(function(x){return x.name===name});return e&&e.mode?e.mode:'standard';},
   exMuscle:function(name,fb){var e=this.getExLib().find(function(x){return x.name===name});return e?e.muscle:(fb||'core');},
-  fmtSet:function(s,mode){if(mode==='iso')return (s.t||0)+'s';if(mode==='bw')return (s.r||0)+'次';return (s.w||0)+'×'+(s.r||0);},
+  fmtSet:function(s,mode){var v;if(mode==='iso')v=(s.t||0)+'s';else if(mode==='bw')v=(s.r||0)+'次';else v=(s.w||0)+'×'+(s.r||0);return v+(s.tag==='drop'?'D':s.tag==='rp'?'RP':s.tag==='fail'?'F':'');},
   getExLib:function(){
     var custom=getJ('ironlog_ex_lib',[]);
     var names=custom.map(function(e){return e.name});
@@ -2342,12 +2362,19 @@ var PR={
   },
   renderAchv:function(){
     var el=document.getElementById('pr-achv');if(!el)return;
-    var wl=getJ('ironlog_workout_logs',[]),cl=getJ('ironlog_cardio_logs',[]);
+    var _vf=function(l){return l&&typeof l==='object'};
+    var wl=getJ('ironlog_workout_logs',[]).filter(_vf),cl=getJ('ironlog_cardio_logs',[]).filter(_vf);
     var vol=wl.reduce(function(s,l){return s+(l.volume||0)},0);
     var cmin=cl.reduce(function(s,l){return s+(l.duration||0)},0);
+    var wmin=wl.reduce(function(s,l){return s+(l.duration||0)},0);
+    var whr=(wmin/60).toFixed(1);
     var wr=getJ('ironlog_weight_records',[]);
     var lost=wr.length>1?+(wr[0].weight-wr[wr.length-1].weight).toFixed(1):0;
     var days=Object.keys(getJ('ironlog_diet_logs',{})).sort(),best=0,cur=0,prev=null;
+    var fdays=days.filter(function(d){return D.dietLogged(d)}).length;
+    var _c30=addD(today(),-29);
+    var w30=wl.filter(function(l){return l&&l.date&&l.date>=_c30}).length;
+    var avgw=(w30*7/30).toFixed(1);
     days.forEach(function(d){
       if(!D.dietLogged(d))return;
       cur=(prev&&addD(prev,1)===d)?cur+1:1;
@@ -2356,7 +2383,10 @@ var PR={
     el.innerHTML=
       '<div class="si"><div class="sl2">训练次数</div><div class="sv">'+wl.length+'</div><div class="su">次</div></div>'+
       '<div class="si"><div class="sl2">举起总量</div><div class="sv ac">'+(vol/1000).toFixed(1)+'</div><div class="su">吨</div></div>'+
+      '<div class="si"><div class="sl2">力量时长</div><div class="sv ac">'+whr+'</div><div class="su">小时</div></div>'+
       '<div class="si"><div class="sl2">有氧时长</div><div class="sv">'+cmin+'</div><div class="su">分钟</div></div>'+
+      '<div class="si"><div class="sl2">周均训练</div><div class="sv">≈'+avgw+'</div><div class="su">次 · 近30天</div></div>'+
+      '<div class="si"><div class="sl2">饮食记录</div><div class="sv">'+fdays+'</div><div class="su">天</div></div>'+
       '<div class="si"><div class="sl2">最长连续记录</div><div class="sv">'+best+'</div><div class="su">天</div></div>'+
       '<div class="si" style="grid-column:1/-1"><div class="sl2">已减体重</div><div class="sv '+(lost>0?'gn':'')+'">'+(lost>0?'-':'')+Math.abs(lost)+'</div><div class="su">kg · 自 '+(wr.length?wr[0].date:'—')+'</div></div>';
   }
@@ -2667,4 +2697,4 @@ if('serviceWorker' in navigator && location.protocol==='https:'){
 </script>
 </body>
 </html>
-<!-- b1788876983 -->
+<!-- b1789107995 -->
